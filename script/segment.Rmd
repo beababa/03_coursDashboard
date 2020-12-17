@@ -35,11 +35,14 @@ library(cartography)
 # Données
 
 ```{r}
-commune <- st_read("../dataE/00_ADMIN/COMMUNE.shp", stringsAsFactors = F)
-dpt <- st_read("../dataE/00_ADMIN/DEPARTEMENT.shp", stringsAsFactors = F)
+commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
+dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
 # liste commune canton
 com2020 <- read.csv("../dataE/00_ADMIN/communes2020.csv")
 can2020 <- read.csv("../dataE/00_ADMIN/canton2020.csv")
+# 2 fichiers de segments
+segmentV11 <-  st_read("../dataS/segment.gpkg", "v11", stringsAsFactors = F)
+segment <- st_read("../dataE/01_CULTURES/segments_syst_L93.shp",  stringsAsFactors = F)
 ```
 
 
@@ -74,8 +77,7 @@ Hypothèse : La version finale doit comporter les entêtes pour la mise à jour 
 
 ```{r}
 # plusieurs couches segments
-segmentV11 <-  st_read("../dataS/segment.gpkg", "v11", stringsAsFactors = F)
-segment <- st_read("../dataE/01_CULTURES/segments_syst_L93.shp",  stringsAsFactors = F)
+
 str(segment)
 str(segmentV11)
 # pas les mêmes variables V11 moins protocolaire
@@ -226,8 +228,10 @@ pct <- function (vecteur) {(vecteur / sum(vecteur)) * 100}
 # Pour pouvoir traiter chaque ville, on éclate en liste
 linter <- split(inter, inter$INSEE_COM)
 # l'aire est sur chaque 5e col de chacune des 46 listes
-# on convertit en matrice
+# On extrait pour toutes les listes uniquement la 5e colone
 
+# on cherche l'aire max déjà
+lapply (linter, max)
 
 
 ```

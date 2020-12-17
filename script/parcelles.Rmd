@@ -37,9 +37,9 @@ library(mapview)
 ## Données
 
 ```{r}
-commune <- st_read("../dataE/00_ADMIN/COMMUNE.shp", quiet = TRUE,stringsAsFactors = F)
-dpt <- st_read("../dataE/00_ADMIN/DEPARTEMENT.shp", quiet = TRUE, stringsAsFactors = F)
-region <- st_read("../dataS/ign.gpkg", "region", quiet = TRUE)
+commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
+dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
+region <- st_read("../dataE/00_ADMIN/ign.gpkg", "region", quiet = TRUE, stringsAsFactors = F)
 # chargement donnée
 data <- read.csv("../dataE/02_POI/parcelles.csv")
 ```

@@ -35,6 +35,7 @@ library(cartography)
 # Données
 
 ```{r}
+# communes sans la corse
 commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
 dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
 # liste commune canton
@@ -147,7 +148,7 @@ table(sapply(testCommuneSegment, length))
 
 
 
-17 038 communes ne sont pas dans un segment, quasiment la moitié.
+16 678 communes ne sont pas dans un segment, quasiment la moitié.
 On intersecte ensuite
 
 ## La base de travail : comSegment
@@ -158,7 +159,7 @@ str(comSegment)
 comSegment <- comSegment [, c("NOM_COM", "INSEE_COM", "codgeo", "libgeo")]
 ```
 
-27 220 morceaux pour 17 038 communes. donc 10 M de trop.
+27 220 morceaux pour 16 678 communes. donc 10 M de trop.
 
 ## Exploration cas Aast et 4 segments
 
@@ -219,22 +220,49 @@ On repart de la base commune (sel et inter)
 
 ```{r}
 # aire des communes et de leurs parties
-sel$aire <- sapply(sel$geometry, st_area)
-inter$aire <- sapply(inter$geometry, st_area)
+sel$aire <- sapply(sel$geom, st_area)
+inter$aire <- sapply(inter$geom, st_area)
 inter <- inter [, c("INSEE_COM", "NOM_COM", "codgeo", "libgeo","aire")]
 str(inter)
 # il s'agit d'obtenir les rapports entre les aires par ville
 pct <- function (vecteur) {(vecteur / sum(vecteur)) * 100}
 # Pour pouvoir traiter chaque ville, on éclate en liste
 linter <- split(inter, inter$INSEE_COM)
+names(linter)
 # l'aire est sur chaque 5e col de chacune des 46 listes
-# On extrait pour toutes les listes uniquement la 5e colone
-
+# On extrait pour toutes les listes uniquement la 5e colonne
+laire <- list()
+for (i in 1:46) { 
+  laire [[i]] <- linter [[i]][,5, drop = TRUE] 
+  names (laire) [[i]] <- linter [[i]][1,2, drop = TRUE] 
+}
 # on cherche l'aire max déjà
-lapply (linter, max)
-
-
+laire.pct <- lapply (laire, pct)
+# on voit qu'il existe tjrs une aire principale occupant + de 90 % de la surface.
+laire.pct.max <- lapply(laire.pct, max)
+print(laire.pct.max)
+# sauf pour Peyruis
+comm <- "Peyruis"
+length(inter$geom [inter$NOM_COM == comm])
+plot(inter$geom [inter$NOM_COM == comm], bg = "antiquewhite1")
+segSel <- st_intersection(segment, inter$geom [inter$NOM_COM == comm])
+noms <-unique(segSel$libgeo)
+segmentSel <- segment [segment$libgeo %in% noms,]
+typoLayer(segmentSel, var = "libgeo",add = TRUE)
+plot(inter$geom [inter$NOM_COM == "Peyruis"], lwd = 2, border = "red",add = TRUE, col = NA)
+layoutLayer("Commune de Peyruis et segments, 2 intersections majeures")
+# cartographie pour tous les cas
+for (i in 1:46){
+    png(paste0("../img/inter_",i,".png"))
+    plot (linter [[i]][,6], border = "red", bg = "antiquewhite1")
+    plot(segment$geom, col = NA, add = TRUE)
+    layoutLayer(names(laire)[i])
+    dev.off()
+}
 ```
 
+TODO affichage 7 / 7
+
+repartir d'un fichier communes simplifié !
 
 ```{r}

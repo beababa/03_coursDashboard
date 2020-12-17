@@ -1,0 +1,32 @@
+{
+    "id": "D03612F8",
+    "path": null,
+    "project_path": null,
+    "type": "r_dataframe",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1607702824959.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "expression": "df_tab8",
+        "caption": "df_tab8",
+        "totalObservations": 51,
+        "displayedObservations": 51,
+        "variables": 2,
+        "cacheKey": "E7BCFE9B",
+        "object": "df_tab8",
+        "environment": "",
+        "contentUrl": "grid_resource/gridviewer.html?env=&obj=df_tab8&cache_key=E7BCFE9B&max_cols=50",
+        "preview": 0
+    },
+    "folds": "",
+    "lastKnownWriteTime": 8247252251680797810,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1607702824959,
+    "read_only": false,
+    "read_only_alternatives": []
+}

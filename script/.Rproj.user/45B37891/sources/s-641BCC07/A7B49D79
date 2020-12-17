@@ -1,0 +1,25 @@
+{
+    "id": "A7B49D79",
+    "path": "~/centralite/A_preparation.Rmd",
+    "project_path": null,
+    "type": "r_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1607961385704.0,
+    "source_on_save": false,
+    "relative_order": 6,
+    "properties": {
+        "chunk_output_type": "console",
+        "cursorPosition": "579,0",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1598699621,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1598699621,
+    "read_only": false,
+    "read_only_alternatives": []
+}

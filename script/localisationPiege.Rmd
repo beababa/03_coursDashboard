@@ -1,0 +1,301 @@
+---
+title: "surface"
+author: "B. Maranget"
+date: "28/09/2020"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Objet
+
+Cartographier en valeur absolue les hac des cultures
+
+# Librairies et répertoire
+
+```{r}
+library(sf)
+library(cartography)
+library(xlsx)
+getwd()
+```
+
+# Données
+
+```{r}
+dpt <- st_read("../dataE/00_ADMIN/DEPARTEMENT.shp", stringsAsFactors = F)
+fr <-  st_read("../dataE/00_ADMIN/France_l93_continent4_buf2.shp")
+data <- read.xlsx("../dataE/02_POI/LieuxpiegesDiabroticaAquitaine2020.xlsx",1, stringsAsFactors = F )
+```
+
+# Nettoyage format numérique et remplacement des c
+
+Choix pour "c" et NA : 1 et zéro ou 1 et NA ?
+
+Objet : matrice puis dataframe
+
+```{r}
+cultures <- names(data)[4:19]
+# passage en matrice pour traiter les remplacements et la conversion en numérique
+mcultures <- data [, cultures]
+mcultures [is.na(mcultures)] <- "0"
+mcultures [mcultures == "c"] <- NA
+
+tab <- table(mcultures=="0", useNA = "always")
+names(tab) <- c("Valeurs", "Valeurs nulles", "c")
+knitr::kable(tab, col.names = c("contenu", "occurence"), padding = 2)
+mculturesnum <- sapply(mcultures, as.numeric)
+colnames(mculturesnum) <- cultures 
+dataF <- as.data.frame(mculturesnum)
+```
+
+
+```{r}
+# nouvelle table
+dataF$dpt <- data [,1]
+```
+
+# jointure
+
+```{r}
+# une seule colonne pour les départements, celle du nom
+dpt <-  dpt [,2]
+head(dpt)
+head(dataF)
+jointure <- merge (dpt, dataF, by.x = "NOM_DEP", by.y = "dpt")
+str(jointure)
+# export de la jointure pour Qgis
+st_write(jointure, "../dataS/Carriere_A.gpkg", "jointure", quiet = TRUE, delete_layer = TRUE)
+```
+
+# couleurs
+
+```{r}
+cultures
+
+# couleurs pour cultures / comment récuperer le nom descouleurs
+lcouleurs <- list (GC = "orange.pal", avoine = "sand.pal", bled = "green.pal", blet = "green.pal", cereales = "green.pal", fourrages = "sand.pal", epeautre = "kaki.pal", lin ="blue.pal", maisf = "sand.pal", maisg = "sand.pal", melanges = "wine.pal", orge = "turquoise.pal", sarrazin =  "brown.pal", seigle = "red.pal", sorgho = "red.pal", triticale = "green.pal")
+# trouver les couleurs correpsondant aux palettes
+couleurs <- c("blue","red", "green", "pink", "grey", "wheat", "olivedrab3" , "orange","brown", "purple", "violetred2", "turquoise", "springgreen1", "blue","red", "green")
+```
+
+
+# distributions
+
+```{r}
+png(
+  "../img/distributions.png",
+  width = 800,
+  height = 800,
+  res = 100
+)
+
+par(mfrow = c(4, 4))
+for (i in 1:16) {
+  # retraut des zéros de la distribution (c)
+  vec <- dataF[ dataF[,i] != 0 , i]
+  hist(vec,
+       main = paste0(
+          substring(cultures [i], 6),
+          "\n Nb obs : ", 
+          length(dataF[,i][!is.na(dataF[,i])&dataF[,i]!=0])
+          ) ,
+       xlab = "surfaces (ha)",
+       ylab = "nb",
+       col = couleurs[i],
+       border = NA
+)
+       }
+dev.off()
+```
+
+![](../img/distributions.png)
+
+trop peu d'observations sur lin_fibre et blé_dur.
+valeurs maximum isolées pour toutes les séries
+
+
+# carto (par 16)
+
+
+```{r, eval= FALSE}
+
+
+
+ i <- 1
+   png(paste0("../img/carto",".png"),
+  width = 600 *4,
+  height = 600 * 4,
+  res = 200)
+    par(mfrow = c(4,4))
+for (i in 1:16) {
+
+
+ 
+  # traitement des valeurs nulles (= blanc) : on fait une carte pour les nuls et une carte sans
+  geomVide <- jointure [jointure [[i+1]] == 0  , i+1, drop = FALSE]
+  geomVide <- geomVide [!is.na(geomVide [[1]]),]
+  geomSansVide <- jointure [jointure [[i+1]] != 0 , i+1, drop = FALSE]
+  geomSansVide <- geomSansVide [!is.na(geomSansVide [[1]]),]
+  geomNA <- jointure [is.na (jointure [[i+1]]),i+1]
+  geomSansVide <- rbind (geomSansVide, geomNA)
+  # enregistrement des couches pour QGIS
+  st_write(geomVide, "../dataS/Carriere_A.gpkg", paste0("geomVide_", cultures [i]), quiet = TRUE, delete_layer = TRUE)
+  st_write(geomSansVide, "../dataS/Carriere_A.gpkg", paste0("data_", cultures[i]), quiet = TRUE, delete_layer = TRUE)
+  
+  head(geomSansVide)
+  head(geomNA)
+  head(geomVide)
+  # variables pour lin, le nobmre de classes est 3 seulement
+  nb <- ifelse(i == 8,  3,5)
+  mypal <- carto.pal(pal1 =  lcouleurs [[i]], n1 = nb)
+  par(mar=c(0,0,1.2,0))
+  #centrage sur l'ensemble de la France
+  plot(fr$geometry, col= NA, border = NA)
+  
+  # carte des valeurs non vides
+  choroLayer(
+    geomSansVide,
+    var =  cultures[i],
+    method = "jenks",
+    nclass = nb,
+    col = mypal,
+    border = NA,
+      legend.title.cex = 0.6,
+  legend.values.cex = 0.5,
+    legend.title.txt = "Nb d'ha",
+  legend.border = "gray96",
+    # pb sur les NA
+   legend.nodata = "inf. à 3",
+     colNA = "white",
+    add = TRUE
+  )
+  # carte des valeurs vnulles
+  plot(geomVide$geom, col ="azure3", border = NA, lty = 1 , add = TRUE)
+  legend(x = "bottomleft", legend = "pas de culture", cex = 0.5, fill = "azure3",
+         border =NA, bty = "n" )
+  layoutLayer(title =substring(cultures [i], 6), tabtitle = TRUE,theme = lcouleurs [[i]], frame = FALSE,
+              postitle = "center")
+  plot(dpt$geometry, col= NA, lty= 3, lwd = 1, border = "gray96", add = TRUE)}
+ dev.off() 
+
+```
+
+![](../img/carto.png)
+
+# carto (par culture)
+
+
+```{r, eval= FALSE}
+
+
+
+ i <- 1
+
+
+for (i in 1:16) {
+
+   png(paste0("../img/carto",cultures [i],".png"),
+  width = 600,
+  height = 600,
+  res = 150)
+  par(lwd = 0.1)
+ 
+  # traitement des valeurs nulles (= blanc) : on fait une carte pour les nuls et une carte sans
+  geomVide <- jointure [jointure [[i+1]] == 0  , i+1, drop = FALSE]
+  geomVide <- geomVide [!is.na(geomVide [[1]]),]
+  geomSansVide <- jointure [jointure [[i+1]] != 0 , i+1, drop = FALSE]
+  geomSansVide <- geomSansVide [!is.na(geomSansVide [[1]]),]
+  geomNA <- jointure [is.na (jointure [[i+1]]),i+1]
+  geomSansVide <- rbind (geomSansVide, geomNA)
+  # variables pour lin, le nobmre de classes est 3 seulement
+  nb <- ifelse(i == 8,  3,5)
+  mypal <- carto.pal(pal1 =  lcouleurs [[i]], n1 = nb)
+  par(mar=c(0,0,1.2,0))
+  #centrage sur l'ensemble de la France
+  plot(fr$geometry, col= NA, lwd = 1,border = NA)
+   
+  # carte des valeurs non vides
+  choroLayer(
+    geomSansVide,
+    var =  cultures[i],
+    method = "jenks",
+    nclass = nb,
+    col = mypal,
+    border = NA,
+      legend.title.cex = 0.6,
+  legend.values.cex = 0.5,
+    legend.title.txt = "Nb d'ha",
+  legend.border = "gray96",
+    # pb sur les NA
+   legend.nodata = "inf. à 3 exploitations",
+     colNA = "white",
+    add = TRUE
+  )
+  # carte des valeurs vnulles
+  plot(geomVide$geom, col ="azure3", border = NA, lty = 1 , add = TRUE)
+  legend(x = "bottomleft", legend = "pas de culture", cex = 0.5, fill = "azure3",
+         border =NA, bty = "n" )
+  layoutLayer(title =substring(cultures [i], 6), tabtitle = TRUE,theme = lcouleurs [[i]], frame = FALSE,
+              postitle = "center", posscale = "topright")
+ plot(dpt$geometry, col= NA, lty= 3, lwd = 1, border = "gray96", add = TRUE)
+ dev.off() 
+}
+
+
+```
+# bonus : rajout graphique
+
+
+```{r}
+png("../img/barres.png", height = 600, width = 600, res = 100)
+# fichier d'exemple, bio non bio valeurs aléatoires
+data <-  st_read("../dataS/Carriere_A.gpkg", "data_Surf_avoine")
+str(data)
+data$bio <- sample(1:100,nrow(data))
+data$nonbio <- sample(1:100, nrow(data))
+       mypal <- carto.pal(pal1 =  lcouleurs [[2]], n1 = nb)
+plot(fr$geometry)
+ # carte des valeurs non vides
+  choroLayer(
+    data,
+    var =  cultures[2],
+    method = "geom",
+    nclass = nb,
+    col = mypal,
+    border = "gray96",
+      legend.title.cex = 0.6,
+  legend.values.cex = 0.5,
+    legend.title.txt = "Nb d'ha",
+  legend.border = "white",
+  legend.pos = "topleft",
+    # pb sur les NA
+   legend.nodata = "inf.à 3",
+     colNA = "white",
+    add = TRUE
+  )
+  plot(dpt$geometry, col= NA, lwd = 1, border = "gray96", add = TRUE)
+data$tot <-  data$bio + data$nonbio
+# une même taille pour légende et symboles carte
+# on trace sur le total, le 2e item
+taille <- 0.35
+propSymbolsLayer(data, var = "tot", symbols = "bar", border = NA, add = T, legend.pos = "n", col = "olivedrab1", inches =  taille)
+propSymbolsLayer(data, var = "nonbio", col = "olivedrab3", symbols = "bar",
+                 border = NA,add = T,  legend.pos = "o", inches = taille)
+legendBarsSymbols("left", var = c(min(data$tot), max(data$tot)), inches = taille, col = "white", title.txt = "nb ha bio \n/ nonbio")
+legendTypo("topright", col = c("olivedrab3","olivedrab1"), categ = c("bio", "nonbio"), title.txt = "type culture",  nodata = F)
+layoutLayer(title =substring(cultures [2], 6), tabtitle = TRUE,theme = lcouleurs [[2]], frame = FALSE,
+              postitle = "center", posscale = "bottomleft")
+
+dev.off()
+```
+
+
+![](../img/barres.png)

@@ -1,0 +1,25 @@
+{
+    "id": "BEBF5690",
+    "path": "~/rGeo/script/parcelles.Rmd",
+    "project_path": "parcelles.Rmd",
+    "type": "r_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1607528118078.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "chunk_output_type": "console",
+        "cursorPosition": "166,46",
+        "scrollLine": "153"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1608149338,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1608149338202,
+    "read_only": false,
+    "read_only_alternatives": []
+}

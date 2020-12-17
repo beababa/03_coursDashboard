@@ -1,0 +1,23 @@
+{
+    "id": "1F47CF03",
+    "path": null,
+    "project_path": null,
+    "type": "r_code_browser",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1608123462018.0,
+    "source_on_save": false,
+    "relative_order": 7,
+    "properties": {
+        "context": "package:sf:::st_jitter"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 6,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1608123462018,
+    "read_only": false,
+    "read_only_alternatives": []
+}

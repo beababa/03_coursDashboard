@@ -1,0 +1,236 @@
+---
+title: "Segment"
+author: "B. Maranget"
+date: "08/12/2020"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+# Passer la valeur suivante à TRUE pour reproduire les extractions.
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+# Cadre
+
+## Objet
+
+Récupérer le segment d'appartenance pour chaque commune.
+
+## Librairies et répertoire
+
+```{r}
+library(sf)
+library(cartography)
+```
+
+# Données
+
+```{r}
+commune <- st_read("../dataE/00_ADMIN/COMMUNE.shp", stringsAsFactors = F)
+dpt <- st_read("../dataE/00_ADMIN/DEPARTEMENT.shp", stringsAsFactors = F)
+# liste commune canton
+com2020 <- read.csv("../dataE/00_ADMIN/communes2020.csv")
+can2020 <- read.csv("../dataE/00_ADMIN/canton2020.csv")
+```
+
+
+# Explorations (Ne pas jouer)
+
+## Communes et cantons 2020 : exploration, combien de communes fractionnées
+
+Plus de communes officiellement fractionnées que par calcul, aie !
+
+```{r}
+# 2054 cantons en 2020 (communes nouvelles et multicantons 286)
+table(can2020$typect)
+# 434 communes fractionnées (les plus grosses)
+# Dans le code officiel géographique, les communes multicantonnales sont codées > 79
+tab <- table(com2020$can)
+# 3033 communes sans code canton ?
+sapply(com2020$can,nchar)
+# lg vides, les communes assoicées ou déléguées n'ont pas de canton ? 3033 cas
+tab [1]
+df <- as.data.frame(tab [-1])
+# on supprime ces 3033 cas.
+df$chiffre <- as.integer(substr(df$Var1,3,4) )
+df1 <- df [df$chiffre > 79,]
+sum(df1$Freq) 
+# 282 communes fractionnées d'après mon calcul...
+```
+
+## Segments, quelle version de fichier ? V11 ou segment ?
+
+Peu importe. On prend la segment au final. 
+Hypothèse : La version finale doit comporter les entêtes pour la mise à jour sur le site ?
+
+```{r}
+# plusieurs couches segments
+segmentV11 <-  st_read("../dataS/segment.gpkg", "v11", stringsAsFactors = F)
+segment <- st_read("../dataE/01_CULTURES/segments_syst_L93.shp",  stringsAsFactors = F)
+str(segment)
+str(segmentV11)
+# pas les mêmes variables V11 moins protocolaire
+egal <- st_equals(segment, segmentV11, sparse = TRUE)
+# on teste la présence d'une géométrie non identique
+table (sapply(egal, length))
+# les 192 géométries sont identiques !
+```
+
+
+## Segments et cantons
+
+
+Moins de 500 communes sont découpées dans les cantons et les segments sont basés sur des cantons...
+Simplement il y a 192 segments. Observons déjà segment et cantons
+Pour la géométrie des cantons, elle n'existe pas dans admin express, on la prend dans geofla 2015
+
+Donc la piste canton - segment n'est pas bonne. Le travail se fait sur commune - segment.
+
+```{r}
+canton <- st_read("../dataE/00_ADMIN/CANTON.SHP")
+# 2378 cantons en 2015
+S_cantonSegment <- st_within(canton, segment, sparse = T)
+table (sapply(S_cantonSegment, length))
+# 2065 cantons ne sont pas dans les segments ...
+```
+
+## Vérification de la méthode, commune et dpt
+
+Au passage on regarde les deux formes matrice simplifiée et matrice logique
+
+Toutes les communes sont dans un département ! Ouf !
+
+```{r}
+S_communeDpt <-  st_within(commune, dpt, sparse = T)
+M_communeDpt <-  st_within(commune, dpt, sparse = F)
+
+S_communeDpt
+M_communeDpt
+
+str(S_communeDpt)
+
+table(sapply(S_communeDpt,length))
+# Toutes les communes sont dans un dpt
+```
+
+# Cas d'étude : segments et communes
+
+On détecte les communes dans un segment
+ou / et ?
+On intersecte et on mesure les aires des communes hors segment
+
+## Within
+
+```{r}
+communeSegment <- st_within(commune, segment, sparse = T)
+res <- sapply(communeSegment, length)
+table(res)
+str(communeSegment)
+# filtre sur les communes problématiques, celles qui sont vides dans la liste
+indiceComPb <- which(res == 0)
+comPb <- commune [indiceComPb,]
+testCommuneSegment <- st_within(comPb, segment, sparse = T)
+table(sapply(testCommuneSegment, length))
+### Vraiment est ce nécessaire.... juste pour m'assurer que j'ai bien compris
+```
+
+
+
+17 038 communes ne sont pas dans un segment, quasiment la moitié.
+On intersecte ensuite
+
+## La base de travail : comSegment
+
+```{r}
+comSegment <- st_intersection(comPb, segment)
+str(comSegment)
+comSegment <- comSegment [, c("NOM_COM", "INSEE_COM", "codgeo", "libgeo")]
+```
+
+27 220 morceaux pour 17 038 communes. donc 10 M de trop.
+
+## Exploration cas Aast et 4 segments
+
+### Un exemple de problème topologique : Aast
+
+```{r}
+Aast <- comSegmentV11 [comSegmentV11$NOM_COM == "Aast",]
+Aast
+plot(Aast$geometry)
+par(mfrow = c(1,3))
+for (i in 1:3) { plot (Aast$geometry [i])}
+# une piste : taille des intersections ?
+taille <- sapply(Aast$geometry, st_area)
+taille100 <- (taille / sum(taille)) *100
+```
+
+### Communes représentées plus de 4 ou 5 fois (maximum)
+
+```{r}
+tab <- table(comSegment$"INSEE_COM")
+max(tab)
+# représentation graphique
+barplot(sort(tab), las = 2, main = paste0(length(tab), " communes représentées entre 1 et 5 fois"))
+```
+
+Méthode : 
+
+- on extrait la fréquence, 
+* on représente barplot,
+- et on filtre la base des communes sélectionnées
+
+point de vigilance : attention à travailler avec le code unique commune ! (code INSEE)
+
+```{r}
+code4 <- names(tab) [tab > 3]
+par(mar = c(8,4,4,4))
+tab4 <- tab [tab > 3] 
+# 46 communes conernées
+barplot(sort(tab4), las = 2, main = paste0(length(tab4), " communes représentées plus de 4 fois"))
+comSeg4 <- comSegment [comSegment$INSEE_COM %in% code4,]
+# 185 morceaux
+```
+
+Vérification à partir base commune sans le within
+
+```{r}
+sel <- commune [commune$INSEE_COM %in% code4,]
+inter <- st_intersection(sel, segment)
+# 185 morceaux également ! pas besoin de passer par le within (strictement à l'intérieur)
+```
+
+## Calcul des aires pour éliminer les problèmes d'ordre topologiques
+
+jeu de test : les communes représentées plus de 4 fois.
+Si cela fonctionne, on le fera sur les 3. puis sur les 2.
+Pour les 1, elles ne sont pas dedans mais elles n'intersectent pas... Bizarre.
+On repart de la base commune (sel et inter)
+
+```{r}
+# aire des communes et de leurs parties
+sel$aire <- sapply(sel$geometry, st_area)
+inter$aire <- sapply(inter$geometry, st_area)
+inter <- inter [, c("INSEE_COM", "NOM_COM", "codgeo", "libgeo","aire")]
+str(inter)
+# il s'agit d'obtenir les rapports entre les aires par ville
+pct <- function (vecteur) {(vecteur / sum(vecteur)) * 100}
+# Pour pouvoir traiter chaque ville, on éclate en liste
+linter <- split(inter, inter$INSEE_COM)
+# l'aire est sur chaque 5e col de chacune des 46 listes
+# on convertit en matrice
+
+
+
+```
+
+
+```{r}

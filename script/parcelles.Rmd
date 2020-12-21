@@ -29,7 +29,7 @@ La fonction st_jitter permet de le faire automatiquement mais est-elle satisfais
 ```{r}
 library(sf)
 library(cartography)
-library(mapview)
+
 ```
 
 # Préparer la donnée
@@ -195,5 +195,21 @@ plot(pt - c(ecart, ecart), add = TRUE)
 plot( pt + c(0, ecart)  ,col = "green", add = T)
 plot( pt - c(0, ecart)  ,col = "green", add = T)
 plot(data, pch = 19, col = "black", add = TRUE)
+```
+
+
+```{r}
+# verif data et data.jitter meme ordre
+data$id <- row.names(data)
+dataS <- data [1:20,]
+ghostLayer(
+  x = st_centroid(dataS),
+  bg = "#A6CAE0"
+)
+plot(dataS$geometry, add = TRUE)
+labelLayer(dataS, txt = "id", cex = 1, halo = T)
+data.jitter$id <- row.names(data.jitter)
+plot(data.jitter, col ="red", add = TRUE)
+labelLayer(data.jitter, txt = "id", col= "red" ,cex = 1, halo = T)
 ```
 

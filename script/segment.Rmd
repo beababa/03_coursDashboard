@@ -252,6 +252,7 @@ typoLayer(segmentSel, var = "libgeo",add = TRUE)
 plot(inter$geom [inter$NOM_COM == "Peyruis"], lwd = 2, border = "red",add = TRUE, col = NA)
 layoutLayer("Commune de Peyruis et segments, 2 intersections majeures")
 # cartographie pour tous les cas
+sel
 for (i in 1:46){
     png(paste0("../img/inter_",i,".png"))
     plot (linter [[i]][,6], border = "red", bg = "antiquewhite1")

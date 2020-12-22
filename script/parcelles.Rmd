@@ -41,7 +41,8 @@ commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,strings
 dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
 region <- st_read("../dataE/00_ADMIN/ign.gpkg", "region", quiet = TRUE, stringsAsFactors = F)
 # chargement donnée
-data <- read.csv("../dataE/02_POI/parcelles.csv")
+data <- read.csv2("../dataE/02_POI/bassin1.csv")
+
 ```
 
 ## Spatialisation du fichier

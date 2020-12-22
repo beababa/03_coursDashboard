@@ -135,10 +135,20 @@ On intersecte et on mesure les aires des communes hors segment
 
 ```{r}
 communeSegment <- st_within(commune, segment, sparse = T)
+# recup des communes - segments
+
 res <- sapply(communeSegment, length)
 table(res)
-str(communeSegment)
+indiceCom <-  which (res != 0)
+com <- commune[indiceCom,]
+tmpCom <- cbind (com, "Codgeo_NUM" = unlist(communeSegment) )
+tmpSeg <-  segment [, c("Codgeo_NUM", "libgeo"), drop = TRUE] 
+comSeg1 <- merge (tmpCom [, c("INSEE_COM", "NOM_COM")], tmpSeg, by = "Codgeo_NUM")
+str(tmpSeg)
+str(tmpCom)
+# 18190 communes dans segments
 # filtre sur les communes problématiques, celles qui sont vides dans la liste
+
 indiceComPb <- which(res == 0)
 comPb <- commune [indiceComPb,]
 testCommuneSegment <- st_within(comPb, segment, sparse = T)
@@ -166,20 +176,22 @@ comSegment <- comSegment [, c("NOM_COM", "INSEE_COM", "codgeo", "libgeo")]
 ### Un exemple de problème topologique : Aast
 
 ```{r}
-Aast <- comSegmentV11 [comSegmentV11$NOM_COM == "Aast",]
+Aast <- comSegment [comSegment$NOM_COM == "Aast",]
 Aast
-plot(Aast$geometry)
+plot(Aast$geom)
 par(mfrow = c(1,3))
-for (i in 1:3) { plot (Aast$geometry [i])}
+for (i in 1:3) { plot (Aast$geom [i])}
 # une piste : taille des intersections ?
-taille <- sapply(Aast$geometry, st_area)
+taille <- sapply(Aast$geom, st_area)
 taille100 <- (taille / sum(taille)) *100
+
 ```
 
 ### Communes représentées plus de 4 ou 5 fois (maximum)
 
 ```{r}
 tab <- table(comSegment$"INSEE_COM")
+table(tab)
 max(tab)
 # représentation graphique
 barplot(sort(tab), las = 2, main = paste0(length(tab), " communes représentées entre 1 et 5 fois"))
@@ -194,9 +206,9 @@ Méthode :
 point de vigilance : attention à travailler avec le code unique commune ! (code INSEE)
 
 ```{r}
-code4 <- names(tab) [tab > 3]
+code4 <- names(tab) [tab > 1]
 par(mar = c(8,4,4,4))
-tab4 <- tab [tab > 3] 
+tab4 <- tab [tab > 1] 
 # 46 communes conernées
 barplot(sort(tab4), las = 2, main = paste0(length(tab4), " communes représentées plus de 4 fois"))
 comSeg4 <- comSegment [comSegment$INSEE_COM %in% code4,]
@@ -208,12 +220,12 @@ Vérification à partir base commune sans le within
 ```{r}
 sel <- commune [commune$INSEE_COM %in% code4,]
 inter <- st_intersection(sel, segment)
-# 185 morceaux également ! pas besoin de passer par le within (strictement à l'intérieur)
+# 11842 communes et 24837  morceaux également ! pas besoin de passer par le within (strictement à l'intérieur)
 ```
 
 ## Calcul des aires pour éliminer les problèmes d'ordre topologiques
 
-jeu de test : les communes représentées plus de 4 fois.
+jeu de test : les  45 communes représentées plus de 4 fois + 1 représentées 5 fois
 Si cela fonctionne, on le fera sur les 3. puis sur les 2.
 Pour les 1, elles ne sont pas dedans mais elles n'intersectent pas... Bizarre.
 On repart de la base commune (sel et inter)
@@ -229,41 +241,82 @@ pct <- function (vecteur) {(vecteur / sum(vecteur)) * 100}
 # Pour pouvoir traiter chaque ville, on éclate en liste
 linter <- split(inter, inter$INSEE_COM)
 names(linter)
+nb <- length(linter)
 # l'aire est sur chaque 5e col de chacune des 46 listes
 # On extrait pour toutes les listes uniquement la 5e colonne
 laire <- list()
-for (i in 1:46) { 
+for (i in 1:nb) { 
   laire [[i]] <- linter [[i]][,5, drop = TRUE] 
-  names (laire) [[i]] <- linter [[i]][1,2, drop = TRUE] 
+  names (laire) [[i]] <- linter [[i]][1,1, drop = TRUE] 
 }
 # on cherche l'aire max déjà
 laire.pct <- lapply (laire, pct)
 # on voit qu'il existe tjrs une aire principale occupant + de 90 % de la surface.
 laire.pct.max <- lapply(laire.pct, max)
-print(laire.pct.max)
-# sauf pour Peyruis
-comm <- "Peyruis"
-length(inter$geom [inter$NOM_COM == comm])
-plot(inter$geom [inter$NOM_COM == comm], bg = "antiquewhite1")
-segSel <- st_intersection(segment, inter$geom [inter$NOM_COM == comm])
-noms <-unique(segSel$libgeo)
-segmentSel <- segment [segment$libgeo %in% noms,]
-typoLayer(segmentSel, var = "libgeo",add = TRUE)
-plot(inter$geom [inter$NOM_COM == "Peyruis"], lwd = 2, border = "red",add = TRUE, col = NA)
-layoutLayer("Commune de Peyruis et segments, 2 intersections majeures")
+comOK <- laire.pct.max [laire.pct.max >= 90]
+anomalies <- laire.pct.max [laire.pct.max <90]
+#128 anomalies
+nom.anomalies <- names(anomalies)
+plot(commune$geom [commune$NOM_COM == nom.anomalies,])
+# sauf pour 5 communes sur les 46
+nb <- length(nom.anomalies)
+i <- 1
+for (i in 1:nb) {
+  g <- inter$geom [inter$NOM_COM == nom.anomalies [i]]
+  sizes <-
+    getFigDim(
+      x = g,
+      width = 300,
+      mar = c(0, 0, 1.2, 0),
+      res = 96
+    )
+  png(
+    paste0("../img/anomalies_", i, ".png"),
+    width = 300,
+    height = sizes [2],
+    res = 96
+  )
+  par(mar = c(0, 0, 1.2, 0))
+  plot(g, bg = "antiquewhite1")
+  segSel <-
+    st_intersection(segment, g)
+  noms <- unique(segSel$libgeo)
+  segmentSel <- segment [segment$libgeo %in% noms,]
+  typoLayer(segmentSel, var = "libgeo", add = TRUE)
+  plot(
+    inter$geom [inter$NOM_COM == nom.anomalies [i]],
+    lwd = 2,
+    border = "red",
+    add = TRUE,
+    col = NA
+  )
+  layoutLayer(paste0("Commune de", nom.anomalies [i],  " et segments"))
+  dev.off()
+}
 # cartographie pour tous les cas
-sel
+par(mfrow = c(7,7))
 for (i in 1:46){
-    png(paste0("../img/inter_",i,".png"))
+
+    #png(paste0("../img/inter_",i,".png"))
     plot (linter [[i]][,6], border = "red", bg = "antiquewhite1")
     plot(segment$geom, col = NA, add = TRUE)
     layoutLayer(names(laire)[i])
-    dev.off()
+    #dev.off()
 }
 ```
 
-TODO affichage 7 / 7
 
-repartir d'un fichier communes simplifié !
+
+```{r}
+# toutes les communes incluses (com)
+# + toutes les communes segmentées (géométrie intersection <90 %)
+# + anomalies
+INSEE_COMOK <- names(comOK)
+str(commune)
+com2 <- commune [commune$INSEE_COM %in% INSEE_COMOK,]
+comf <- rbind(com, com2)
+comf <- comf [, c("INSEE_COM")]
+```
+
 
 ```{r}

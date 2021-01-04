@@ -135,25 +135,27 @@ On intersecte et on mesure les aires des communes hors segment
 
 ```{r}
 communeSegment <- st_within(commune, segment, sparse = T)
+communeSegment
+unlist(communeSegment)
+# attention il s'agit des indices pour commune comme pour segment
 # recup des communes - segments
-
 res <- sapply(communeSegment, length)
 table(res)
+# recup indice communes inclues 18190
 indiceCom <-  which (res != 0)
+# recup communes et segments via les indices
 com <- commune[indiceCom,]
-tmpCom <- cbind (com, "Codgeo_NUM" = unlist(communeSegment) )
-tmpSeg <-  segment [, c("Codgeo_NUM", "libgeo"), drop = TRUE] 
-comSeg1 <- merge (tmpCom [, c("INSEE_COM", "NOM_COM")], tmpSeg, by = "Codgeo_NUM")
-str(tmpSeg)
-str(tmpCom)
+seg <- segment [unlist(communeSegment),]
+# attribution du segment par jointure attributaire
+tmpCom <- cbind (com, seg )
+tmpSeg <-  seg [, c("Codgeo_NUM", "libgeo"), drop = TRUE] 
+tmpSeg <- unique(tmpSeg)
+# une commune par segment donc 18190 obs
+comSeg1 <- merge (tmpCom [, c("INSEE_COM", "NOM_COM","Codgeo_NUM")], tmpSeg, by = "Codgeo_NUM")
 # 18190 communes dans segments
 # filtre sur les communes problématiques, celles qui sont vides dans la liste
-
 indiceComPb <- which(res == 0)
 comPb <- commune [indiceComPb,]
-testCommuneSegment <- st_within(comPb, segment, sparse = T)
-table(sapply(testCommuneSegment, length))
-### Vraiment est ce nécessaire.... juste pour m'assurer que j'ai bien compris
 ```
 
 
@@ -187,7 +189,7 @@ taille100 <- (taille / sum(taille)) *100
 
 ```
 
-### Communes représentées plus de 4 ou 5 fois (maximum)
+### Compter le nombre de parties de communes
 
 ```{r}
 tab <- table(comSegment$"INSEE_COM")
@@ -206,28 +208,26 @@ Méthode :
 point de vigilance : attention à travailler avec le code unique commune ! (code INSEE)
 
 ```{r}
-code4 <- names(tab) [tab > 1]
+# nb choix de la limite
+nb <- 1
+code <- names(tab) [tab > nb]
 par(mar = c(8,4,4,4))
-tab4 <- tab [tab > 1] 
-# 46 communes conernées
-barplot(sort(tab4), las = 2, main = paste0(length(tab4), " communes représentées plus de 4 fois"))
-comSeg4 <- comSegment [comSegment$INSEE_COM %in% code4,]
-# 185 morceaux
+tab <- tab [tab > nb] 
+barplot(sort(tab), las = 2, main = paste0(length(tab), " communes représentées plus de ", nb,"  fois"))
+comSeg <- comSegment [comSegment$INSEE_COM %in% code,]
+# nb de morceaux
 ```
 
 Vérification à partir base commune sans le within
 
 ```{r}
-sel <- commune [commune$INSEE_COM %in% code4,]
+sel <- commune [commune$INSEE_COM %in% code,]
 inter <- st_intersection(sel, segment)
 # 11842 communes et 24837  morceaux également ! pas besoin de passer par le within (strictement à l'intérieur)
 ```
 
 ## Calcul des aires pour éliminer les problèmes d'ordre topologiques
 
-jeu de test : les  45 communes représentées plus de 4 fois + 1 représentées 5 fois
-Si cela fonctionne, on le fera sur les 3. puis sur les 2.
-Pour les 1, elles ne sont pas dedans mais elles n'intersectent pas... Bizarre.
 On repart de la base commune (sel et inter)
 
 ```{r}
@@ -241,24 +241,25 @@ pct <- function (vecteur) {(vecteur / sum(vecteur)) * 100}
 # Pour pouvoir traiter chaque ville, on éclate en liste
 linter <- split(inter, inter$INSEE_COM)
 names(linter)
+linter [[1]]
 nb <- length(linter)
 # l'aire est sur chaque 5e col de chacune des 46 listes
 # On extrait pour toutes les listes uniquement la 5e colonne
 laire <- list()
 for (i in 1:nb) { 
-  laire [[i]] <- linter [[i]][,5, drop = TRUE] 
+  laire [[i]] <- linter [[i]][,5, drop = TRUE]
   names (laire) [[i]] <- linter [[i]][1,1, drop = TRUE] 
 }
-# on cherche l'aire max déjà
+# on cherche l'aire max
 laire.pct <- lapply (laire, pct)
 # on voit qu'il existe tjrs une aire principale occupant + de 90 % de la surface.
 laire.pct.max <- lapply(laire.pct, max)
 comOK <- laire.pct.max [laire.pct.max >= 90]
 anomalies <- laire.pct.max [laire.pct.max <90]
-#128 anomalies
+# 128 anomalies
 nom.anomalies <- names(anomalies)
-plot(commune$geom [commune$NOM_COM == nom.anomalies,])
-# sauf pour 5 communes sur les 46
+plot(commune$geom [commune$INSEE_COM %in% nom.anomalies,])
+# cartographies
 nb <- length(nom.anomalies)
 i <- 1
 for (i in 1:nb) {
@@ -305,14 +306,15 @@ for (i in 1:46){
 }
 ```
 
-
+## Table finale
 
 ```{r}
-# toutes les communes incluses (com)
-# + toutes les communes segmentées (géométrie intersection <90 %)
+# toutes les communes incluses (comSeg1)
+# + toutes les communes segmentées (géométrie intersection <90 %) (comOK)
+comSeg2 <- commune [commune$INSEE_COM %in% comOK]
+
 # + anomalies
-INSEE_COMOK <- names(comOK)
-str(commune)
+
 com2 <- commune [commune$INSEE_COM %in% INSEE_COMOK,]
 comf <- rbind(com, com2)
 comf <- comf [, c("INSEE_COM")]

@@ -321,4 +321,21 @@ comf <- comf [, c("INSEE_COM")]
 ```
 
 
+Idée : sauf pour les 128 anomalies, reprendre les centroides
+
+C'est quand même beaucoup plus simple.
+
 ```{r}
+nom.anomalies
+centr <- st_centroid(commune)
+res <- st_intersection(centr, segment)
+head(res)
+res <- res [!(res$INSEE_COM %in% nom.anomalies), ]
+res <- res [, c("INSEE_COM", "NOM_COM", "codgeo", "libgeo"), drop= TRUE]
+# merge géométries commune
+res2 <- merge (res, commune [, "INSEE_COM"], by = "INSEE_COM")
+head(res2)
+```
+
+reste les 128 communes... analyse des cartographies
+

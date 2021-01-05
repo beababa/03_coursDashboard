@@ -3,10 +3,5 @@
 .RData
 .Ruserdata
 # gros fichiers
-dataE/00_ADMIN/ref-nuts-2021-01m.geojson.zip
-dataS/ign.gpkg
-dataE/00_ADMIN/COMMUNE.shp
-dataE/00_ADMIN/ign.gpkg
-dataS/Carriere_A.gpkg
 dataE/
 dataS/

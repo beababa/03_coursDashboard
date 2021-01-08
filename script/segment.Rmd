@@ -127,6 +127,24 @@ table(sapply(S_communeDpt,length))
 
 # Cas d'étude : segments et communes
 
+Les segments ne représentent pas une couverture exhaustive de l'espace. 
+Du coup, on exclue toutes les communes sur ces segments.
+Une méthode simple est de partir des centroides, d'intersecter et de repartir de la base
+commune obtenue.
+
+```{r}
+centroid <- st_centroid(commune)
+data <- st_intersection(centroid, segment)
+# verif graphique sur les communes exclues
+diff <- setdiff(centroid$INSEE_COM, data$INSEE_COM)
+dataDiff <- commune [commune$INSEE_COM %in% diff,]
+plot(dataDiff$geom)
+# constitution base commune : polygone et champs INSEE_COM et NOM_COM uniquement
+commune <- commune [!(commune$INSEE_COM %in% diff), c("INSEE_COM", "NOM_COM")]
+# 31 565 communes inclues dans les segments, 3000 exclues
+
+```
+
 On détecte les communes dans un segment
 ou / et ?
 On intersecte et on mesure les aires des communes hors segment
@@ -221,6 +239,7 @@ comSeg <- comSegment [comSegment$INSEE_COM %in% code,]
 Vérification à partir base commune sans le within
 
 ```{r}
+# rappel code = communes plus de 2 fois
 sel <- commune [commune$INSEE_COM %in% code,]
 inter <- st_intersection(sel, segment)
 # 11842 communes et 24837  morceaux également ! pas besoin de passer par le within (strictement à l'intérieur)
@@ -250,6 +269,8 @@ for (i in 1:nb) {
   laire [[i]] <- linter [[i]][,5, drop = TRUE]
   names (laire) [[i]] <- linter [[i]][1,1, drop = TRUE] 
 }
+# on repère les communes dont les parties sont minimes par rapport au total des aires
+
 # on cherche l'aire max
 laire.pct <- lapply (laire, pct)
 # on voit qu'il existe tjrs une aire principale occupant + de 90 % de la surface.
@@ -263,7 +284,7 @@ plot(commune$geom [commune$INSEE_COM %in% nom.anomalies,])
 nb <- length(nom.anomalies)
 i <- 1
 for (i in 1:nb) {
-  g <- inter$geom [inter$NOM_COM == nom.anomalies [i]]
+  g <- inter$geom [inter$INSEE_COM == nom.anomalies [i]]
   sizes <-
     getFigDim(
       x = g,
@@ -285,41 +306,19 @@ for (i in 1:nb) {
   segmentSel <- segment [segment$libgeo %in% noms,]
   typoLayer(segmentSel, var = "libgeo", add = TRUE)
   plot(
-    inter$geom [inter$NOM_COM == nom.anomalies [i]],
+    inter$geom [inter$INSEE_COM == nom.anomalies [i]],
     lwd = 2,
     border = "red",
     add = TRUE,
     col = NA
   )
-  layoutLayer(paste0("Commune de", nom.anomalies [i],  " et segments"))
+  layoutLayer(paste0("Commune de ", inter$NOM_COM [inter$INSEE_COM == nom.anomalies [i]],  " et segments"))
   dev.off()
 }
-# cartographie pour tous les cas
-par(mfrow = c(7,7))
-for (i in 1:46){
 
-    #png(paste0("../img/inter_",i,".png"))
-    plot (linter [[i]][,6], border = "red", bg = "antiquewhite1")
-    plot(segment$geom, col = NA, add = TRUE)
-    layoutLayer(names(laire)[i])
-    #dev.off()
-}
 ```
 
 ## Table finale
-
-```{r}
-# toutes les communes incluses (comSeg1)
-# + toutes les communes segmentées (géométrie intersection <90 %) (comOK)
-comSeg2 <- commune [commune$INSEE_COM %in% comOK]
-
-# + anomalies
-
-com2 <- commune [commune$INSEE_COM %in% INSEE_COMOK,]
-comf <- rbind(com, com2)
-comf <- comf [, c("INSEE_COM")]
-```
-
 
 Idée : sauf pour les 128 anomalies, reprendre les centroides
 
@@ -329,13 +328,86 @@ C'est quand même beaucoup plus simple.
 nom.anomalies
 centr <- st_centroid(commune)
 res <- st_intersection(centr, segment)
+# 31565 communes sur 34868.pourquoi une différence de 3 303 ? Il s'agit sans doute des centroids sur espace sans segment.
+# Mais il devrait y en avoir moins (71, cf calculs ci-dessous)
+# on supprime les anomales
 head(res)
 res <- res [!(res$INSEE_COM %in% nom.anomalies), ]
 res <- res [, c("INSEE_COM", "NOM_COM", "codgeo", "libgeo"), drop= TRUE]
+# 31494 communes sur 34868, seules 71 communes ont été retirées...
+# reste 57 cas problématiques.
+nb <- 31565 - nrow(res)
+length(nom.anomalies)- nb
 # merge géométries commune
 res2 <- merge (res, commune [, "INSEE_COM"], by = "INSEE_COM")
 head(res2)
 ```
 
 reste les 128 communes... analyse des cartographies
+
+cas des communes sur aucun segment, là aussi repérage par rapport au centroid et exclusion
+de ces communes.
+
+Il faut également vérifier qu'il reste 57 cas
+
+De plus, on comprendra peut-ètre pourquoi différence de 3303
+
+```{r}
+# variables : nom.anomalies
+head(centr)
+centrAnomalies <- centr [centr$INSEE_COM %in% nom.anomalies,]
+resAnomalies <- st_intersection(centrAnomalies, segment)
+# remplacement du point par le polygone
+resAnomaliesPoly <- resAnomalies [, c("INSEE_COM", "NOM_COM", "codgeo", "libgeo"),drop = TRUE]
+resAnomaliesPoly <- merge (resAnomaliesPoly, commune [, "INSEE_COM"], by = "INSEE_COM")
+# 71 communes communes ont un centroid dans un segment.
+# Les 57 autres cas sont à retirer.
+commHorsSegment <- setdiff(centrAnomalies$INSEE_COM, resAnomalies$INSEE_COM)
+# cartographies des 71 cas.
+nb <- nrow(resAnomaliesPoly)
+i <- 1
+for (i in 1:nb) {
+  g <- resAnomaliesPoly$geom [i]
+  sizes <-
+    getFigDim(
+      x = g,
+      width = 300,
+      mar = c(0, 0, 1.2, 0),
+      res = 96
+    )
+  png(
+    paste0("../img/anomaliesTri_", i, ".png"),
+    width = 300,
+    height = sizes [2],
+    res = 96
+  )
+  par(mar = c(0, 0, 1.2, 0))
+  plot(g, bg = "antiquewhite1")
+  segSel <-
+    st_intersection(segment, g)
+  noms <- unique(segSel$libgeo)
+  segmentSel <- segment [segment$libgeo %in% noms,]
+  typoLayer(segmentSel, var = "libgeo", add = TRUE)
+  plot(
+    g,
+    lwd = 2,
+    border = "red",
+    add = TRUE,
+    col = NA
+  )
+  layoutLayer(paste0("Commune de ", resAnomaliesPoly$NOM_COM [i],  " et segments"))
+  dev.off()
+}
+```
+
+Analyse des 71 cas
+
+Il reste beaucoup de cas où les aires débordent sans signification !
+Trouver la bonne borne au dessus de 90 %
+
+```{r}
+anomalies <- laire.pct.max [laire.pct.max < 70]
+nom.anomalies <- names(anomalies)
+# 42
+```
 

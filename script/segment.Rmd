@@ -25,6 +25,29 @@ knitr::opts_chunk$set(warning = FALSE)
 
 Récupérer le segment d'appartenance pour chaque commune.
 
+Plusieurs explorations des données sont d'abord nécessaires (partie 1).
+
+On traite ensuite le problème en plusieurs étapes (partie 2).
+
+Afin de diminuer le nombre de communes traitées dans l'intersection, on repère d'abord
+les communes inscrites totalement dans les segments (partie 2.1) 
+(ensemble de 18 190 communes). 
+
+Les contours des segments ne correspondent pas aux contours des communes. Pour contourner
+ce problème, on utilise les centroïdes des communes et on intersecte avec les segments.
+
+Mais, dans le cas présent, cela ne suffirait pas, car :
+
+- certaines communes n'appartiennent à aucun segment (partie 2.1) Plus de 3 000 communes
+sont concernés
+
+- d'autres communes, les communes nouvelles (mouvement acceleré en 2016), sont coupées 
+entre plusieurs segments. (partie 2.3) A priori, ce mouvement touche moins de 4 000 communes.
+
+Il s'agit donc de repérer ces communes, de les traiter à part et d'utiliser le centroïde pour 
+toutes les autres.
+
+
 ## Librairies et répertoire
 
 ```{r}
@@ -46,14 +69,45 @@ segmentV11 <-  st_read("../dataS/segment.gpkg", "v11", stringsAsFactors = F)
 segment <- st_read("../dataE/01_CULTURES/segments_syst_L93.shp",  stringsAsFactors = F)
 ```
 
+Colonnes du fichier final
+
+```{r}
+colCommune <- c("INSEE_COM", "NOM_COM")
+colSegment <- c("codgeo", "libgeo")
+col <- c(colCommune, colSegment)
+```
+
+Zone spécifique d'étude : estuaire de la Gironde
+
+Afin d'étudier les problèmes, une zone est choisie. Il s'agit de l'estuaire de la 
+Gironde car, sur cette zone, les géographies des communes recouvrent l'estuaire.
+
+```{r}
+cible <- commune$geom [commune$NOM_DEP %in% c("GIRONDE","CHAMPAGNE")]
+```
+
+
+
+
 
 # Explorations (Ne pas jouer)
+
+## Communes 2020 et communes ign
+
+```{r, eval=FALSE}
+diff <- setdiff(com2020$com, commune$INSEE_COM)
+com2020 [com2020$com == "01119",]
+# Corcelles a fusionné en 2016 en Champdor-Corcelles
+commune[grep("Corcelles",commune$NOM_COM),]
+```
+
+La base ign est plus récente que com2020
 
 ## Communes et cantons 2020 : exploration, combien de communes fractionnées
 
 Plus de communes officiellement fractionnées que par calcul, aie !
 
-```{r}
+```{r, eval=FALSE}
 # 2054 cantons en 2020 (communes nouvelles et multicantons 286)
 table(can2020$typect)
 # 434 communes fractionnées (les plus grosses)
@@ -76,7 +130,7 @@ sum(df1$Freq)
 Peu importe. On prend la segment au final. 
 Hypothèse : La version finale doit comporter les entêtes pour la mise à jour sur le site ?
 
-```{r}
+```{r, eval=FALSE}
 # plusieurs couches segments
 
 str(segment)
@@ -98,7 +152,7 @@ Pour la géométrie des cantons, elle n'existe pas dans admin express, on la pre
 
 Donc la piste canton - segment n'est pas bonne. Le travail se fait sur commune - segment.
 
-```{r}
+```{r, eval=FALSE}
 canton <- st_read("../dataE/00_ADMIN/CANTON.SHP")
 # 2378 cantons en 2015
 S_cantonSegment <- st_within(canton, segment, sparse = T)
@@ -112,7 +166,7 @@ Au passage on regarde les deux formes matrice simplifiée et matrice logique
 
 Toutes les communes sont dans un département ! Ouf !
 
-```{r}
+```{r, eval = FALSE}
 S_communeDpt <-  st_within(commune, dpt, sparse = T)
 M_communeDpt <-  st_within(commune, dpt, sparse = F)
 
@@ -125,12 +179,68 @@ table(sapply(S_communeDpt,length))
 # Toutes les communes sont dans un dpt
 ```
 
+
 # Cas d'étude : segments et communes
 
+## Les communes inscrites dans les segments
+
+Cette étape permet de diminuer significativement le nombre de communes traitées.
+
+C'est la fonction spatiale "within" qui permet de détecter les communes inscrites
+dans un segment. Elle génère une matrice binaire (TRUE / FALSE). L'option sparse produit
+un objet *sgbp*, plus facile à manipuler que la matrice binaire. Il s'agit des indices 
+des communes et des segments concernés.
+
+### Cartographie
+
+```{r}
+lindiceSegment <- st_within(commune, segment, sparse = T)
+# distinguer les communes hors et dedans
+vec <- sapply(lindiceSegment, length)
+table(vec)
+commune  <- cbind(commune, vec)
+png("../img/within.png")
+par(mar = c(0,0,0,0))
+ghostLayer(cible, bg = "lightblue")
+typoLayer(commune, border  = "antiquewhite1",var = "vec", legend.title.txt = "Exclu / Inclu", col = c("red", "green"), add = TRUE)
+plot(segment, col = NA, border = "black",lwd = 2, add = TRUE)
+dev.off()
+```
+
+![](../img/within.png)
+
+### Données
+
+```{r}
+# recup indice communes inclues 18190
+indiceCom <-  which (vec != 0)
+# recup communes et segments via les indices
+com <- commune[indiceCom,]
+seg <- segment [unlist(lindiceSegment),]
+# attribution du segment par jointure attributaire
+tmpCom <- cbind (com, seg )
+tmpSeg <-  seg [, colSegment, drop = TRUE] 
+tmpSeg <- unique(tmpSeg)
+# une commune par segment donc 18190 obs
+dataInclu <- merge (tmpCom [, c("INSEE_COM", "NOM_COM","codgeo")], tmpSeg, by = "codgeo")
+# 18190 communes dans segments
+# filtre sur les communes problématiques, celles qui sont vides dans la liste
+indiceComPb <- which(vec == 0)
+commune <- commune [indiceComPb,]
+```
+
+
+16678 communes ne sont pas dans un segment, quasiment la moitié du total. Cet ensemble
+se divise entre communes hors segments et communes sur plusieurs segments.
+
+## Les communes hors segment
+
 Les segments ne représentent pas une couverture exhaustive de l'espace. 
-Du coup, on exclue toutes les communes sur ces segments.
+Ici, on exclue toutes les communes hors segment de la base commune.
 Une méthode simple est de partir des centroides, d'intersecter et de repartir de la base
 commune obtenue.
+
+### Intersection centroid et segments
 
 ```{r}
 centroid <- st_centroid(commune)
@@ -138,89 +248,99 @@ data <- st_intersection(centroid, segment)
 # verif graphique sur les communes exclues
 diff <- setdiff(centroid$INSEE_COM, data$INSEE_COM)
 dataDiff <- commune [commune$INSEE_COM %in% diff,]
+png("../img/horsSegment.png")
+par(mar = c(0,0,0,0))
 plot(dataDiff$geom)
+dev.off()
+```
+
+### Certaines communes appartiennent à un segment
+
+La cartographie des communes hors segment interpelle, particulièrement au niveau
+de l'estuaire de la Gironde.
+
+
+```{r}
+sizes <-
+      getFigDim(
+        x = cible,
+        width = 600,
+        mar = c(0, 0, 0, 0),
+        res = 96
+      )
+png("../img/comEstuaire.png", width = sizes [1], height = sizes [2], res = 96)
+par(mar = c(0,0,0,0))
+ghostLayer(cible, bg = "lightblue")
+plot(segment, col = "gold", add = TRUE)
+plot(dataDiff, col = "green", add = TRUE)
+comEstuaire <- st_read("../dataS/segment.gpkg", "comEstuaire", quiet = TRUE)
+plot(comEstuaire, col = "red", add = TRUE)
+dev.off()
+```
+
+
+![](../img/comEstuaire.png)
+
+
+### Sauvegarde des communes hors segment et des faux
+```{r}
+dataDiff$libgeo <- "Hors segment"
+dataDiff$codgeo <- "00"
+dataDiff$libgeo [dataDiff$NOM_DEP == "GIRONDE" & dataDiff$INSEE_COM %in% comEstuaire$INSEE_COM] <- "MEDOC"
+dataDiff$libgeo [dataDiff$NOM_DEP == "CHARENTE-MARITIME" & dataDiff$INSEE_COM %in% comEstuaire$INSEE_COM] <- "CHAMPAGNES" <- "CHAMPAGNES"
 # on rajoutera le dataDiff à la table principale avec la mention 00 et "hors segment"
 st_write(dataDiff, "../dataS/segment.gpkg", "communeHorsSegment", quiet = TRUE, delete_layer = TRUE  )
-# affichage sous Qgis permet de repérer pb estuaire de la gironde.
-# certaines communes isolées au mileu d'un segment... nécessité expertise...
-# constitution base commune : polygone et champs INSEE_COM et NOM_COM uniquement
 commune <- commune [!(commune$INSEE_COM %in% diff), c("INSEE_COM", "NOM_COM")]
-# 31 565 communes inclues dans les segments, 3000 exclues
-
-```
-
-On détecte les communes dans un segment
-ou / et ?
-On intersecte et on mesure les aires des communes hors segment
-
-## Within
-
-```{r}
-communeSegment <- st_within(commune, segment, sparse = T)
-communeSegment
-unlist(communeSegment)
-# attention il s'agit des indices pour commune comme pour segment
-# recup des communes - segments
-res <- sapply(communeSegment, length)
-table(res)
-# recup indice communes inclues 18190
-indiceCom <-  which (res != 0)
-# recup communes et segments via les indices
-com <- commune[indiceCom,]
-seg <- segment [unlist(communeSegment),]
-# attribution du segment par jointure attributaire
-tmpCom <- cbind (com, seg )
-tmpSeg <-  seg [, c("Codgeo_NUM", "libgeo"), drop = TRUE] 
-tmpSeg <- unique(tmpSeg)
-# une commune par segment donc 18190 obs
-comSegOK <- merge (tmpCom [, c("INSEE_COM", "NOM_COM","Codgeo_NUM")], tmpSeg, by = "Codgeo_NUM")
-# 18190 communes dans segments
-# filtre sur les communes problématiques, celles qui sont vides dans la liste
-indiceComPb <- which(res == 0)
-comPb <- commune [indiceComPb,]
+# Sur les communes non inclues strictement dans les segments, 13 374 communes appartiennent aux segments,  3303 exclues
 ```
 
 
-13 375 communes ne sont pas dans un segment, quasiment la moitié.
-On intersecte ensuite
 
-## La base de travail : comSegment
+## Les communes divisées sur plusieurs segments (st_intersection)
 
 ```{r}
-comSegment <- st_intersection(comPb, segment)
-str(comSegment)
-comSegment <- comSegment [, c("NOM_COM", "INSEE_COM", "codgeo", "libgeo")]
+partie <- st_intersection(commune, segment)
+partie <- partie [, col]
 ```
 
 26 276 morceaux pour 13 375 communes. toutes les communes en 2 morceaux ?
 
-## Exploration cas Aast et 4 segments
 
-### Un exemple de problème topologique : Aast
-
-```{r}
-Aast <- comSegment [comSegment$NOM_COM == "Aast",]
-Aast
-plot(Aast$geom)
-par(mfrow = c(1,3))
-for (i in 1:3) { plot (Aast$geom [i])}
-# une piste : taille des intersections ?
-taille <- sapply(Aast$geom, st_area)
-taille100 <- (taille / sum(taille)) *100
-
-```
-
-### Compter le nombre de parties de communes
+### Dénombrer les parties des communes
 
 ```{r}
-tab <- table(comSegment$"INSEE_COM")
+tab <- table(partie$INSEE_COM)
 table(tab)
 max(tab)
 # représentation graphique
-barplot(sort(tab), las = 2, main = paste0(length(tab), " communes représentées entre 1 et 5 fois"))
+par(mar = c(4,4,4,2))
+barplot(sort(tab), las = 2, xlab = "communes", ylab = "nb de parties", names.arg = NA,
+        main = paste0(length(tab), " communes représentées entre 1 et 5 fois"))
 ```
 
-Méthode : 
+### Un exemple de problème topologique : la commune partagée en 5 parties
+
+```{r}
+id <- names(tab) [tab == 5]
+sel <- partie [partie$INSEE_COM == id,]
+ghostLayer(sel)
+plot(segment, col = "gold", add = TRUE)
+typoLayer(sel, var = "codgeo", add = TRUE)
+par(mfrow = c(2,3))
+for (i in 1:5) { plot (sel$geom [i])}
+# une piste : taille des intersections ?
+taille <- sapply(sel$geom, st_area)/10000
+plot(taille, main = "5 parties intersectées : une seule zone", xlab = "identifiant partie",
+    ylab = "aire (hac)" )
+```
+
+Cet exemple souligne les problèmes topologiques. Mais on ne peut pas encore utiliser
+la technique du centroide puisqu'il y a des communes qui chevauchent réellement les
+segments.
+
+### Base des parties de commune
+
+#### Méthode
 
 - on extrait la fréquence, 
 * on représente barplot,
@@ -229,55 +349,113 @@ Méthode :
 point de vigilance : attention à travailler avec le code unique commune ! (code INSEE)
 
 ```{r}
-# nb choix de la limite
-nb <- 1
-code <- names(tab) [tab > nb]
-par(mar = c(8,4,4,4))
-tab <- tab [tab > nb] 
-barplot(sort(tab), las = 2, main = paste0(length(tab), " communes représentées plus de ", nb,"  fois"))
-comSeg <- comSegment [comSegment$INSEE_COM %in% code,]
-# nb de morceaux 24 656
+filtrerParties <- function (nbPartiesMin, nbPartiesMax) {
+  # nbPartiesMin <- 0
+  # nbPartiesMax <- 1
+  code <- names(tab) [tab >= nbPartiesMin & tab <= nbPartiesMax]
+  par(mar = c(8, 4, 4, 4))
+  tabSel <- tab  [tab >= nbPartiesMin & tab <= nbPartiesMax]
+  barplot(
+    sort(tabSel), xlab = "identifiant partie", names.arg = NA,
+    las = 2,
+    main = paste0(
+      length(tabSel),
+      " communes représentées entre ",
+      nbPartiesMin,
+      " et ",
+      nbPartiesMax,
+      "  fois"
+    )
+  )
+  data <- partie [partie$INSEE_COM %in% code, ]
+  }
 ```
 
-Vérification à partir base commune sans le within
+
+#### Une seule partie ? Impossible !
+
+Pourquoi ces géométries ne sont pas inclues dans les communes inscrites dans les segments ?
 
 ```{r}
-# rappel code = communes plus de 2 fois
-sel <- commune [commune$INSEE_COM %in% code,]
-inter <- st_intersection(sel, segment)
-# 11755 communes et 24656  morceaux également ! pas besoin de passer par le within (strictement à l'intérieur)
+data <- filtrerParties(0,1)
+sizes <-
+      getFigDim(
+        x = cible,
+        width = 600,
+        mar = c(0, 0, 0, 0),
+        res = 96
+      )
+png("../img/comUnePartie.png", width = sizes [1], height = sizes [2], res = 96)
+par(mar = c(0,0,0,0))
+ghostLayer(cible, bg = "lightblue")
+plot(segment, col = "gold", add = TRUE)
+plot(data, col = "green", add = TRUE)
+dev.off()
+
+dataUnePartie <- data
 ```
 
-## Calcul des aires pour éliminer les problèmes d'ordre topologiques
+![](../img/comUnePartie.png)
+Sans comprendre vraiment pourquoi ces communes n'ont qu'une partie et ne sont pas considérées comme
+incluses.
 
-On repart de la base commune (sel et inter)
+
+
+
+
+
+#### Entre deux et cinq parties
+
+```{r}
+data <- filtrerParties(2,5)
+comSel <- commune [commune$INSEE_COM %in% unique(data$INSEE_COM),]
+# 11 755 communes concernées
+```
+
+### Calcul des aires pour éliminer les problèmes d'ordre topologiques
+
+#### Calcul aires de la commune et des parties de la communes, filtrage des petites aires.
 
 ```{r}
 # aire des communes et de leurs parties
-sel$aire <- sapply(sel$geom, st_area)
-inter$aire <- sapply(inter$geom, st_area)
-inter <- inter [, c("INSEE_COM", "NOM_COM", "codgeo", "libgeo","aire")]
-str(inter)
+data$aire <- sapply(data$geom, st_area)/10000
+comSel$aire <- sapply(comSel$geom, st_area)/10000
+# Elimination des toutes petites taills < 15 hac
+plot(comSel$aire)
+dataTest <- data [data$aire > 15,]
+length(unique(dataTest$INSEE_COM))
+# Si on supprime les parties inférieures à 15 hac, on garde la même quantité de commune.
+```
+
+#### Calcul des rapports entre les aires respectives
+
+```{r}
 # il s'agit d'obtenir les rapports entre les aires par ville
 pct <- function (vecteur) {(vecteur / sum(vecteur)) * 100}
 # Pour pouvoir traiter chaque ville, on éclate en liste
-linter <- split(inter, inter$INSEE_COM)
-names(linter)
-linter [[1]]
-nb <- length(linter)
-# l'aire est sur chaque 5e col de chacune des 46 listes
-# On extrait pour toutes les listes uniquement la 5e colonne
+ldata <- split(data, data$INSEE_COM)
+ldata [[1]] [,6, drop = TRUE]
+nb <- length(ldata)
+# l'aire est sur chaque 6e col de chacune des 46 listes
+# On extrait pour toutes les listes uniquement la 6e colonne
 laire <- list()
+i <- 1
 for (i in 1:nb) { 
-  laire [[i]] <- linter [[i]][,5, drop = TRUE]
-  names (laire) [[i]] <- linter [[i]][1,1, drop = TRUE] 
+  laire [[i]] <- ldata [[i]][,6, drop = TRUE]
+  names (laire) [[i]] <- ldata [[i]][1,1, drop = TRUE] 
 }
 # on repère les communes dont les parties sont minimes par rapport au total des aires
-
 # on cherche l'aire max
 laire.pct <- lapply (laire, pct)
 # on voit qu'il existe tjrs une aire principale occupant + de 90 % de la surface.
-laire.pct.max <- lapply(laire.pct, max)
+aire.pct.max <- sapply(laire.pct, max)
+plot(aire.pct.max)
+```
+
+#### 3 hypothèses d'élimination des aires : 70,80,90 %
+
+
+```{r, eval=FALSE}
 comOK <- laire.pct.max [laire.pct.max >= 90]
 # 3 hypothèses
 anomalies90 <- laire.pct.max [laire.pct.max < 90]
@@ -286,6 +464,7 @@ anomalies70 <- laire.pct.max [laire.pct.max < 70]
 # 71, 28 et 16 anomalies : on produit les cartos pour chacun  des cas
 # afin de vérifier rapidement quelle hypothèse est la meilleure
 for (j in c(70, 80, 90)) {
+  #j <- 70
   anomalies <- laire.pct.max [laire.pct.max < j]
   nom.anomalies <- names(anomalies)
   plot(commune$geom [commune$INSEE_COM %in% nom.anomalies, ])
@@ -293,7 +472,7 @@ for (j in c(70, 80, 90)) {
   nb <- length(nom.anomalies)
   i <- 1
   for (i in 1:nb) {
-    g <- inter$geom [inter$INSEE_COM == nom.anomalies [i]]
+    g <- commune$geom [commune$INSEE_COM == nom.anomalies [i]]
     sizes <-
       getFigDim(
         x = g,
@@ -315,93 +494,132 @@ for (j in c(70, 80, 90)) {
     segmentSel <- segment [segment$libgeo %in% noms, ]
     typoLayer(segmentSel, var = "libgeo", add = TRUE)
     plot(
-      inter$geom [inter$INSEE_COM == nom.anomalies [i]],
+      data$geom [data$INSEE_COM == nom.anomalies [i]],
       lwd = 2,
       border = "red",
       add = TRUE,
       col = NA
     )
-    layoutLayer(paste0(j, "_Commune de ", inter$NOM_COM [inter$INSEE_COM == nom.anomalies [i]],  " et segments"))
+    layoutLayer(paste0(j, "_Commune de ", commune$NOM_COM [commune$INSEE_COM == nom.anomalies [i]],  " et segments"))
     dev.off()
   }
 }
 ```
 
+![](../img/anomalies_90_10.png)
+![](../img/anomalies_90_11.png)
+![](../img/anomalies_90_12.png)
+![](../img/anomalies_90_13.png)
+![](../img/anomalies_90_14.png)
+![](../img/anomalies_90_15.png)
+![](../img/anomalies_90_16.png)
+![](../img/anomalies_90_17.png)
+![](../img/anomalies_90_18.png)
+![](../img/anomalies_90_19.png)
+![](../img/anomalies_90_1.png)
+![](../img/anomalies_90_20.png)
+![](../img/anomalies_90_21.png)
+![](../img/anomalies_90_22.png)
+![](../img/anomalies_90_23.png)
+![](../img/anomalies_90_24.png)
+![](../img/anomalies_90_25.png)
+![](../img/anomalies_90_26.png)
+![](../img/anomalies_90_27.png)
+![](../img/anomalies_90_28.png)
+![](../img/anomalies_90_29.png)
+![](../img/anomalies_90_2.png)
+![](../img/anomalies_90_30.png)
+![](../img/anomalies_90_31.png)
+![](../img/anomalies_90_32.png)
+![](../img/anomalies_90_33.png)
+![](../img/anomalies_90_34.png)
+![](../img/anomalies_90_35.png)
+![](../img/anomalies_90_36.png)
+![](../img/anomalies_90_37.png)
+![](../img/anomalies_90_38.png)
+![](../img/anomalies_90_39.png)
+![](../img/anomalies_90_3.png)
+![](../img/anomalies_90_40.png)
+![](../img/anomalies_90_41.png)
+![](../img/anomalies_90_42.png)
+![](../img/anomalies_90_43.png)
+![](../img/anomalies_90_44.png)
+![](../img/anomalies_90_45.png)
+![](../img/anomalies_90_46.png)
+![](../img/anomalies_90_47.png)
+![](../img/anomalies_90_48.png)
+![](../img/anomalies_90_49.png)
+![](../img/anomalies_90_4.png)
+![](../img/anomalies_90_50.png)
+![](../img/anomalies_90_51.png)
+![](../img/anomalies_90_52.png)
+![](../img/anomalies_90_53.png)
+![](../img/anomalies_90_54.png)
+![](../img/anomalies_90_55.png)
+![](../img/anomalies_90_56.png)
+![](../img/anomalies_90_57.png)
+![](../img/anomalies_90_58.png)
+![](../img/anomalies_90_59.png)
+![](../img/anomalies_90_5.png)
+![](../img/anomalies_90_60.png)
+![](../img/anomalies_90_61.png)
+![](../img/anomalies_90_62.png)
+![](../img/anomalies_90_63.png)
+![](../img/anomalies_90_64.png)
+![](../img/anomalies_90_65.png)
+![](../img/anomalies_90_66.png)
+![](../img/anomalies_90_67.png)
+![](../img/anomalies_90_68.png)
+![](../img/anomalies_90_69.png)
+![](../img/anomalies_90_6.png)
+![](../img/anomalies_90_70.png)
+![](../img/anomalies_90_71.png)
+![](../img/anomalies_90_7.png)
+![](../img/anomalies_90_8.png)
+![](../img/anomalies_90_9.png)
+
+
+#### Extractions des centroides
 
 Borne à 80 semble aller mieux.
-Pour toutes les diff90 80 on prend le centroid
+Pour toutes les parties sup. à 80 on prend le centroid
 pour les parties 80, centroid de chaque partie
 
-```{r}
-comOK <- laire.pct.max [laire.pct.max >= 80]
+```{r, eval=FALSE}
+id <- names(laire.pct.max [laire.pct.max >= 80])
+centroid <- st_centroid(commune [commune$INSEE_COM %in% id,])
+dataPlus80 <- st_intersection(centroid, segment)
+dataPlus80 <- dataPlus80 [,col]
 #11727
 anomalies80 <- laire.pct.max [laire.pct.max < 80]
-names(anomalies80)
+id <- names(anomalies80)
 # pour toutes ces communes, on prend le fichier des parties et on attribue le
 # segment du centroid des parties
 # pour mémoire fichier des parties
-parties <- st_intersection(commune [commune$INSEE_COM %in% names(anomalies80),],segment)
+partie80 <- st_intersection(commune [commune$INSEE_COM %in% names(anomalies80),],segment)
 # 70 parties pour 28 communnes
-# on élimine les petites parties
-parties$aire <- (sapply(parties$geom, st_area)/10000)
-plot(parties$aire)
-lparties <- split(parties,  parties$INSEE_COM)
-
-nb <- length(lparties)
-laire <- list()
-for (i in 1:nb) { 
-  laire [[i]] <- lparties [[i]][,5, drop = TRUE]
-  names (laire) [[i]] <- lparties [[i]][1,1, drop = TRUE] 
-}
-
-laire.pct <- lapply(laire, pct)
-aire.pct <- unlist(laire.pct)
-plot(sort(aire.pct))
-aire20 <- aire.pct [aire.pct < 20]
-noms20 <-  names(aire20)
-plot(comSeg)
+centroid <- st_centroid(partie80)
+data80 <- st_intersection(centroid, segment)
+data80 <- data80 [, col]
 ```
-
 
 
 ## Table finale
 
-Idée : sauf pour les 71 anomalies, reprendre les centroides
+On a obtenu plusieurs tables : dataDiff, dataInclu, dataUnePartie, dataPlus80 dont le
+total doit faire l'ensemble des communes moins les anomalies.
+Concernant les géométries, sauf pour dataPlus80, on reprend les géométries des communes
+de départ.
 
-(C'est quand même beaucoup plus simple.)
+Vérification
 
-```{r}
-nom.anomalies
-centr <- st_centroid(commune)
-res <- st_intersection(centr, segment)
-# 31565 communes sur 34868.pourquoi une différence de 3 303 ? Il s'agit sans doute des centroids sur espace sans segment.
-# Mais il devrait y en avoir moins (71, cf calculs ci-dessous)
-# on supprime les anomales
-head(res)
-res <- res [!(res$INSEE_COM %in% nom.anomalies), ]
-res <- res [, c("INSEE_COM", "NOM_COM", "codgeo", "libgeo"), drop= TRUE]
-# 31494 communes sur 31565, les 71 anomalies
-nb <- 31565 - nrow(res)
-length(nom.anomalies)- nb
 
+```{r, eval=FALSE}
+nrow(dataDiff) + nrow(dataInclu) + nrow (dataPlus80) + nrow(dataUnePartie)
+nrow(data80)
 ```
 
-reste les 71 communes... analyse des cartographies
-
-
-Analyse des 71 cas
-
-Il reste beaucoup de cas où les aires débordent sans signification !
-Trouver la bonne borne au dessus de 90 %
 
 
 
-
-
-
-
-```{r}
-borne70 <- laire.pct.max [laire.pct.max < 70]
-
-```
 

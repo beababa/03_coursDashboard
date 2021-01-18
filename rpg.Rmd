@@ -1,0 +1,163 @@
+---
+title: "RPG"
+author: "B. Maranget"
+date: "08/01/2021"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+# Passer la valeur suivante à TRUE pour reproduire les extractions.
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+# Cadre
+
+## Objet
+
+agréger contenu rpg de parcelles à canton
+
+
+## Librairies et répertoire
+
+```{r}
+library(sf)
+library(cartography)
+library(rgdal)
+```
+
+# Données
+
+```{r}
+# communes sans la corse
+commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
+dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
+ogrListLayers("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg") 
+ogrListLayers("../dataE/01_CULTURES/ILOTS_ANONYMES.gpkg") 
+dataTest <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique", 
+	query = 'SELECT * FROM "parcelle_graphique" LIMIT 100' )
+
+culture <- read.table("C:/Users/maranb/parcelles/dataE/01_CULTURES/culture.csv", quote="\"", comment.char="")
+can2020 <- read.csv("../dataE/00_ADMIN/canton2020.csv")
+canton2015 <- st_read("../dataE/00_ADMIN/CANTON.SHP")
+
+```
+
+
+```{r}
+dataTest <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique",
+query = 'SELECT * FROM "parcelle_graphique" LIMIT 10' )
+names(dataTest)
+data <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique",
+  query = 'SELECT  ID_PARCEL , CODE_CULTU , CODE_GROUP FROM "parcelle_graphique" ' )
+```
+
+9 millions de lignes
+
+```{r}
+head(dataTest)
+data <- data [data$CODE_CULTU %in% culture,]
+```
+
+
+
+```{r}
+i <- 1
+query_str <- paste0('SELECT ID_PARCEL, geom FROM "parcelle_graphique" WHERE CODE_CULTU = "', culture [i], "\"") 
+data <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique", query = query_str)
+inter <- st_intersection(canton2015 [,"CODE_CANT"], data [,"ID_PARCEL"])
+
+```
+
+
+
+constitution d'un jeu de test
+
+```{r}
+dataTest <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique", 
+	query = 'SELECT * FROM "parcelle_graphique" LIMIT 100' )
+head(dataTest)
+st_write(dataTest, "../dataS/rpg.gpkg", "test", delete_layer = TRUE, quiet = TRUE)
+st_write(canton2015, "../dataS/rpg.gpkg", "canton",delete_layer = TRUE, quiet = TRUE)
+head(dataTest)
+```
+
+
+Le fichier est trop gros pour que les géométries soient ouvertes.
+
+On met en place une base postgis et on fait l'agregation dedans.
+
+```{sql connection=}
+CREATE TABLE lien AS (
+SELECT canton.fid, code_cultu, sum(surf_parc)  AS surface
+FROM parcelle_graphique, canton
+	WHERE ST_INTERSECTS(st_centroid(parcelle_graphique.geom), canton.geom)
+	GROUP BY code_cultu, canton.fid
+	);
+
+```
+
+La table contient donc toutes les données du fichier. Pour alléger, on a enlevé 
+les géométries.
+L'identifiant  (fid) correspond aux derniers chiffres de l'identifiant géofla.
+
+TODO pourquoi cette multiplicité d'identifiants ?
+
+# Liste  et dénombrement des cultures
+
+
+```{r}
+data <- read.csv("../dataS/lien.csv", sep = "\t", dec = ".", header  = FALSE)
+str(data)
+names(data) <- c("ID_CANTON", "CULTURE", "SURFACE")
+table(data$CULTURE)
+canton2015$ID_CANTON <- as.integer(substring(canton2015$ID_GEOFLA, 21,29))
+str(canton2015)
+# on fait la jointure avec les géométries des cantons
+data <- merge(data, canton2015, by = "ID_CANTON")
+dataCAE <- data [data$CULTURE == "CAE",]
+st_write(dataCAE, "../dataS/rpg.gpkg", "baseCAE", quiet = TRUE, delete_layer = TRUE)
+```
+
+
+Pour vérification, on va extraire de la table le CAE via R
+
+
+
+```{r}
+cae <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique", 
+	query = 'SELECT * FROM "parcelle_graphique" WHERE CODE_CULTU = "CAE"')
+st_write(cae, "../dataS/rpg.gpkg", "cae", delete_layer = TRUE, quiet = TRUE)
+
+head(cae)
+cae.c <- st_centroid(cae)
+caeCantonInter <- st_intersection(cae, canton2015)
+nrow(caeCantonInter) - nrow(cae)
+# 41 morceaux de parcelles sur 2634.
+str(caeCantonInter)
+# verif des aires
+caeCantonInter$aire <- round(st_area(caeCantonInter)/10000,2)
+caeCantonInter$aire <- as.numeric(caeCantonInter$aire)
+caeCantonInter$verif <- caeCantonInter$SURF_PARC - caeCantonInter$aire
+plot((caeCantonInter$verif))
+# 91 aires différentes
+caeCantonAire <-caeCantonInter [, c("aire", "ID_GEOFLA"), drop = FALSE]
+caeCantonAgg <- aggregate(aire~ID_GEOFLA,caeCantonAire, sum)
+# on rattache les géométries des cantons.
+caeData <- merge(caeCantonAgg, canton2015, by = "ID_GEOFLA")
+caeData <- st_as_sf(caeData)
+choroLayer(caeData, var ="aire")
+st_write(caeData, "../dataS/rpg.gpkg", "verifCAE", quiet = TRUE, delete_layer = TRUE)
+```
+
+Il y a de légères différences dûes à l'utilisation du centroid dans la requete sql.
+
+

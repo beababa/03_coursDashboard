@@ -1,0 +1,216 @@
+---
+title: "Représentations parcelles typologie"
+author: "B. Maranget"
+date: "16/12/2020"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+# Passer la valeur suivante à TRUE pour reproduire les extractions.
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+# Objet
+
+Eparpiller données superposées
+La fonction st_jitter permet de le faire automatiquement mais est-elle satisfaisante ?
+
+## Librairies et répertoire
+
+```{r}
+library(sf)
+library(cartography)
+
+```
+
+# Préparer la donnée
+
+## Données
+
+```{r}
+commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
+dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
+region <- st_read("../dataE/00_ADMIN/ign.gpkg", "region", quiet = TRUE, stringsAsFactors = F)
+# chargement donnée
+data <- read.csv2("../dataE/02_POI/bassin1.csv")
+
+```
+
+## Spatialisation du fichier
+
+Le problème, les . et les , dans les coordonnées et le type de la donnée
+
+```{r}
+# remplacements des virgules
+data$x <- gsub(",", ".",data$x) 
+data$y <- gsub (",",".", data$y)
+data$x <- as.numeric(data$x)
+data$y <- as.numeric(data$y)
+# spatialisation
+data.sf <- st_as_sf(data, coords = c("x", "y"), crs = 2154)
+```
+
+## Déterminer les communes d'appartenance : st_within
+
+```{r}
+indiceCommune <- st_within(data.sf, commune, sparse = TRUE)
+indiceCommune <- unlist(indiceCommune)
+names(commune)
+comSel <- commune [indiceCommune, c("INSEE_COM", "NOM_COM"), drop = TRUE]
+# on lie la table des points et les communes
+data <- cbind(data.sf, comSel)
+tab <- table(data$INSEE_COM)
+```
+
+## Etude des points en doublon
+
+```{r}
+# Combien ?
+table(tab)
+# étude du cas des 5 pts sur 1 commune
+code5 <- names (tab [tab == 5])
+data5 <- data [data$INSEE_COM == code5,]
+```
+
+
+# Méthodes de déplacement des points
+
+## Fonction st_jitter
+
+```{r}
+data.jitter <- st_as_sf(st_jitter(data$geometry, 10000))
+data5.jitter <- st_as_sf(st_jitter(data5$geometry, 10000))
+# visualisation, cas de Millau
+plot (commune$geom [commune$NOM_COM == "Millau",], bg = "antiquewhite1")
+plot (data5.jitter, add = TRUE)
+layoutLayer("5 points sur Millau")
+# donc un point un peu loin... mais ça dépend de l'échelle !
+```
+
+### Echelle régionale
+
+On travaille sur région de ville de Millau
+
+Filtrage des données
+
+```{r}
+logData <- st_within(data, region [11,], sparse = F)
+logData <- as.vector(logData)
+dataReg <- data [logData == TRUE,]
+dataReg.jitter <- data.jitter [logData == TRUE,]
+```
+
+filtrage sur les doublons au sens stricts
+
+```{r}
+tab <- table(data$INSEE_COM)
+table(tab)
+# les cas où 2 points (12 cas)
+code2 <- names (tab [tab == 2])
+data2 <- dataReg [dataReg$INSEE_COM %in% code2,]
+data2.jitter <- st_as_sf(st_jitter(data2$geometry, 10000))
+```
+
+
+
+
+Cartographie
+
+noir la data
+rouge le dispersé
+bleu millau
+
+```{r}
+plot (region$geom [11,], bg = "antiquewhite1")
+plot(dataReg, pch = 19, col = "black", add = TRUE)
+plot(dataReg.jitter, pch = 19, col = "red", add = TRUE)
+plot(data5.jitter, col = "blue", add = TRUE)
+layoutLayer("Région Auvergne Rhone Alpes - tous les points")
+#legend("bottom", col = c("black", "red", "blue", leg.text = c("pt", "dispersés", "Millau")))
+```
+
+```{r}
+plot (region$geom [11,], bg = "antiquewhite1")
+plot(data2, pch = 19, col = "black", add = TRUE)
+plot(data2.jitter, pch = 19, col = "red", add = TRUE)
+layoutLayer("Région Auvergne Rhone Alpes - doublons")
+```
+
+
+
+Cartographie avec la typologie
+
+
+
+```{r}
+# Fixer les couleurs de la typologie
+categ <- sort(unique(dataReg$groupe))
+couleurs <- rainbow(length(categ))
+```
+
+
+```{r}
+# sans dispersion
+plot (region$geom [11,], bg = "antiquewhite1")
+typoLayer(dataReg, lwd = 8, var = "groupe", col = couleurs, legend.values.order = categ, add = TRUE)
+layoutLayer("Région Auvergne Rhone Alpes - sans dispersion")
+# avec. nécessité de récupérer la donnée
+dataReg.jitter <- cbind(dataReg.jitter, dataReg$groupe)
+plot (region$geom [11,], bg = "antiquewhite1")
+typoLayer(dataReg.jitter, lwd = 8, var = "dataReg.groupe", col = couleurs, legend.values.order = categ, add = TRUE)
+plot(data2, col = "black", add = TRUE)
+layoutLayer("Région Auvergne Rhone Alpes - avec dispersion")
+```
+
+
+
+
+
+
+
+Représentation satisfaisante ?
+
+## Déplacement manuel
+
+Idée : on cpt le nb de pts, puis on les envoie à un écart si > 2
+L'écart est dépendant de l'échelle régionale
+
+```{r}
+nrow(data5)
+pt <- data5$geometry[1]
+ecart <- 10000 * 0.7
+plot (region$geom [11,], bg = "antiquewhite1")
+plot(pt , add = TRUE)
+plot( pt + c(ecart,0), col= "red", add = TRUE )
+plot( pt- c(ecart,0), col= "red", add = TRUE)
+plot(pt - c(ecart, ecart), add = TRUE)
+plot( pt + c(0, ecart)  ,col = "green", add = T)
+plot( pt - c(0, ecart)  ,col = "green", add = T)
+plot(data, pch = 19, col = "black", add = TRUE)
+```
+
+
+```{r}
+# verif data et data.jitter meme ordre
+data$id <- row.names(data)
+dataS <- data [1:20,]
+ghostLayer(
+  x = st_centroid(dataS),
+  bg = "#A6CAE0"
+)
+plot(dataS$geometry, add = TRUE)
+labelLayer(dataS, txt = "id", cex = 1, halo = T)
+data.jitter$id <- row.names(data.jitter)
+plot(data.jitter, col ="red", add = TRUE)
+labelLayer(data.jitter, txt = "id", col= "red" ,cex = 1, halo = T)
+```
+

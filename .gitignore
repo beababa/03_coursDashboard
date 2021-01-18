@@ -5,3 +5,6 @@
 # gros fichiers
 dataE/
 dataS/
+script/parcelles_cache/
+script/segment_cache/
+

@@ -31,7 +31,6 @@ agréger contenu rpg de parcelles à canton
 ```{r}
 library(sf)
 library(cartography)
-library(rgdal)
 ```
 
 # Données
@@ -40,138 +39,107 @@ library(rgdal)
 # communes sans la corse
 commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
 dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
-ogrListLayers("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg") 
-ogrListLayers("../dataE/01_CULTURES/ILOTS_ANONYMES.gpkg") 
+# Ouverture des 100 premières lignes de fichier des parcelles
 dataTest <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique", 
 	query = 'SELECT * FROM "parcelle_graphique" LIMIT 100' )
-
-culture <- read.table("C:/Users/maranb/parcelles/dataE/01_CULTURES/culture.csv", quote="\"", comment.char="")
-can2020 <- read.csv("../dataE/00_ADMIN/canton2020.csv")
+# liste des variables culture année 2017 (ancien fichier résultat)
+culture <- read.csv("../dataE/01_CULTURES/culture.csv", header = FALSE, stringsAsFactors = FALSE)
+culture <- culture$V1
+# 297 colonnes 280 d'origigine et rajout col avec 8 
 canton2015 <- st_read("../dataE/00_ADMIN/CANTON.SHP")
-
 ```
 
 
-```{r}
-dataTest <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique",
-query = 'SELECT * FROM "parcelle_graphique" LIMIT 10' )
-names(dataTest)
-data <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique",
-  query = 'SELECT  ID_PARCEL , CODE_CULTU , CODE_GROUP FROM "parcelle_graphique" ' )
-```
+# Récupération des données du fichier des parcelles
 
-9 millions de lignes
+## Ouverture
 
-```{r}
-head(dataTest)
-data <- data [data$CODE_CULTU %in% culture,]
-```
+Le fichier comporte 9 millions de parcelles, il ne s'ouvre pas en totalité sous R.
 
+On pourrait l'ouvrir via une boucle sur chaque code culture
 
-
-```{r}
+```{r, eval=FALSE}
 i <- 1
 query_str <- paste0('SELECT ID_PARCEL, geom FROM "parcelle_graphique" WHERE CODE_CULTU = "', culture [i], "\"") 
 data <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique", query = query_str)
 inter <- st_intersection(canton2015 [,"CODE_CANT"], data [,"ID_PARCEL"])
-
 ```
 
+On pourrait l'ouvrir sans la géométrie
 
 
-constitution d'un jeu de test
-
-```{r}
-dataTest <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique", 
-	query = 'SELECT * FROM "parcelle_graphique" LIMIT 100' )
-head(dataTest)
-st_write(dataTest, "../dataS/rpg.gpkg", "test", delete_layer = TRUE, quiet = TRUE)
-st_write(canton2015, "../dataS/rpg.gpkg", "canton",delete_layer = TRUE, quiet = TRUE)
-head(dataTest)
+```{r, eval = FALSE}
+#  téléchargement du fichier sans la géomtrie
+dataSansGeom <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique",
+  query = 'SELECT  ID_PARCEL , CODE_CULTU , CODE_GROUP FROM "parcelle_graphique" ' )
 ```
 
+On préfère mettre en place une base postgis et on fait l'agregation dedans.
 
-Le fichier est trop gros pour que les géométries soient ouvertes.
 
-On met en place une base postgis et on fait l'agregation dedans.
-
-```{sql connection=}
+```SQL
 CREATE TABLE lien AS (
 SELECT canton.fid, code_cultu, sum(surf_parc)  AS surface
 FROM parcelle_graphique, canton
 	WHERE ST_INTERSECTS(st_centroid(parcelle_graphique.geom), canton.geom)
 	GROUP BY code_cultu, canton.fid
 	);
-
 ```
 
+
+
+TODO explorer diply et sqllite
+
+
 La table contient donc toutes les données du fichier. Pour alléger, on a enlevé 
-les géométries.
+les géométries à l'export mais l'intersection s'est fait sur les géométries
 L'identifiant  (fid) correspond aux derniers chiffres de l'identifiant géofla.
 
 TODO pourquoi cette multiplicité d'identifiants ?
 
-# Liste  et dénombrement des cultures
-
+## Création d'un identifiant simple
 
 ```{r}
 data <- read.csv("../dataS/lien.csv", sep = "\t", dec = ".", header  = FALSE)
-str(data)
+#  106 660 lg
 names(data) <- c("ID_CANTON", "CULTURE", "SURFACE")
 table(data$CULTURE)
+# simplification de l'identifiant geofla
 canton2015$ID_CANTON <- as.integer(substring(canton2015$ID_GEOFLA, 21,29))
-str(canton2015)
-# on fait la jointure avec les géométries des cantons
-data <- merge(data, canton2015, by = "ID_CANTON")
-str(data)
-# pour fichier final
-col <- c("ID_CANTON", "NOM_CHF", "CODE_DEPT", "NOM_DEPT", "CODE_REG","NOM_REGION", "CODE_CAN")
-# calcul SAU comme somme de toutes les surfaces
-names(data)
-vCulture <- names (table(data$CULTURE))
-SAU <-  aggregate(data$SURFACE, by = list (data$ID_CANTON), sum)
-names(SAU) <- c("ID_CANTON", "SAU_HA")
-# transposer les cultures de colonne en lg
-dataTest <- head(data [, c("ID_CANTON", "CULTURE")])
-dataTest
-t(dataTest)
-i <-  1
-numCanton <- 1
-vnumCanton <- unique(data$ID_CANTON)
-# créer un df
-df <- data.frame(matrix(vector(),0,242,
-                        dimnames = list(c(), c("ID_CANTON",vCulture))),
-                 stringsAsFactors = F)
-i <- 1
-nb <- length(unique(data$ID_CANTON))
-for (numCanton in 1:3) {
-  numCanton <- vnumCanton[i]
-  df [i, "ID_CANTON" ]<- numCanton 
-  j <- 1
-  for (j in 1:length(vCulture)) {
-    print(surface <- data$SURFACE [data$ID_CANTON == numCanton & data$CULTURE == vCulture [j]])
-    surface <- ifelse(length(surface) == 0, 0, surface)
-    df [data$ID_CANTON [i],vCulture[j]] <- surface
-    }
-}
-
-# 242 * 2378 = 575 M cellules à faire...
-df
-dataCAE <- data [data$CULTURE == "CAE",]
-
-st_write(dataCAE, "../dataS/rpg.gpkg", "baseCAE", quiet = TRUE, delete_layer = TRUE)
+# verif identiant unique 2378 cantons.
+length(unique(canton2015$ID_CANTON))
 ```
 
+## Calcul de la SAU pour toutes les cultures pour chaque canton
+
+```{r}
+SAU <-  aggregate(data$SURFACE, by = list (data$ID_CANTON), sum)
+names(SAU) <- c("ID_CANTON", "SAU_HA")
+canton2015b <- merge(canton2015, SAU, by = "ID_CANTON")
+# 2281 cantons avec une SAU contre 2378 cantons au total
+diff <- setdiff(canton2015$ID_CANTON,canton2015b$ID_CANTON)
+cantondiff <- canton2015 [canton2015$ID_CANTON %in% diff,]
+plot(dpt$geom, col = "antiquewhite1", border = "white")
+plot(cantondiff$geometry, add = TRUE, col= "red", border = NA)
+canton2015 <- canton2015b
+```
+
+
+Il y 97 cantons sans culture.
+
+TODO analyse canton sans culture ?
+
+TODO pb surface bio inclu dans SAU ?
+
+## Vérification import données
 
 Pour vérification, on va extraire de la table le CAE via R
 
 
-
-```{r}
+```{r, eval= FALSE}
 cae <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique", 
 	query = 'SELECT * FROM "parcelle_graphique" WHERE CODE_CULTU = "CAE"')
 st_write(cae, "../dataS/rpg.gpkg", "cae", delete_layer = TRUE, quiet = TRUE)
-
 head(cae)
 cae.c <- st_centroid(cae)
 caeCantonInter <- st_intersection(cae, canton2015)
@@ -191,14 +159,96 @@ caeData <- merge(caeCantonAgg, canton2015, by = "ID_GEOFLA")
 caeData <- st_as_sf(caeData)
 choroLayer(caeData, var ="aire")
 st_write(caeData, "../dataS/rpg.gpkg", "verifCAE", quiet = TRUE, delete_layer = TRUE)
+
+dataCAE <- data [data$CULTURE == "CAE",]
+
+st_write(dataCAE, "../dataS/rpg.gpkg", "baseCAE", quiet = TRUE, delete_layer = TRUE)
 ```
+
 
 Il y a de légères différences dûes à l'utilisation du centroid dans la requete sql.
 
 
+TODO vérification sur les quantités totales de culture
 
+
+
+
+# Catégories de culture
+
+## Problème : pas toutes les variables dans le rpg 2019
 
 ```{r}
-
+dataCulture <- names (table(data$CULTURE))
+diff <- setdiff(culture, dataCulture)
+# exclusion 10 codes
+setdiff(dataCulture, culture)
+cultureDef <- intersect(culture,dataCulture)
+# cultureDef représente les champs présents dans les deux tables (231)
+# on filtre ensuite sur les cultures nécessaires uniquement
+dataFiltre <- data [data$CULTURE %in% cultureDef,]
+# 103 430 lg. -3 000 c'est toujours bon à prendre 
 ```
+
+
+## Vérification code culture possible entre fichier sans geom et lien
+
+
+```{r, eval = FALSE}
+#  téléchargement du fichier sans la géomtrie
+dataSansGeom <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique",
+  query = 'SELECT  ID_PARCEL , CODE_CULTU , CODE_GROUP FROM "parcelle_graphique" ' )
+cultureSansGeom <- names(table(dataSansGeom$CODE_CULTU))
+setdiff(cultureSansGeom, vCulture)
+```
+
+Donc les données sont sûres....
+
+# Mise en forme des données
+
+Le tableau final comporte une transposition de la colonne en ligne.
+
+## Transpostion données colonne ligne
+
+```{r}
+# création df nb de lg = nb de cantons et nb de col = nb de cultures + Canton
+df <- data.frame(matrix
+                    (vector(),
+                    2281,232,
+                    dimnames = list(c(), c("ID_CANTON",cultureDef))
+                    ),
+                 stringsAsFactors = F)
+# parcours de dataFiltre
+df$ID_CANTON <- unique(data$ID_CANTON)
+nb <- length(dataFiltre$ID_CANTON)
+i <- 1
+for (i in 1:nb) {
+  surface <- dataFiltre$SURFACE [i]
+  canton <- dataFiltre$ID_CANTON [i]
+  culture <- dataFiltre$CULTURE [i]
+  df [df$ID_CANTON == canton ,  culture] <- surface
+}
+# verif : compter les totaux
+sum(df [,-1], na.rm = TRUE)
+sum(dataFiltre$SURFACE)
+```
+
+
+##  Fusion avec colonnes finales
+
+```{r}
+# on fait la jointure avec les géométries des cantons
+dfFusion <- merge(canton2015, df, by = "ID_CANTON")
+# 2281
+# pour fichier final
+col <- c("Code_canto",  "NOM_CHF", "CODE_DEPT", "NOM_DEPT", "CODE_REG","NOM_REG", "CODE_CANT", "SAU_HA", cultureDef)
+dfFusion <- dfFusion [, col]
+st_write(dfFusion, "../dataS/rpg.gpkg", "dataFinale", quiet = TRUE, delete_layer = TRUE)
+# export des données alpha numériques uniquement
+dfSansGeom <- dfFusion [, col, drop = TRUE]
+write.csv2(dfSansGeom, "../dataS/dataFinale.csv", na = "" , row.names = FALSE)
+# 2281 lignes
+```
+
+
 

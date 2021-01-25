@@ -1,0 +1,176 @@
+---
+title: "Chrysomele"
+author: "B. Maranget"
+date: "25/01/2021"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+# Passer la valeur suivante à TRUE pour reproduire les extractions.
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+# Cadre
+
+## Objet
+
+Paramètres à estimer à partir fichiers rpg sur plusieurs années
+
+- taille moyenne parcelles
+- SAU moyenne
+- surface moyenne mais
+- idem mais en ponoculture
+- idem mais 1e fois
+
+difficulté : identifiant différent
+
+## Librairies et répertoire
+
+```{r}
+library(sf)
+library(cartography)
+```
+
+## Données
+
+### Générales
+
+```{r}
+# communes sans la corse
+commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
+dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
+canton2015 <- st_read("../dataE/00_ADMIN/CANTON.SHP")
+unzip(zipfile =  "../dataE/01_CULTURES/rpg2015.zip", exdir = "../dataE/01_CULTURES")
+unzip(zipfile =  "../dataE/01_CULTURES/rpg2016.zip", exdir = "../dataE/01_CULTURES")
+unzip(zipfile =  "../dataE/01_CULTURES/rpg2017.zip", exdir = "../dataE/01_CULTURES")
+unzip(zipfile =  "../dataE/01_CULTURES/rpg2018.zip", exdir = "../dataE/01_CULTURES")
+rpg2015 <- st_read("../dataE/01_CULTURES/D010_RPG2015.shp")
+rpg2016 <- st_read("../dataE/01_CULTURES/D010_RPG2016.shp")
+rpg2017 <- st_read("../dataE/01_CULTURES/D010_RPG2017.shp")
+rpg2018 <- st_read("../dataE/01_CULTURES/D010_RPG2018_2.shp")
+rpg2018 <- st_transform(rpg2018, crs = st_crs(2154))
+```
+
+### Zone test
+
+```{r}
+test2015 <- rpg2015 [rpg2015$geometry [1],]
+bb <- st_as_sfc(st_bbox(test2015))
+test2015 <- st_intersection( st_make_valid(rpg2015), bb)
+test2016 <- st_intersection( rpg2016, bb)
+test2017 <- st_intersection( st_make_valid(rpg2017), bb)
+test2018 <- st_intersection( st_make_valid(rpg2018), bb)
+# observation différence
+plot(test2015$geometry)
+plot(test2016$geometry, col = "red", add = TRUE)
+plot(test2017$geometry, col = "blue", add = TRUE)
+plot(test2018$geometry, col = "green", add = TRUE)
+test_2015_2016 <- st_equals(test2015, test2016, sparse = T)
+table(sapply(test_2015_2016, length))
+# sur 21 geometries, 9 sont différentes...
+rpg2015_2016  <- st_equals(st_make_valid(rpg2015), st_make_valid(rpg2016), sparse = T)
+table(sapply(rpg2015_2016, length))
+# meme proportion
+```
+
+
+### Opérateurs spatiaux
+
+![](../img/opspatiaux.png)
+
+
+# Méthodes possibles
+
+## Centroides
+
+Pour éviter les problèmes topologiques liés aux contours de parcelles. On utilise les centroides.
+
+```{r}
+data <- c("test2015", "test2016", "test2017", "test2018")
+ldata <- list(test2015,test2016,test2017,test2018)
+lcentr <- lapply(ldata, st_centroid)
+str(lcentr)
+aspect <- c(0,10,20,3)
+col <- c("red", "green", "blue", "black")
+plot(test2015$geometry)
+for (i in 1:4) {
+  plot(lcentr [[i]][10], pch = aspect [i], col = col [i], add = TRUE)
+}
+```
+
+Assez peu de superposition des centroïdes. La solution est écartée.
+
+## Grille
+
+Comme les géométries ne semblent pas se superposer, on utilise une grille dont chaque carreau fait 1 hac.
+
+
+```{r}
+grid <- st_make_grid(bb, cellsize = 100)
+plot(test2015$geometry)
+plot(grid, add = TRUE)
+```
+
+
+```{r}
+inter <- function(data) { st_intersection(data, grid)}
+linter <- lapply(ldata, inter)
+sapply(linter, nrow)
+
+```
+
+La différence des longueurs montrent que les géométries sont différentes.
+
+Fonctions pour calculer le % aire
+
+```{r}
+pct <- function(aire) { (aire / 10000) * 100}
+laire <- lapply(linter, st_area)
+lcoeff <- lapply(laire, pct)
+```
+
+
+
+# Surface avec maïs en 2015 uniquement
+
+Retenir les carreaux maïs ("BTH" ?)
+
+```{r}
+noms <-  c("test2015", "test2016", "test2017", "test2018")
+data <- ldata [[4]]
+data [data$Code_cultu == "BTH",]
+data [data [,4, drop = T] == "BTH",]
+# filtrage des carreaux
+sel <- function (data) {data [data [,4, drop = TRUE] == "BTH",]}
+ldataBTH <- lapply (linter, sel)
+par(mfrow = c(2,2))
+for (i in 1:4) {
+  plot(ldataBTH [[i]][10])
+  layoutLayer(title = noms [i])
+}
+
+```
+
+Sur 4 ans, les carreaux maïs et rien d'autre.
+
+```{r}
+res1 <- st_intersection(ldataBTH [[1]], ldataBTH [[2]])
+res2 <- st_intersection(res1, ldataBTH [[3]])
+res3 <- st_intersection (res2, ldataBTH [[4]])
+aireMais <- round(sum(st_area(res3)),0)
+plot(res3$geometry)
+plot(test2015$geometry)
+plot(res3, add = TRUE)
+layoutLayer(paste0("aire blé cultivé uniquement en 2015 : ",aireMais, "m2"))
+# on calcule l'aire de res3 uniquement
+```
+

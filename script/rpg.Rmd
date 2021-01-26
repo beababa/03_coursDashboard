@@ -251,4 +251,74 @@ write.csv2(dfSansGeom, "../dataS/dataFinale.csv", na = "" , row.names = FALSE)
 ```
 
 
+## Extraction des données à cartographier
+
+MD 2017	MD 2018	MD 2019	MD / TA	MD/ surf tot	MD/surf M	MD/légumes
+
+l'extraction s'est faite sous excel mais j'ai toujorus le pb de l'identifiant unique.
+
+
+```{r}
+data <- read.csv2("../dataE/01_CULTURES/extraction.csv")
+data.sf <-  merge(canton2015, data, by = "CODE_CAN")
+names(data)
+names(canton2015)
+unique(data$Code_canto)
+length(unique(canton2015$Code_canto))
+# 1972 code canton pour 2378 lignes dans le fichier canton
+```
+
+Impossible de faire la jointure puisqu'il y a un problème d'identifiant unique.
+On repart de la totalité de la donnée.
+
+```{r}
+data <- st_read("../dataS/rpg.gpkg", "dataFinale", quiet = TRUE, stringsAsFactors = FALSE)
+
+code <- read.csv2("../dataE/01_CULTURES/code_culture.csv", stringsAsFactors = FALSE)
+# filtrage sur MP et Aquitaine
+table(data$NOM_REG)
+data <- data [data$NOM_REG %in% c("MIDI-PYRENEES", "AQUITAINE"),]
+# 323 cantons concernés
+# calcul des agregats
+# TA
+codeTA <- code$Code.Culture[code$TA == "Oui"]
+coderpg <- names(data) [9:239]
+tail(coderpg)
+# verif BTH jusqu'à TRU
+codeTA2 <- intersect(codeTA, coderpg)
+# mais
+codeMais <- code$Code.Culture[code$Maïs == "Oui"]
+codeMais2 <- intersect(codeMais, coderpg)
+# Légumes
+codeLegume <- code$Code.Culture[code$Légumes == "Oui"]
+codeLegume2 <- intersect(codeLegume, coderpg)
+# différences entre codes totaux et codes utilisés
+data$TA <- rowSums(data [, codeTA2, drop = TRUE], na.rm = TRUE)
+data$Mais <- rowSums(data [, codeMais2, drop = TRUE], na.rm = TRUE)
+data$Legume <- rowSums(data [, codeLegume2, drop = TRUE], na.rm = TRUE)
+# rapports
+data$ratio_MID_TA <- (data$MID/data$TA)*100
+data$ratio_MID_Mais <- (data$MID/data$Mais)*100
+data$ratio_MID_Legume <- (data$MID/data$Legume)*100
+data$ratio_MID_SAU <- (data$MID/data$SAU_HA)
+# vérif avec totaux
+idcol <- grep( "ratio",names(data))
+colSums(data [,idcol, drop = TRUE], na.rm = TRUE)
+# export pour carto
+st_write(data, "../dataS/rpg.gpkg", "dataFinale", quiet = TRUE, delete_layer = TRUE)
+```
+
+
+# Cartographie
+
+```{r}
+bksMais <- c(10,20,30,40)
+bksLegume <- c(10,20,30)
+bksSAU <- c(5,10,15,20,25)
+bksTA <- c(5,10,15,20,25)
+```
+
+
+
+
 

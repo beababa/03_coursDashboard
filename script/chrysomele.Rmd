@@ -66,9 +66,11 @@ rpg2018 <- st_transform(rpg2018, crs = st_crs(2154))
 test2015 <- rpg2015 [rpg2015$geometry [1],]
 bb <- st_as_sfc(st_bbox(test2015))
 test2015 <- st_intersection( st_make_valid(rpg2015), bb)
-test2016 <- st_intersection( rpg2016, bb)
+test2016 <- st_intersection( st_make_valid(rpg2015), bb)
 test2017 <- st_intersection( st_make_valid(rpg2017), bb)
 test2018 <- st_intersection( st_make_valid(rpg2018), bb)
+ltest <- list(test2015, test2016, test2017, test2018)
+names(ltest) <- c("test2015", "test2016", "test2017", "test2018")
 # observation différence
 plot(test2015$geometry)
 plot(test2016$geometry, col = "red", add = TRUE)
@@ -97,6 +99,7 @@ Pour éviter les problèmes topologiques liés aux contours de parcelles. On uti
 ```{r}
 data <- c("test2015", "test2016", "test2017", "test2018")
 ldata <- list(test2015,test2016,test2017,test2018)
+names(ldata) <- c("année1", "année2", "année3", "année4")
 lcentr <- lapply(ldata, st_centroid)
 str(lcentr)
 aspect <- c(0,10,20,3)
@@ -113,6 +116,10 @@ Assez peu de superposition des centroïdes. La solution est écartée.
 
 Comme les géométries ne semblent pas se superposer, on utilise une grille dont chaque carreau fait 1 hac.
 
+https://rcarto.github.io/carto_avec_r/chapitre3.html#les-grilles-r%C3%A9guli%C3%A8res
+
+
+![](../img/carroyage.png)
 
 ```{r}
 grid <- st_make_grid(bb, cellsize = 100)
@@ -125,12 +132,23 @@ plot(grid, add = TRUE)
 inter <- function(data) { st_intersection(data, grid)}
 linter <- lapply(ldata, inter)
 sapply(linter, nrow)
-
 ```
 
-La différence des longueurs montrent que les géométries sont différentes.
+La différence du nombre des carreaux montrent que les géométries sont différentes.
 
-Fonctions pour calculer le % aire
+L'objet de référence est désormais une liste.
+
+Cela permet d'appliquer rapidement les mêmes traitements avec *lapply* et des fonctions spécifiques  (cf fonction *inter* ci-dessus, permet d'intersecter les géométries avec la grille.
+
+Inconvénient : manipulation des objets plus lourde ([[i]])
+
+Avantage : éviter les boucles
+
+Exemple de fonction : calculer le % aire pour chaque carré de la grille
+Ceci permettra de donner une valeur continue à chaque carreau. Par exemple, si on veut cartographier
+le % de maïs sur chacune des 4 années et comparer les cartes.
+
+TO DO
 
 ```{r}
 pct <- function(aire) { (aire / 10000) * 100}
@@ -139,38 +157,152 @@ lcoeff <- lapply(laire, pct)
 ```
 
 
+Cependant dans le cas présent, la grille sert à rien. Puisqu'on utilise uniquement les opérateurs
+spatiaux pour déterminer une aire qui servira de base au calcul.
 
-# Surface avec maïs en 2015 uniquement
+L'équivalent serait de combiner les coeff pour obtenir une moyenne d'occupation de carreau par exemple.
+Cela permettra de vérifier la justesse de nos résultats par manipulations spatiales.
 
-Retenir les carreaux maïs ("BTH" ?)
+TO DO
+
+
+## Allègement des données, uniquement le maïs
+
+
+L'idée est de retenir uniquement les carreaux maïs ("BTH" pour les besoins du test), cela allège considérablement la base !
+
 
 ```{r}
-noms <-  c("test2015", "test2016", "test2017", "test2018")
-data <- ldata [[4]]
-data [data$Code_cultu == "BTH",]
-data [data [,4, drop = T] == "BTH",]
 # filtrage des carreaux
 sel <- function (data) {data [data [,4, drop = TRUE] == "BTH",]}
 ldataBTH <- lapply (linter, sel)
-par(mfrow = c(2,2))
+couleur <- c("red","blue", "green", "black")
+par(mar = c(0,0,1.2,0), mfrow = c(2,2))
+i <- 1
 for (i in 1:4) {
-  plot(ldataBTH [[i]][10])
-  layoutLayer(title = noms [i])
+  plot(ldataBTH [[i]][10], border = couleur [i])
+  layoutLayer(title = names(ldataBTH [i]))
 }
-
 ```
+
+ldataBTH est désormais notre objet de référence. 
+
+# Manipulations spatiales
+
+## Uniquement le maïs sur les 4 ans
 
 Sur 4 ans, les carreaux maïs et rien d'autre.
 
 ```{r}
-res1 <- st_intersection(ldataBTH [[1]], ldataBTH [[2]])
-res2 <- st_intersection(res1, ldataBTH [[3]])
-res3 <- st_intersection (res2, ldataBTH [[4]])
-aireMais <- round(sum(st_area(res3)),0)
+res1 <- st_intersection(ldataBTH$année1, ldataBTH$année2)
+res2 <- st_intersection(res1, ldataBTH$année3)
+res3 <- st_intersection (res2, ldataBTH$année4)
+aireMais <- round(sum(st_area(res3))/10000,2)
 plot(res3$geometry)
 plot(test2015$geometry)
 plot(res3, add = TRUE)
-layoutLayer(paste0("aire blé cultivé uniquement en 2015 : ",aireMais, "m2"))
+layoutLayer(paste0("aire blé cultivé uniquement en 2015 : ",aireMais, " ha"))
 # on calcule l'aire de res3 uniquement
+```
+
+TO DO fonction récursive
+
+TO DO pourquoi des points sur le plot ?
+
+## Uniquement mais en 2015
+
+Union des 3 années et différence avec 2015
+
+sans quadrillage (problème de CRS avec le quadrillage)
+
+```{r}
+ltestBTH <- lapply (ltest, sel)
+# assembler les polygones des différentes couches
+Y <- st_union(st_union(ltestBTH$test2016), st_union(ltestBTH$test2017), st_union(ltestBTH$test2018))
+X <- st_union(ltestBTH$test2015)
+# graphique
+par(mfrow = c(1,2))
+plot(X)
+plot(Y, col = "blue")
+# parcelle où mais cultivé en 2015
+res1 <- st_difference(X, Y)
+plot(res1)
+(round(st_area(res1),0))
+```
+
+Remarque : il faut appliquer une union des polygones avant de faire la différence sinon la différence
+se fera sur chaque polygone
+Du coup, on crée applique st_union une bonne fois pour toute !
+
+```{r}
+lunion <- lapply(ltestBTH, st_union)
+
+```
+
+
+
+
+## Uniquement mais en 2016, 2017, 2018
+
+On crée une fonction ayant pour paramètre l'année de la demande.
+
+```{r}
+
+anneeUnique <- function(num) {
+  X <- lunion [[num]]
+  lreste <- lunion
+  lreste [[num]] <- NULL
+  Y <- st_union(lreste [[1]], lreste [[2]], lreste [[3]])
+  res <- st_difference(X,Y )
+  # graphique
+  par(mfrow = c(1,3))
+  plot(X, main = num)
+  plot(Y, col = "blue", main = "autres")
+  plot(res, main = "difference")
+  round(st_area(res),0)
+}
+anneeUnique(1)
+anneeUnique(2)
+anneeUnique(3)
+anneeUnique(4)
+lnum <- c(1,2,3,4)
+sapply(lnum, anneeUnique)
+```
+
+TODO pb géometries pas complètes
+
+## Deux ans sur les quatre ans
+
+Intersection des années et différence entre les deux géométries créées
+Directement en fonction
+
+```{r}
+num1 <- 1
+num2 <- 2
+deuxAns <- function (num1,num2) {
+  X <- st_union(lunion [[num1]], lunion [[num2]])
+  lreste <-lunion [c(-num1,-num2)]
+  Y <- st_union (lreste [[1]], lreste [[2]])
+  # Toutes les géométries de X qui ne sont pas dans Y
+  res <- st_difference(X,Y )
+   # graphique
+  par(mfrow = c(2,2))
+  plot(X, main = paste(num1, num2))
+  plot(Y, col = "blue", main = "autres")
+  plot(res, main = "difference")
+  # Elimination des petits petits polygones (500 m2)
+  # TO DO valider cette limite
+  res2 <- st_cast(res, "POLYGON")
+  res3 <- sapply(st_as_sf(res2), st_area)
+  indice <- which(round(res3,0) > 500)
+  plot(res2 [indice], main = "retenu")
+  res4 <- round(st_area (res2 [indice]),0)
+  return(res4)
+  }
+
+deuxAns(1,4)
+deuxAns(2,3)
+deuxAns(2,4)
+deuxAns(3,4)
 ```
 

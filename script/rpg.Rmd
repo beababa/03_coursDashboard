@@ -39,6 +39,7 @@ library(cartography)
 # communes sans la corse
 commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
 dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
+region <- st_read("../dataE/00_ADMIN/ign.gpkg", "region", quiet = TRUE, stringsAsFactors =F)
 # Ouverture des 100 premières lignes de fichier des parcelles
 dataTest <- st_read("../dataE/01_CULTURES/PARCELLES_GRAPHIQUES.gpkg", "parcelle_graphique", 
 	query = 'SELECT * FROM "parcelle_graphique" LIMIT 100' )
@@ -88,22 +89,9 @@ FROM parcelle_graphique, canton
 
 
 TODO attaquer la base postgis depuis R
-Mais le traitement des guillemets est complexe
+Essayé : traitement des guillemets est complexe
 
-```{r}
-library(DBI)
-library(RPostgres)
-# With DBI
-con <- dbConnect(
-  RPostgres::Postgres(),
-  host = "localhost",
-  dbname = "tachasa",
-  port = 5432,
-  user = "tachasa",
-  password = "bonbon2013"
-)
 
-```
 
 
 TODO explorer diply et sqlite
@@ -114,21 +102,37 @@ les géométries à l'export mais l'intersection s'est fait sur les géométries
 L'identifiant  (fid) correspond au rang des cantons de 1 à 
 Le geofla permet de valider le fid
 
-TODO pourquoi cette multiplicité d'identifiants ?
 
-## Création d'un identifiant simple
+
+## Création d'un identifiant unique et simple (ID_GEOFLA trop complexe)
 
 ```{r}
-data <- read.csv("../dataS/lien.csv", sep = "\t", dec = ".", header  = FALSE)
+data <- read.csv("../dataS/data2019.csv", sep = "\t", dec = ".", header  = FALSE)
 #  106 660 lg
-names(data) <- c("ID_CANTON", "CULTURE", "SURFACE")
+names(data) <- c("ID_CANTON", "ID_GEOFLA", "CULTURE", "SURFACE")
 table(data$CULTURE)
-# l'id canton correspond à un numéro incrementé dans la base postgis de 1 à 2378
-# ajout de lID
-canton2015$ID_CANTON <- seq(1:2378)
+
 ```
 
-TODO Pour s'assurer que l'id canton est ok on compare les deux geofla
+TODO pourquoi cette multiplicité d'identifiants ?
+
+Attention le Code_canto et CODE_CANT ne sont pas des identifiants uniques !
+
+```{r}
+max(table(canton2015$Code_canto))
+max(table(canton2015$CODE_CANT))
+max(table(canton2015$ID_GEOFLA))
+# l'id canton correspond à un numéro incrementé dans la base postgis de 1 à 2378
+# il correspond pas aux 4 derniers caractères de l'id geofla (max canton 2378)
+data$Sub_ID_GEOFLA <- as.integer(substring(data$ID_GEOFLA, 21,24))
+data[!(data$Sub_ID_GEOFLA == data$ID_CANTON),]
+```
+
+id_canton correspond aux derniers chiffres de l'id_geofla
+
+```{r}
+canton2015$ID_CANTON <- as.integer(substring(canton2015$ID_GEOFLA, 21,24))
+```
 
 ## Calcul de la SAU pour toutes les cultures pour chaque canton
 
@@ -139,8 +143,30 @@ canton2015b <- merge(canton2015, SAU, by = "ID_CANTON")
 # 2281 cantons avec une SAU contre 2378 cantons au total
 diff <- setdiff(canton2015$ID_CANTON,canton2015b$ID_CANTON)
 cantondiff <- canton2015 [canton2015$ID_CANTON %in% diff,]
-plot(dpt$geom, col = "antiquewhite1", border = "white")
-plot(cantondiff$geometry, add = TRUE, col= "red", border = NA)
+
+
+# canton 2015, région avant 2016, donc on intersecte pour récupérer les nouvelles régions
+regionS <- st_intersection(region, cantondiff)
+regS <- unique(regionS$NOM_REG)
+deptS <- st_intersection(dpt, cantondiff)
+# 1 region iles de france + 8 dpts
+dptS <- unique(deptS$NOM_DEP[deptS$INSEE_REG !=11])
+fond1 <- region [region$NOM_REG == "ILE-DE-FRANCE", "NOM_REG"] 
+fond2 <- dpt [dpt$NOM_DEP %in% dptS, "NOM_DEP"]
+names(fond1)[1] <- "NOM"
+names(fond2)[1] <- "NOM"
+fond <- rbind(fond1, fond2)
+#png("img/cantonsansculture.png")
+par(mfrow = c(3,3))
+for (i in 1:9){
+  par(mar = c(0,0,1.2,0))
+  ghostLayer(fond$geom [i], bg = "lightblue2")
+  plot(region$geom, col = "antiquewhite1", border = "white", add = TRUE)
+  plot(fond$geom [i], col = "antiquewhite2", border = "white", add = TRUE)
+  plot(cantondiff$geometry, add = TRUE, col= "red", border = NA)
+  layoutLayer(fond$NOM [i])
+}
+#dev.off()
 canton2015 <- canton2015b
 ```
 
@@ -231,13 +257,14 @@ Le tableau final comporte une transposition de la colonne en ligne.
 ## Transpostion données colonne ligne
 
 ```{r}
-# création df nb de lg = nb de cantons et nb de col = nb de cultures + Canton
+# création df nb de lg = nb de cantons et nb de col = nb de cultures + idCanton
 df <- data.frame(matrix
                     (vector(),
                     2281,232,
                     dimnames = list(c(), c("ID_CANTON",cultureDef))
                     ),
                  stringsAsFactors = F)
+df$ID_CANTON <- canton2015$ID_CANTON 
 # parcours de dataFiltre
 nb <- length(dataFiltre$ID_CANTON)
 i <- 1
@@ -260,7 +287,7 @@ sum(dataFiltre$SURFACE)
 dfFusion <- merge(canton2015, df, by = "ID_CANTON")
 # 2281
 # pour fichier final
-col <- c("Code_canto",  "NOM_CHF", "CODE_DEPT", "NOM_DEPT", "CODE_REG","NOM_REG", "CODE_CANT", "SAU_HA", cultureDef)
+col <- c("ID_CANTON", "ID_GEOFLA","Code_canto",  "NOM_CHF", "CODE_DEPT", "NOM_DEPT", "CODE_REG","NOM_REG", "CODE_CANT", "SAU_HA", cultureDef)
 dfFusion <- dfFusion [, col]
 st_write(dfFusion, "../dataS/rpg.gpkg", "dataFinale", quiet = TRUE, delete_layer = TRUE)
 # export des données alpha numériques uniquement
@@ -272,9 +299,9 @@ write.csv2(dfSansGeom, "../dataS/dataFinale.csv", na = "" , row.names = FALSE)
 
 ## Extraction des données à cartographier
 
-MD 2017	MD 2018	MD 2019	MD / TA	MD/ surf tot	MD/surf M	MD/légumes
+MD 2017	MD 2018	MD 2019	MD / TA	MD / surf tot	MD/surf M	MD/légumes
 
-l'extraction s'est faite sous excel mais j'ai toujorus le pb de l'identifiant unique.
+l'extraction s'est faite sous excel mais j'ai toujours le pb de l'identifiant unique.
 
 
 ```{r}
@@ -292,6 +319,8 @@ On repart de la totalité de la donnée.
 
 ```{r}
 data <- st_read("../dataS/rpg.gpkg", "dataFinale", quiet = TRUE, stringsAsFactors = FALSE)
+names(data)
+sum(dataSel$MID, na.rm = TRUE )
 code <- read.csv2("../dataE/01_CULTURES/code_culture.csv", stringsAsFactors = FALSE)
 # filtrage sur MP et Aquitaine
 table(data$NOM_REG)
@@ -310,22 +339,24 @@ codeMais2 <- intersect(codeMais, coderpg)
 # Légumes
 codeLegume <- code$Code.Culture[code$Légumes == "Oui"]
 codeLegume2 <- intersect(codeLegume, coderpg)
+# rajout mais dans légumes
 codeLegume2 <- c("MID", codeLegume2)
 # différences entre codes totaux et codes utilisés
 dataSel$TA <- rowSums(dataSel [, codeTA2, drop = TRUE], na.rm = TRUE)
 dataSel$Mais <- rowSums(dataSel [, codeMais2, drop = TRUE], na.rm = TRUE)
 dataSel$Legume <- rowSums(dataSel [, codeLegume2, drop = TRUE], na.rm = TRUE)
-# rapports
-data$ratio_MID_TA <- (data$MID/data$TA)*100
-data$ratio_MID_Mais <- (data$MID/data$Mais)*100
-data$ratio_MID_Legume <- (data$MID/data$Legume)*100
-data$ratio_MID_SAU <- (data$MID/data$SAU_HA)
+# rapports pour les données de seleciton
+dataSel$ratio_MID_TA <- (dataSel$MID/dataSel$TA)*100
+dataSel$ratio_MID_Mais <- (dataSel$MID/dataSel$Mais)*100
+dataSel$ratio_MID_Legume <- (dataSel$MID/dataSel$Legume)*100
+dataSel$ratio_MID_SAU <- (dataSel$MID/dataSel$SAU_HA)
 # vérif avec totaux
+colSums(dataSel[, c("TA", "Mais", "Legume", "SAU_HA"), drop = TRUE, na.rm = TRUE])
+# décalage avec tab excel en TA et SAU 
 idcol <- grep( "ratio",names(dataSel))
 colSums(dataSel [,idcol, drop = TRUE], na.rm = TRUE)
 # export pour carto
 st_write(dataSel  [,c("MID",names(dataSel)[idcol])], "../dataS/rpg.gpkg", "dataCarte", quiet = TRUE, delete_layer = TRUE)
-dataSel
 ```
 
 
@@ -339,6 +370,7 @@ bksMais <- c(0,10,20,30,40)
 bksLegume <- c(0,20,40,60,80,100)
 data$ratio_MID_SAU <- data$ratio_MID_SAU * 100
 bksSAU <- c(0,5,10,15,20,25)
+bksTA <- bksSAU
 lbks <- list(bksAire,bksTA, bksMais, bksLegume,bksSAU)
 palettes <- c("taupe.pal","blue.pal", "purple.pal", "green.pal", "red.pal")
 nbcl <- c(6,5,4,5,5)
@@ -370,7 +402,7 @@ for (i in 1:5) {
 
 # Chiffres 2017 et 2018 pour le maïs doux
 
-## Essais St_read non concluants sur du shpae...
+## Essais St_read non concluants sur du shape...
 
 ```{r}
 # verif en tête
@@ -390,28 +422,52 @@ names(canton2015)
 ## Base postgis : requête
 
 
-```{sql}
-CREATE TABLE lien2018 AS (
-SELECT canton.fid, code_cultu, sum(surf_parc), canton.geom  AS surface
+```sql
+
+CREATE TABLE mais2018 AS (
+SELECT canton.fid, canton.id_geofla,code_cultu, sum(surf_parc), canton.geom  AS surface
 FROM rpg2018, canton
 	WHERE ST_INTERSECTS(st_centroid(rpg2018.wkb_geometry), canton.geom)
 		AND rpg2018.code_cultu LIKE 'MID'
 	GROUP BY code_cultu, canton.fid
 	);
+
+
+CREATE TABLE mais2017 AS (
+SELECT canton.fid, canton.id_geofla,code_cultu, sum(surf_parc), canton.geom  AS surface
+FROM rpg2017, canton
+	WHERE ST_INTERSECTS(st_centroid(rpg2017.wkb_geometry), canton.geom)
+		AND rpg2017.code_cultu LIKE 'MID'
+	GROUP BY code_cultu, canton.fid
+	);
 ```
 
+Résultat 239 et 270
 
-Remarque, on a ajouté les géométries et le filtre MID
+On récupère la donnée directement
 
-On a besoin également de l'équivalence canton.fid et geofla
 
 ```{r}
-cantonId <- read.csv2("../dataE/00_ADMIN/canton.csv", sep = "\t", header = FALSE)
-head(cantonId [, 1:17])
-cantonId <- cantonId [,1:2]
-names(cantonId) <- c("FID","ID_GEOFLA")
-head(cantonId)
-canton2015 <- merge(canton2015, cantonId, by = "ID_GEOFLA")
+library(DBI)
+library(RPostgres)
+# With DBI
+con <- dbConnect(
+  RPostgres::Postgres(),
+  host = "localhost",
+  dbname = "tachasa",
+  port = 5432,
+  user = "tachasa",
+  password = "bonbon2013"
+)
+con
+```
+
+```{r, eval= FALSE}
+mais2018 <- st_read(con, "mais2018")
+mais2017 <- st_read(con, "mais2017")
+# sauvegarde dans le rgp.gpkg
+st_write(mais2017, "../dataS/rpg.gpkg", "mais2017", quiet = TRUE, delete_layer = TRUE)
+st_write(mais2018, "../dataS/rpg.gpkg", "mais2018", quiet = TRUE, delete_layer = TRUE)
 ```
 
 Selon l'intersection spatiale
@@ -420,30 +476,55 @@ Selon l'intersection spatiale
 cantonZone <- canton2015 [canton2015$NOM_REG %in%  c("MIDI-PYRENEES", "AQUITAINE"),]
 mais2017 <- st_read("../dataS/rpg.gpkg", "mais2017")
 mais2018 <- st_read("../dataS/rpg.gpkg", "mais2018")
-inter2017 <- st_intersection(cantonZone, mais2017)
-inter2018 <- st_intersection(cantonZone, mais2018)
-names(inter2017)
-par(mfrow = c(2,2), mar = c(0,0,0,0))
-choroLayer(inter2017, var = "sum")
-choroLayer(inter2018, var = "sum")
+names(mais2017)[c(1,3)]  <- c("ID_GEOFLA", "Surface")
+names(mais2018)[c(1,3)]  <- c("ID_GEOFLA", "Surface")
+mais2017 <- mais2017 [, c(1,3)]
+mais2018 <- mais2018 [, c(1,3)]
+mais2019  <- st_read("../dataS/rpg.gpkg", "dataFinale", quiet = TRUE, stringsAsFactors = FALSE)
+mais2019 <- mais2019 [!(is.na(mais2019$MID)), c("ID_GEOFLA", "MID")]
+names(mais2019) [1:2] <- c("ID_GEOFLA", "Surface")
+lmais <- list(mais2017,mais2018, mais2019)
+names(lmais) <- c("mais2017", "mais2018", "mais2019")
+intersecterCanton <- function (datasf) {st_intersection(cantonZone [, "ID_GEOFLA"], datasf)}
+linter <- lapply(lmais, intersecterCanton)
+par(mfrow = c(2,3), mar = c(0,0,0,0))
+choroLayer(linter [[1]], var = "Surface", legend.title.txt =  "2017")
+choroLayer(linter [[2]], var = "Surface", legend.title.txt =  "2018")
+choroLayer(linter [[3]], var = "Surface", legend.title.txt =  "2019")
 ```
 
 Selon l'attribut
 
 ```{r}
-names(mais2017)[c(1,3)]  <- c("ID_GEOFLA", "Surface")
-names(mais2018)[c(1,3)]  <- c("ID_GEOFLA", "Surface")
-attr2017 <- merge (canton2015, mais2017 [, c(1,3), drop = TRUE], by = "ID_GEOFLA")
-attr2018 <- merge(canton2015, mais2018 [, c(1,3), drop = TRUE], by = "ID_GEOFLA")
-choroLayer(attr2017 [ attr2017$NOM_REG %in%  c("MIDI-PYRENEES", "AQUITAINE"),], var = "Surface")
-choroLayer(attr2018 [attr2018$NOM_REG %in%  c("MIDI-PYRENEES", "AQUITAINE"),], var = "Surface")
+mergerCanton <- function (datasf) {merge(cantonZone [,"ID_GEOFLA"], datasf [, c("ID_GEOFLA", "Surface"), drop = TRUE], by = "ID_GEOFLA")}
+lmerger <- lapply(lmais, mergerCanton)
+choroLayer(lmerger [[1]], var = "Surface", legend.title.txt =  "2017")
+choroLayer(lmerger [[2]], var = "Surface", legend.title.txt =  "2018")
+choroLayer(lmerger [[3]], var = "Surface", legend.title.txt =  "2019")
 ```
 
 Mise en forme et export
 
-```{r}
+Objectif : tableau .csv avec 2017 2018 2019 par canton
 
-write.csv2(attr2017 [, c(1:10), drop = TRUE], "../dataS/mais2017.csv", na = "")
-write.csv2(attr2018 [, c(1:10), drop = TRUE], "../dataS/mais2018.csv", na = "")
+```{r}
+data <- do.call(rbind,lmerger)
+id <- unique(data$ID_GEOFLA)
+i <- 1
+for (i in 1:length(id)) {
+  dataf$ID_GEOFLA [i] <- id [i]
+  surface2017 <- mais2017$Surface [mais2017$ID_GEOFLA == id [i], drop = TRUE]
+  dataf$annee2017 [i] <- ifelse(length(surface2017) == 0, NA,surface2017)
+  surface2018 <- mais2018$Surface [mais2018$ID_GEOFLA == id [i], drop = TRUE]
+  dataf$annee2018 [i] <- ifelse(length(surface2018) == 0, NA,surface2018)
+  surface2019 <- mais2019$Surface [mais2019$ID_GEOFLA == id [i], drop = TRUE]
+  dataf$annee2019 [i] <- ifelse(length(surface2019) == 0, NA,surface2019)
+}
+# export simple
+write.csv2(dataf , "../dataS/comparaisonSimple.csv",row.names = FALSE, na = "0" )
+# rajout des éléments identifcation canton
+datafin <- merge(canton2015, dataf, by = "ID_GEOFLA")
+datafinsansgeom <- datafin [,c(1:21), drop = TRUE]
+write.csv2(datafinsansgeom , "../dataS/comparaison.csv",row.names = FALSE, na = "0" )
 ```
 

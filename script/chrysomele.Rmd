@@ -88,6 +88,26 @@ table(sapply(rpg2015_2016, length))
 ### Opérateurs spatiaux
 
 ![](../img/opspatiaux.png)
+# Paramètres généraux
+
+## Taille moyenne des parcelles agricole
+
+
+```{r}
+ldata <- list(rpg2015, rpg2016, rpg2017, rpg2018)
+calcul <- function(data) {
+  (sum(st_area(data)) / nrow(data))/10000
+} 
+sapply(ldata,calcul)
+```
+
+4,7 hac environ
+
+## SAU moyenne
+
+```{r}
+
+```
 
 
 # Méthodes possibles
@@ -216,7 +236,7 @@ Union des 3 années et différence avec 2015
 sans quadrillage (problème de CRS avec le quadrillage)
 
 ```{r}
-ltestBTH <- lapply (ltest, sel)
+ltestBTH <- lapply (ldata, sel)
 # assembler les polygones des différentes couches
 Y <- st_union(st_union(ltestBTH$test2016), st_union(ltestBTH$test2017), st_union(ltestBTH$test2018))
 X <- st_union(ltestBTH$test2015)
@@ -236,7 +256,6 @@ Du coup, on crée applique st_union une bonne fois pour toute !
 
 ```{r}
 lunion <- lapply(ltestBTH, st_union)
-
 ```
 
 
@@ -247,7 +266,6 @@ lunion <- lapply(ltestBTH, st_union)
 On crée une fonction ayant pour paramètre l'année de la demande.
 
 ```{r}
-
 anneeUnique <- function(num) {
   X <- lunion [[num]]
   lreste <- lunion
@@ -261,10 +279,6 @@ anneeUnique <- function(num) {
   plot(res, main = "difference")
   round(st_area(res),0)
 }
-anneeUnique(1)
-anneeUnique(2)
-anneeUnique(3)
-anneeUnique(4)
 lnum <- c(1,2,3,4)
 sapply(lnum, anneeUnique)
 ```
@@ -294,7 +308,7 @@ deuxAns <- function (num1,num2) {
   # TO DO valider cette limite
   res2 <- st_cast(res, "POLYGON")
   res3 <- sapply(st_as_sf(res2), st_area)
-  indice <- which(round(res3,0) > 500)
+  indice <- which(round(res3,0) > 0)
   plot(res2 [indice], main = "retenu")
   res4 <- round(st_area (res2 [indice]),0)
   return(res4)

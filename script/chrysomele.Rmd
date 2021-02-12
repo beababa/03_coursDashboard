@@ -446,12 +446,18 @@ lzone <- split(inter, inter$groupe)
 eclaterZoneAn <- function (num) {
   df <- lzone[[num]]
   ldf <- split (df, df$an)
-  lunion <- lapply(ldf, st_union)
+ # lunion <- lapply(ldf, st_union)
 }
 #lzone1 <- eclaterZoneAn (1)
 lzone2 <- eclaterZoneAn (2)
+lzone2
 #lzone3 <- eclaterZoneAn (3)
 lzone4 <- eclaterZoneAn (4)
+
+
+# pb sur les géométries, le résultat est une collection de linestring
+
+sfc <- st_union(lzone2 [[1]], "MULTIPOLYGON")
 
 # tests utilisaton des foncitons par ordre de grandeur de lzone 
 #avec lzone4 2.1 MB 

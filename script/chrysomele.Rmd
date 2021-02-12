@@ -15,7 +15,7 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(cache = TRUE)
 # Passer la valeur suivante à TRUE pour reproduire les extractions.
-knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(eval = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
 ```
 
@@ -48,16 +48,34 @@ library(cartography)
 # communes sans la corse
 commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
 dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
-canton2015 <- st_read("../dataE/00_ADMIN/CANTON.SHP")
-unzip(zipfile =  "../dataE/01_CULTURES/rpg2015.zip", exdir = "../dataE/01_CULTURES")
-unzip(zipfile =  "../dataE/01_CULTURES/rpg2016.zip", exdir = "../dataE/01_CULTURES")
-unzip(zipfile =  "../dataE/01_CULTURES/rpg2017.zip", exdir = "../dataE/01_CULTURES")
-unzip(zipfile =  "../dataE/01_CULTURES/rpg2018.zip", exdir = "../dataE/01_CULTURES")
-rpg2015 <- st_read("../dataE/01_CULTURES/D010_RPG2015.shp")
-rpg2016 <- st_read("../dataE/01_CULTURES/D010_RPG2016.shp")
-rpg2017 <- st_read("../dataE/01_CULTURES/D010_RPG2017.shp")
-rpg2018 <- st_read("../dataE/01_CULTURES/D010_RPG2018_2.shp")
-rpg2018 <- st_transform(rpg2018, crs = st_crs(2154))
+canton2015 <- st_read("../dataE/00_ADMIN/canton2015/CANTON.SHP")
+# rpg dezipage
+chemin <-"../dataE/01_CULTURES/rpg/"
+noms <- list.files(chemin)
+for (i in 1:length(noms)){
+  unzip(zipfile =  paste0(chemin,noms[i]), exdir = chemin)
+}
+# assemblage
+noms <- list.files(chemin,pattern = ".shp")
+data <- NULL
+i <- 1
+for (i in 1:length(noms)){
+  tmp <- st_read(paste0(chemin, noms [i]))
+  tmp <- tmp [tmp$Code_cultu %in% c("MID", "MIE", "MIS"), ]
+  tmp$an <- substring(noms [i],9,12)
+  data <- rbind(data,tmp)
+}
+# exploration
+rpg <- data  [, c("Code_cultu", "an")]
+par(mar = c(4,4,4,4))
+tab <- table(rpg$Code_cultu, rpg$an)
+tab
+barplot(tab, beside = T, col = heat.colors(3), border = NA)
+# liste
+lrpg <- split(rpg, rpg$an)
+names(lrpg) <- c("rpg2015", "rpg2016", "rpg2017", "rpg2018")
+# Enregistrement en format .gpkg
+st_write(rpg, "../dataS/chrysomele.gpkg", "rpg", row.names = FALSE,quiet = TRUE, delete_layer = TRUE)
 ```
 
 ### Zone test
@@ -84,6 +102,22 @@ table(sapply(rpg2015_2016, length))
 # meme proportion
 ```
 
+
+
+### Zones d'étude
+
+```{r}
+alsace <- read.csv2("../dataE/00_ADMIN/alsace.csv")
+names(alsace) <- c("zone", "PR", "nom", "CODE_CANTO")
+canton2012 <- st_read("../dataE/00_ADMIN/canton2012/CANTON.SHP", quiet = TRUE, stringsAsFactors = TRUE)
+str(alsace)
+str(canton2012)
+cantonS <- canton2012 [ canton2012$NOM_REG == "ALSACE",]
+alsace.sf <- merge (cantonS, alsace, by = "CODE_CANTO")
+alsace.sf <- alsace.sf [, c("CODE_CANTO", "ID_GEOFLA","zone", "PR", "nom" ),]
+st_write(alsace.sf, "../dataS/chrysomele.gpkg", "cantonAlsace", quiet = TRUE, delete_layer = TRUE)
+plot(alsace.sf$geometry)
+```
 
 ### Opérateurs spatiaux
 
@@ -265,8 +299,8 @@ lunion <- lapply(ltestBTH, st_union)
 
 On crée une fonction ayant pour paramètre l'année de la demande.
 
-```{r}
-anneeUnique <- function(num) {
+```{r, eval=TRUE}
+anneeUnique <- function(lunion, num) {
   X <- lunion [[num]]
   lreste <- lunion
   lreste [[num]] <- NULL
@@ -279,6 +313,10 @@ anneeUnique <- function(num) {
   plot(res, main = "difference")
   round(st_area(res),0)
 }
+```
+
+
+```{r}
 lnum <- c(1,2,3,4)
 sapply(lnum, anneeUnique)
 ```
@@ -290,33 +328,143 @@ TODO pb géometries pas complètes
 Intersection des années et différence entre les deux géométries créées
 Directement en fonction
 
-```{r}
-num1 <- 1
-num2 <- 2
-deuxAns <- function (num1,num2) {
+```{r, eval=TRUE}
+deuxAnsOLD <- function (num1,num2, lunion) {
   X <- st_union(lunion [[num1]], lunion [[num2]])
   lreste <-lunion [c(-num1,-num2)]
   Y <- st_union (lreste [[1]], lreste [[2]])
   # Toutes les géométries de X qui ne sont pas dans Y
   res <- st_difference(X,Y )
-   # graphique
-  par(mfrow = c(2,2))
-  plot(X, main = paste(num1, num2))
-  plot(Y, col = "blue", main = "autres")
-  plot(res, main = "difference")
+  # couteux
+  # graphique
+  # par(mfrow = c(2, 2))
+  # plot(X, main = paste(num1, num2))
+  # plot(Y, col = "blue", main = "autres")
+  # plot(res, main = "difference")
   # Elimination des petits petits polygones (500 m2)
   # TO DO valider cette limite
-  res2 <- st_cast(res, "POLYGON")
-  res3 <- sapply(st_as_sf(res2), st_area)
-  indice <- which(round(res3,0) > 0)
-  plot(res2 [indice], main = "retenu")
-  res4 <- round(st_area (res2 [indice]),0)
-  return(res4)
+  
+  #res2 <- st_cast(res, "MULTILINESTRING")
+  res3 <- st_cast(res, "MULTIPOLYGON")
+  res4 <- sapply(st_as_sf(res3), st_area)
+  indice <- which(round(res4,0) > 500)
+  #plot(res2 [indice], main = "retenu")
+  res5 <- round(st_area (res3 [indice]),0)
+  return(res5)
+  }
+num1 <- 1
+num2 <- 2
+lunion <- lzone2
+lunion
+deuxAns <- function (num1,num2, lunion) {
+  X <- st_union(lunion [[num1]], lunion [[num2]])
+  lreste <-lunion [c(-num1,-num2)]
+  Y <- st_union (lreste [[1]], lreste [[2]])
+  # Toutes les géométries de X qui ne sont pas dans Y
+  res <- 
+    st_cast(st_difference(X,Y ), "MULTIPOLYGON")
+    
+  # couteux
+  # graphique
+  # par(mfrow = c(2, 2))
+  # plot(X, main = paste(num1, num2))
+  # plot(Y, col = "blue", main = "autres")
+  # plot(res, main = "difference")
+  # Elimination des petits petits polygones (500 m2)
+  # TO DO valider cette limite
+  
+  #res2 <- st_cast(res, "MULTILINESTRING")
+  res2 <- sapply(st_as_sf(res), st_area)
+  indice <- which(round(res2,0) > 500)
+  #plot(res2 [indice], main = "retenu")
+  res3 <- round(res2 [indice],0)
+  return(res3)
   }
 
-deuxAns(1,4)
-deuxAns(2,3)
-deuxAns(2,4)
-deuxAns(3,4)
 ```
+
+
+# Test sur zones Alsace
+
+## Mise en forme des données : agrégation aux 4 zones de l'Alsace
+
+Les données du RPG, même pour une seule région, sont très lourdes et le R de base les manipule mal, éclater
+les fichiers selon des zones géographiques permettra de faciliter les traitements.
+
+TODO exploration diplyr plus efficace que le R de base ?
+
+TODO utiliser base postgis ?
+
+
+```{r}
+alsace <- st_read("../dataS/chrysomele.gpkg", "cantonAlsace", quiet = TRUE, stringsAsFactors = FALSE)
+rpg <- st_read("../dataS/chrysomele.gpkg", "rpg", quiet = TRUE, stringsAsFactors = FALSE)
+# agrégation par zones
+aggAlsace <- aggregate(alsace [,c("zone"), drop = FALSE], by = list (alsace$zone), length)
+names(aggAlsace)[1:2] <- c("groupe", "nb")
+plot(aggAlsace$geometry, col = "antiquewhite1")
+plot(lrpg[[1]], add = TRUE)
+labelLayer(aggAlsace, txt = "groupe", halo = 2 )
+#lrpg <- lapply(lrpg, st_union)
+# intersection très couteuse.
+intersecter <- function(data) {
+  inter <- st_intersection(data, aggAlsace)
+}
+lrpg <- split(rpg, rpg$an)
+lrpg <- lapply(lrpg, st_make_valid)
+linter <- lapply(lrpg, intersecter)
+inter <- do.call(rbind,linter)
+data <- linter [[1]]
+agg <- aggregate(data, by = list(data$groupe), length)
+# sauvegarde pour éviter de refaire les manip trop coûteuse
+st_write(agg, "../dataS/chrysomele.gpkg", "agg")
+st_write(inter, "../dataS/chrysomele.gpkg", "inter")
+```
+
+## Utilisation des fonctions anneeUnique et deuxAns
+
+Pour ces fonctions, il faut lister chaque zone sur toutes les années à partir de la donnée "inter".
+Beaucoup de manipulations d'objet sous R...
+Il faut également ne pas oublier d'appliquer les st_union sur chacun de ces objets. 
+
+### Récupération de la donnée
+
+```{r, eval=TRUE}
+agg <- st_read("../dataS/chrysomele.gpkg", "agg", quiet = TRUE, stringsAsFactors = FALSE)
+inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFactors = FALSE)
+# 276 000 obs
+```
+
+
+### Eclatement des données par zone, puis par année
+
+TODO Est-ce nécessaire ?
+
+```{r, eval=TRUE}
+# on éclate les données par zone puis par an
+lzone <- split(inter, inter$groupe)
+eclaterZoneAn <- function (num) {
+  df <- lzone[[num]]
+  ldf <- split (df, df$an)
+  lunion <- lapply(ldf, st_union)
+}
+#lzone1 <- eclaterZoneAn (1)
+lzone2 <- eclaterZoneAn (2)
+#lzone3 <- eclaterZoneAn (3)
+lzone4 <- eclaterZoneAn (4)
+
+# tests utilisaton des foncitons par ordre de grandeur de lzone 
+#avec lzone4 2.1 MB 
+# puis lzone2 34.8
+#zone3 50
+# zone1 117
+zone4AnneeUnique1 <-anneeUnique(lzone4, 1)
+# en ha
+zone4AnneeUnique1 /1000
+zone4DeuxAns1 <- deuxAns(1,2, lzone4)
+zone4DeuxAns1
+# erreur stcast / il faut utiliser st_combine, argl
+#zone2AnneeUnique1 <- anneeUnique (lzone2, 1)
+```
+
 

@@ -37,6 +37,7 @@ difficulté : identifiant différent
 
 ```{r}
 library(sf)
+# Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1
 library(cartography)
 ```
 
@@ -307,10 +308,10 @@ anneeUnique <- function(lunion, num) {
   Y <- st_union(lreste [[1]], lreste [[2]], lreste [[3]])
   res <- st_difference(X,Y )
   # graphique
-  par(mfrow = c(1,3))
-  plot(X, main = num)
-  plot(Y, col = "blue", main = "autres")
-  plot(res, main = "difference")
+  # par(mfrow = c(1, 3))
+  # plot(X, main = num)
+  # plot(Y, col = "blue", main = "autres")
+  # plot(res, main = "difference")
   round(st_area(res),0)
 }
 ```
@@ -352,10 +353,7 @@ deuxAnsOLD <- function (num1,num2, lunion) {
   res5 <- round(st_area (res3 [indice]),0)
   return(res5)
   }
-num1 <- 1
-num2 <- 2
-lunion <- lzone2
-lunion
+
 deuxAns <- function (num1,num2, lunion) {
   X <- st_union(lunion [[num1]], lunion [[num2]])
   lreste <-lunion [c(-num1,-num2)]
@@ -414,11 +412,15 @@ lrpg <- split(rpg, rpg$an)
 lrpg <- lapply(lrpg, st_make_valid)
 linter <- lapply(lrpg, intersecter)
 inter <- do.call(rbind,linter)
+# elimination des geometries pouvant poser pb
+table(st_geometry_type(inter))
+# 407 sur 275 géometries....
+inter <- inter [st_geometry_type(inter) != "GEOMETRYCOLLECTION",]
 data <- linter [[1]]
 agg <- aggregate(data, by = list(data$groupe), length)
 # sauvegarde pour éviter de refaire les manip trop coûteuse
 st_write(agg, "../dataS/chrysomele.gpkg", "agg")
-st_write(inter, "../dataS/chrysomele.gpkg", "inter")
+st_write(inter, "../dataS/chrysomele.gpkg", "inter", quiet = TRUE, delete_layer = TRUE)
 ```
 
 ## Utilisation des fonctions anneeUnique et deuxAns
@@ -440,37 +442,123 @@ inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFac
 
 TODO Est-ce nécessaire ?
 
-```{r, eval=TRUE}
+```{r}
 # on éclate les données par zone puis par an
 lzone <- split(inter, inter$groupe)
 eclaterZoneAn <- function (num) {
-  df <- lzone[[num]]
-  ldf <- split (df, df$an)
- # lunion <- lapply(ldf, st_union)
+df <- lzone[[num]]
+ ldf <- split (df, df$an)
+# lcomb <- lapply(ldf, st_combine)
+ #lunion <- lapply(lcomb, st_union)
 }
-#lzone1 <- eclaterZoneAn (1)
+lzone1 <- eclaterZoneAn (1)
 lzone2 <- eclaterZoneAn (2)
-lzone2
-#lzone3 <- eclaterZoneAn (3)
+lzone3 <- eclaterZoneAn (3)
 lzone4 <- eclaterZoneAn (4)
+# enregistrement en fichiers pour qgis
+enregistrer <- function(df,num) {
+  #  on récupère le nom de la zone
+  zone <- substring(deparse(substitute(df)),1,6)
+  print(zone)
+  annee <- df [1, c("an"), drop = TRUE]
+  st_write(df, dsn = "../dataS/chrysomelexport.gpkg", layer = paste0(zone,"_", annee), quiet = TRUE, delete_layer = TRUE)
+}
+for (i in 1:4) {
+  enregistrer(lzone1[[i]])
+}
+for (i in 1:4) {
+  enregistrer(lzone2[[i]])
+}
+for (i in 1:4) {
+  enregistrer(lzone3[[i]])
+}
+for (i in 1:4) {
+  enregistrer(lzone4[[i]])
+}
 
+res <- anneeUnique(lzone4,1)
 
-# pb sur les géométries, le résultat est une collection de linestring
-
-sfc <- st_union(lzone2 [[1]], "MULTIPOLYGON")
-
-# tests utilisaton des foncitons par ordre de grandeur de lzone 
-#avec lzone4 2.1 MB 
-# puis lzone2 34.8
-#zone3 50
-# zone1 117
-zone4AnneeUnique1 <-anneeUnique(lzone4, 1)
-# en ha
-zone4AnneeUnique1 /1000
-zone4DeuxAns1 <- deuxAns(1,2, lzone4)
-zone4DeuxAns1
-# erreur stcast / il faut utiliser st_combine, argl
-#zone2AnneeUnique1 <- anneeUnique (lzone2, 1)
 ```
 
+### Nouvelle méthode : R + QGIS
+
+En fait, on a besoin d'enregistrer le fichier de l'année et celui des 3 autres. On fera la différence sous Qgis.
+En effet, la différence ne nécessite pas de st_union et le traitement est moins long que sous R.
+
+```{r}
+enregistrerAnneeUnique <- function(df, num) {
+  zone <- deparse(substitute(df))
+  print(zone)
+  nomAn <- c("2015","2016","2017", "2018")
+  X <- df [df$an == nomAn [num], ]
+  Y <- df [df$an != nomAn [num],]
+  # L'union peut se faire sous R quand même non ?
+  # Xunion <- st_union(X)
+  # Yunion <- st_union(Y)
+  # obligation d'enregistrer dans des gpkg sinon qgis ne les voit pas
+  nomgpkg <- paste0("../dataS/chrysomelexport",zone,".gpkg")
+  st_write(X, dsn = nomgpkg, layer = paste0(zone,"_", nomAn[num]), quiet = TRUE, delete_layer = TRUE)
+  st_write(Y, dsn = nomgpkg, layer = paste0(zone,"_autres_", nomAn[num]), quiet = TRUE, delete_layer = TRUE)
+}
+zone1 <- lzone [[1]]
+zone2 <- lzone [[2]]
+zone3 <- lzone [[3]]
+zone4 <- lzone [[4]]
+
+enregistrerAnneeUnique(zone1,1)
+enregistrerAnneeUnique(zone1,2)
+enregistrerAnneeUnique(zone1,3)
+enregistrerAnneeUnique(zone1,4)
+
+enregistrerAnneeUnique(zone2,1)
+enregistrerAnneeUnique(zone2,2)
+enregistrerAnneeUnique(zone2,3)
+enregistrerAnneeUnique(zone2,4)
+
+enregistrerAnneeUnique(zone4,1)
+enregistrerAnneeUnique(zone4,2)
+enregistrerAnneeUnique(zone4,3)
+enregistrerAnneeUnique(zone4,4)
+
+enregistrerAnneeUnique(zone3,1)
+enregistrerAnneeUnique(zone3,2)
+enregistrerAnneeUnique(zone3,3)
+enregistrerAnneeUnique(zone3,4)
+
+
+
+```
+
+
+On récupère la couche de différence
+
+
+
+```{r, eval = TRUE}
+diff2015 <- st_read("../dataS/chrysomelediff.gpkg", layer = "2015", quiet = TRUE)
+total2015 <- sum(st_area(diff2015))
+diff2018 <- st_read("../dataS/chrysomelediff.gpkg", layer = "2018", quiet = TRUE)
+total2018 <- sum(st_area(diff2018))
+total2015 / 10000
+total2018 /10000
+# pourquoi unité différente ?
+```
+
+TODO 2016 et 17 ne passent pas sous Qgis, sans doute pour un pb de polygone trop petit provoquant une 
+erreur de topologie. 
+
+![](../img/qgisdiffpb.png)
+
+
+....et l'explication
+
+
+![](../img/cause.png)
+
+reférence : https://github.com/Turfjs/turf/issues/1575
+
+Donc supprimer les polygones trop petits, faire sous Qgis
+... Et vérifier que cela ne passe pas sous R (voir st_make_valid, st_valid et st_geometry_type)
+
+TODO macro R sous Qgis pour éviter les AR voire python
 

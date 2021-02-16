@@ -6,6 +6,7 @@ output:
   html_document: 
     number_sections: yes
     toc: yes
+    toc_float: true
 editor_options: 
   chunk_output_type: console
 ---
@@ -412,10 +413,29 @@ lrpg <- split(rpg, rpg$an)
 lrpg <- lapply(lrpg, st_make_valid)
 linter <- lapply(lrpg, intersecter)
 inter <- do.call(rbind,linter)
+```
+
+
+Contrôle validité des géométries 
+
+On écarte les GEOMETRY COLLECTION et tous les trops petits polygones
+
+```{r}
+# type de géométrie, on retient que les polygones / multipolygones
 # elimination des geometries pouvant poser pb
 table(st_geometry_type(inter))
-# 407 sur 275 géometries....
+# 407 sur 275 M géometries....
 inter <- inter [st_geometry_type(inter) != "GEOMETRYCOLLECTION",]
+
+# petits polygones
+library(units)
+inter$aire <- drop_units( st_area(inter$geom))
+summary(inter$aire)
+# on supprime toutes les aires < 500
+inter <- inter [inter$aire > 500,]
+# 274 083 obs
+# on ne peut pas faire un st_is_valid. trop long
+inter <- st_make_valid(inter)
 data <- linter [[1]]
 agg <- aggregate(data, by = list(data$groupe), length)
 # sauvegarde pour éviter de refaire les manip trop coûteuse
@@ -434,7 +454,10 @@ Il faut également ne pas oublier d'appliquer les st_union sur chacun de ces obj
 ```{r, eval=TRUE}
 agg <- st_read("../dataS/chrysomele.gpkg", "agg", quiet = TRUE, stringsAsFactors = FALSE)
 inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFactors = FALSE)
-# 276 000 obs
+# 274 083 obs, tous en multipolygone
+# verif
+summary(inter$aire)
+# Un minimum à 500 pour 2015 et 2018, mais pour 2016 2017 on le monte à 10 000 (1 ha)
 ```
 
 
@@ -486,6 +509,8 @@ En fait, on a besoin d'enregistrer le fichier de l'année et celui des 3 autres.
 En effet, la différence ne nécessite pas de st_union et le traitement est moins long que sous R.
 
 ```{r}
+df <- zone2
+num <- 1
 enregistrerAnneeUnique <- function(df, num) {
   zone <- deparse(substitute(df))
   print(zone)
@@ -493,17 +518,28 @@ enregistrerAnneeUnique <- function(df, num) {
   X <- df [df$an == nomAn [num], ]
   Y <- df [df$an != nomAn [num],]
   # L'union peut se faire sous R quand même non ?
-  # Xunion <- st_union(X)
-  # Yunion <- st_union(Y)
+   Xunion <- st_union(X)
+   Yunion <- st_union(Y)
+  res <- st_difference(Xunion,Yunion )
   # obligation d'enregistrer dans des gpkg sinon qgis ne les voit pas
   nomgpkg <- paste0("../dataS/chrysomelexport",zone,".gpkg")
   st_write(X, dsn = nomgpkg, layer = paste0(zone,"_", nomAn[num]), quiet = TRUE, delete_layer = TRUE)
   st_write(Y, dsn = nomgpkg, layer = paste0(zone,"_autres_", nomAn[num]), quiet = TRUE, delete_layer = TRUE)
-}
+  return(res)
+  }
 zone1 <- lzone [[1]]
 zone2 <- lzone [[2]]
 zone3 <- lzone [[3]]
 zone4 <- lzone [[4]]
+
+
+anomalie <- st_is_valid(zone1, reason = TRUE)
+table(anomalie, useNA = "always")
+sf_extSoftVersion()["lwgeom"]
+# inutile de faire st_make_valid, lwgeom n'existe pas
+summary(zone1)
+# on met la barre à 10 000
+zone1 <- zone1 [zone1$aire > 10000,]
 
 enregistrerAnneeUnique(zone1,1)
 enregistrerAnneeUnique(zone1,2)
@@ -535,13 +571,21 @@ On récupère la couche de différence
 
 
 ```{r, eval = TRUE}
-diff2015 <- st_read("../dataS/chrysomelediff.gpkg", layer = "2015", quiet = TRUE)
-total2015 <- sum(st_area(diff2015))
-diff2018 <- st_read("../dataS/chrysomelediff.gpkg", layer = "2018", quiet = TRUE)
-total2018 <- sum(st_area(diff2018))
-total2015 / 10000
-total2018 /10000
-# pourquoi unité différente ?
+couche <- c("2015", "2016", "2017", "2018")
+total <- NULL
+i <- 1
+for (i in 1:4) {
+  diff <-
+    st_read("../dataS/chrysomelediff.gpkg",
+            layer = couche [i],
+            quiet = TRUE)
+    total <- rbind(total,sum(st_area(diff)))
+}
+rownames(total) <- couche
+colnames(total) <- "zone1"
+total <- round(total/10000,0)
+# total des différences années et autres années (aires en ha)
+total
 ```
 
 TODO 2016 et 17 ne passent pas sous Qgis, sans doute pour un pb de polygone trop petit provoquant une 
@@ -561,4 +605,10 @@ Donc supprimer les polygones trop petits, faire sous Qgis
 ... Et vérifier que cela ne passe pas sous R (voir st_make_valid, st_valid et st_geometry_type)
 
 TODO macro R sous Qgis pour éviter les AR voire python
+
+
+
+```{r}
+
+```
 

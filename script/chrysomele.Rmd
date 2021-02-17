@@ -321,7 +321,7 @@ anneeUnique <- function(lunion, num) {
 
 ```{r}
 lnum <- c(1,2,3,4)
-sapply(lnum, anneeUnique)
+sapply(lzone2, anneeUnique)
 ```
 
 TODO pb géometries pas complètes
@@ -384,21 +384,25 @@ deuxAns <- function (num1,num2, lunion) {
 ```
 
 
-# Test sur zones Alsace
+# Zone d'étude Alsace
 
 ## Mise en forme des données : agrégation aux 4 zones de l'Alsace
 
-Les données du RPG, même pour une seule région, sont très lourdes et le R de base les manipule mal, éclater
-les fichiers selon des zones géographiques permettra de faciliter les traitements.
+Les données du RPG, même pour une seule région, sont très lourdes et le R de base les manipule mal, 
+2 solutions explorées :
+- éclater les fichiers selon des zones géographiques et puis les années permettra de faciliter les traitements.
+- dissoudre les petites parcelles (st_join) sur chacune des zones et des années, il faut vérifier que cela allège
+
+Pour le faire, tout unir, et éclater.
 
 TODO exploration diplyr plus efficace que le R de base ?
 
 TODO utiliser base postgis ?
 
+### Intersection zones et rpb
 
 ```{r}
 alsace <- st_read("../dataS/chrysomele.gpkg", "cantonAlsace", quiet = TRUE, stringsAsFactors = FALSE)
-
 rpg <- st_read("../dataS/chrysomele.gpkg", "rpg", quiet = TRUE, stringsAsFactors = FALSE)
 # 275 234 obs
 # agrégation par zones
@@ -415,11 +419,62 @@ layoutLayer(title = "Zones d'étude Alsace")
 dev.off()
 # intersection très couteuse. géométrie du rpg nécessite de forcer la validité
 inter <- st_intersection(st_make_valid(rpg), aggAlsace)
-# 
+# On travaillera à partir de ce fichier désormais.
+a <- aggregate(rpg [,"an"], list (nb = lengths (st_intersects(rpg, aggAlsace))> 0), length)
+str(rpg)
 ```
 
 ![](../img/alsace.png)
+
 TODO Attention zone Strasbourg absente ?
+
+### Organiser la donnée par zone et année
+
+```{r}
+# on éclate les données par zone puis par an et on efface les frontières entre parcelles.
+# 
+lzone <- split(inter, inter$groupe)
+#df <-  lzone[[4]]
+recupPoly <- function (sfc) {
+  poly <- st_cast(sfc, "POLYGON")
+}
+eclater <- function (num) {
+ df <- lzone[[num]]
+ ldf <- split (df, df$an)
+ # on unit toutes les géométries
+  lunion <- lapply(ldf, st_union)
+  lpoly <- lapply(lunion, recupPoly)
+}
+lzone1 <- eclater (1)
+lzone2 <- eclater (2)
+lzone3 <- eclater (3)
+lzone4 <- eclater (4)
+# 116 / 34.7 / 50.5 et 2.6 M°
+# enregistrement en fichiers pour qgis
+enregistrer <- function(df,num) {
+  #  on récupère le nom de la zone
+  zone <- substring(deparse(substitute(df)),1,6)
+  print(zone)
+  annee <- df [1, c("an"), drop = TRUE]
+  st_write(df, dsn = "../dataS/chrysomelexport.gpkg", layer = paste0(zone,"_", annee), quiet = TRUE, delete_layer = TRUE)
+}
+
+for (i in 1:4) {
+  enregistrer(lzone1[[i]])
+}
+for (i in 1:4) {
+  enregistrer(lzone2[[i]])
+}
+for (i in 1:4) {
+  enregistrer(lzone3[[i]])
+}
+for (i in 1:4) {
+  enregistrer(lzone4[[i]])
+}
+```
+
+
+
 
 
 
@@ -450,11 +505,13 @@ for (i in 1:5) {
 petiteAnomalie <- anomalie [anomalie$aire < 0.5,]
 library(mapview)
 mapview(petiteAnomalie)
-st_write(grosseAnomalie, "../dataS/chrysomele.gpkg", "anomalie", delete_layer = TRUE, quiet = TRUE)
-st_write(petiteAnomalie, "../dataS/chrysomele.gpkg", "anomalie", delete_layer = TRUE, quiet = TRUE)
+st_write(grosseAnomalie, "../dataS/chrysomele.gpkg", "panomalie", delete_layer = TRUE, quiet = TRUE)
+st_write(petiteAnomalie, "../dataS/chrysomele.gpkg", "ganomalie", delete_layer = TRUE, quiet = TRUE)
 # Ces "geometry collection" ne se visionnent pas donc on les enlève.
 inter <- inter [st_geometry_type(inter) != "GEOMETRYCOLLECTION",]
 ```
+
+
 
 
 ### Etude de la distribution de l'aire
@@ -496,9 +553,11 @@ mapview(interSel)
 
 ## Utilisation des fonctions anneeUnique et deuxAns
 
-Pour ces fonctions, il faut lister chaque zone sur toutes les années à partir de la donnée "inter".
-Beaucoup de manipulations d'objet sous R...
-Il faut également ne pas oublier d'appliquer les st_union sur chacun de ces objets. 
+```{r}
+res <- anneeUnique(lzone2,1)
+sapply(lzone2, anneeUnique)
+```
+
 
 ### Récupération et filtrage de la donnée
 
@@ -514,43 +573,6 @@ Il faut également ne pas oublier d'appliquer les st_union sur chacun de ces obj
 
 TODO Est-ce nécessaire ?
 
-```{r}
-# on éclate les données par zone puis par an
-lzone <- split(inter, inter$groupe)
-eclaterZoneAn <- function (num) {
-df <- lzone[[num]]
- ldf <- split (df, df$an)
-# lcomb <- lapply(ldf, st_combine)
- #lunion <- lapply(lcomb, st_union)
-}
-lzone1 <- eclaterZoneAn (1)
-lzone2 <- eclaterZoneAn (2)
-lzone3 <- eclaterZoneAn (3)
-lzone4 <- eclaterZoneAn (4)
-# enregistrement en fichiers pour qgis
-enregistrer <- function(df,num) {
-  #  on récupère le nom de la zone
-  zone <- substring(deparse(substitute(df)),1,6)
-  print(zone)
-  annee <- df [1, c("an"), drop = TRUE]
-  st_write(df, dsn = "../dataS/chrysomelexport.gpkg", layer = paste0(zone,"_", annee), quiet = TRUE, delete_layer = TRUE)
-}
-for (i in 1:4) {
-  enregistrer(lzone1[[i]])
-}
-for (i in 1:4) {
-  enregistrer(lzone2[[i]])
-}
-for (i in 1:4) {
-  enregistrer(lzone3[[i]])
-}
-for (i in 1:4) {
-  enregistrer(lzone4[[i]])
-}
-
-res <- anneeUnique(lzone4,1)
-
-```
 
 ### Nouvelle méthode : R + QGIS
 

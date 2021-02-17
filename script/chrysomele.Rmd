@@ -51,6 +51,7 @@ library(cartography)
 commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
 dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
 canton2015 <- st_read("../dataE/00_ADMIN/canton2015/CANTON.SHP")
+fond <- st_read("../dataE/00_ADMIN/nuts.gpkg", "pays", quiet = TRUE, stringsAsFactors =F)
 # rpg dezipage
 chemin <-"../dataE/01_CULTURES/rpg/"
 noms <- list.files(chemin)
@@ -397,51 +398,101 @@ TODO utiliser base postgis ?
 
 ```{r}
 alsace <- st_read("../dataS/chrysomele.gpkg", "cantonAlsace", quiet = TRUE, stringsAsFactors = FALSE)
+
 rpg <- st_read("../dataS/chrysomele.gpkg", "rpg", quiet = TRUE, stringsAsFactors = FALSE)
+# 275 234 obs
 # agrégation par zones
 aggAlsace <- aggregate(alsace [,c("zone"), drop = FALSE], by = list (alsace$zone), length)
 names(aggAlsace)[1:2] <- c("groupe", "nb")
-plot(aggAlsace$geometry, col = "antiquewhite1")
-plot(lrpg[[1]], add = TRUE)
+png("../img/alsace.png")
+par(mar=c(0,0,1.2,0))
+ghostLayer(aggAlsace, bg = "lightblue1")
+plot(fond, col = "antiquewhite3", border = NA, add = TRUE)
+plot(dpt$geom, add = TRUE, col = "antiquewhite2", border = NA)
+plot(aggAlsace$geometry, col = "antiquewhite1", border = "grey", add= TRUE)
 labelLayer(aggAlsace, txt = "groupe", halo = 2 )
-#lrpg <- lapply(lrpg, st_union)
-# intersection très couteuse.
-intersecter <- function(data) {
-  inter <- st_intersection(data, aggAlsace)
-}
-lrpg <- split(rpg, rpg$an)
-lrpg <- lapply(lrpg, st_make_valid)
-linter <- lapply(lrpg, intersecter)
-inter <- do.call(rbind,linter)
+layoutLayer(title = "Zones d'étude Alsace")
+dev.off()
+# intersection très couteuse. géométrie du rpg nécessite de forcer la validité
+inter <- st_intersection(st_make_valid(rpg), aggAlsace)
+# 
 ```
 
+![](../img/alsace.png)
+TODO Attention zone Strasbourg absente ?
 
-Contrôle validité des géométries 
 
-On écarte les GEOMETRY COLLECTION et tous les trops petits polygones
+
+## Contrôle validité des géométries après l'intersection zone, données
+
+### Cas des GEOMETRY COLLECTION 
+
+Cartographie des GEOMETRY COLLECTION
 
 ```{r}
 # type de géométrie, on retient que les polygones / multipolygones
 # elimination des geometries pouvant poser pb
 table(st_geometry_type(inter))
 # 407 sur 275 M géometries....
-inter <- inter [st_geometry_type(inter) != "GEOMETRYCOLLECTION",]
-
-# petits polygones
+anomalie <- inter [st_geometry_type(inter) == "GEOMETRYCOLLECTION",]
+ghostLayer(aggAlsace [aggAlsace$groupe == 3,])
+plot(anomalie$geom, add = TRUE)
 library(units)
-inter$aire <- drop_units( st_area(inter$geom))
+anomalie$aire <- round(drop_units(st_area(anomalie$geom)/10000),0)
+plot(anomalie$aire)
+grosseAnomalie <- anomalie [anomalie$aire > 25,]
+ghostLayer(aggAlsace [aggAlsace$groupe == 3,])
+par(mfrow = c(2,3))
+for (i in 1:5) {
+  plot(grosseAnomalie$geom [i])
+  labelLayer(grosseAnomalie, txt = "aire", cex = 1.2,halo = 3)
+}
+petiteAnomalie <- anomalie [anomalie$aire < 0.5,]
+library(mapview)
+mapview(petiteAnomalie)
+st_write(grosseAnomalie, "../dataS/chrysomele.gpkg", "anomalie", delete_layer = TRUE, quiet = TRUE)
+st_write(petiteAnomalie, "../dataS/chrysomele.gpkg", "anomalie", delete_layer = TRUE, quiet = TRUE)
+# Ces "geometry collection" ne se visionnent pas donc on les enlève.
+inter <- inter [st_geometry_type(inter) != "GEOMETRYCOLLECTION",]
+```
+
+
+### Etude de la distribution de l'aire
+
+```{r}
 summary(inter$aire)
-# on supprime toutes les aires < 500
-inter <- inter [inter$aire > 500,]
-# 274 083 obs
+# on supprime toutes les aires < 0.5
+inter$aire <- round(drop_units(st_area(inter$geom)/10000),0)
+inter <- inter [inter$aire > 0.5,]
+# 207 334 obs
 # on ne peut pas faire un st_is_valid. trop long
-inter <- st_make_valid(inter)
-data <- linter [[1]]
-agg <- aggregate(data, by = list(data$groupe), length)
 # sauvegarde pour éviter de refaire les manip trop coûteuse
-st_write(agg, "../dataS/chrysomele.gpkg", "agg")
 st_write(inter, "../dataS/chrysomele.gpkg", "inter", quiet = TRUE, delete_layer = TRUE)
 ```
+
+```{r, eval=TRUE}
+inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFactors = FALSE)
+# 274 083 obs, tous en multipolygone
+# verif
+summary(inter)
+par(mfrow = c(1,2))
+barplot(sort(inter$aire))
+abline (h = mean(inter$aire))
+# Un minimum à 500 pour 2015 et 2018, mais pour 2016 2017 on le monte à 10 000 (1 ha)
+interSel <- inter [inter$aire > 1,]
+barplot(sort(interSel$aire))
+abline (h = mean(interSel$aire))
+# 144 034 obs
+```
+
+Une distribution très bipolaire... pb
+
+```{r}
+
+mapview(interSel)
+```
+
+
 
 ## Utilisation des fonctions anneeUnique et deuxAns
 
@@ -449,16 +500,14 @@ Pour ces fonctions, il faut lister chaque zone sur toutes les années à partir 
 Beaucoup de manipulations d'objet sous R...
 Il faut également ne pas oublier d'appliquer les st_union sur chacun de ces objets. 
 
-### Récupération de la donnée
+### Récupération et filtrage de la donnée
 
-```{r, eval=TRUE}
-agg <- st_read("../dataS/chrysomele.gpkg", "agg", quiet = TRUE, stringsAsFactors = FALSE)
-inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFactors = FALSE)
-# 274 083 obs, tous en multipolygone
-# verif
-summary(inter$aire)
-# Un minimum à 500 pour 2015 et 2018, mais pour 2016 2017 on le monte à 10 000 (1 ha)
-```
+
+
+
+#### Vision des géométries
+
+
 
 
 ### Eclatement des données par zone, puis par année
@@ -509,8 +558,8 @@ En fait, on a besoin d'enregistrer le fichier de l'année et celui des 3 autres.
 En effet, la différence ne nécessite pas de st_union et le traitement est moins long que sous R.
 
 ```{r}
-df <- zone2
-num <- 1
+ df <- zone2
+ num <- 1
 enregistrerAnneeUnique <- function(df, num) {
   zone <- deparse(substitute(df))
   print(zone)
@@ -526,49 +575,38 @@ enregistrerAnneeUnique <- function(df, num) {
   st_write(X, dsn = nomgpkg, layer = paste0(zone,"_", nomAn[num]), quiet = TRUE, delete_layer = TRUE)
   st_write(Y, dsn = nomgpkg, layer = paste0(zone,"_autres_", nomAn[num]), quiet = TRUE, delete_layer = TRUE)
   return(res)
-  }
-zone1 <- lzone [[1]]
-zone2 <- lzone [[2]]
-zone3 <- lzone [[3]]
-zone4 <- lzone [[4]]
+}
+```
 
 
+Essai de nettoyage de la donnée
+```{r}
 anomalie <- st_is_valid(zone1, reason = TRUE)
 table(anomalie, useNA = "always")
 sf_extSoftVersion()["lwgeom"]
 # inutile de faire st_make_valid, lwgeom n'existe pas
-summary(zone1)
-# on met la barre à 10 000
-zone1 <- zone1 [zone1$aire > 10000,]
-
-enregistrerAnneeUnique(zone1,1)
-enregistrerAnneeUnique(zone1,2)
-enregistrerAnneeUnique(zone1,3)
-enregistrerAnneeUnique(zone1,4)
-
-enregistrerAnneeUnique(zone2,1)
-enregistrerAnneeUnique(zone2,2)
-enregistrerAnneeUnique(zone2,3)
-enregistrerAnneeUnique(zone2,4)
-
-enregistrerAnneeUnique(zone4,1)
-enregistrerAnneeUnique(zone4,2)
-enregistrerAnneeUnique(zone4,3)
-enregistrerAnneeUnique(zone4,4)
-
-enregistrerAnneeUnique(zone3,1)
-enregistrerAnneeUnique(zone3,2)
-enregistrerAnneeUnique(zone3,3)
-enregistrerAnneeUnique(zone3,4)
+```
 
 
+Enregistrement des données pour Qgis
 
+Pour chaque année, deux couches, celle de l'année X et celle de toutes les années Y.
+
+```{r}
+#boucle pour les zones
+for (i in 1:4) {
+  zone <- lzone [[i]]
+  # on met la barre à 10 000 (1 ha)
+  zone <- zone [zone$aire > 10000, ]
+  # boucle pour les années
+  for (j in 1:4) {
+    enregistrerAnneeUnique(zone, j)
+  }
+}
 ```
 
 
 On récupère la couche de différence
-
-
 
 ```{r, eval = TRUE}
 couche <- c("2015", "2016", "2017", "2018")

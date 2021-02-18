@@ -29,7 +29,7 @@ Paramètres à estimer à partir fichiers rpg sur plusieurs années
 - taille moyenne parcelles
 - SAU moyenne
 - surface moyenne mais
-- idem mais en ponoculture
+- idem mais en monoculture
 - idem mais 1e fois
 
 difficulté : identifiant différent
@@ -39,6 +39,7 @@ difficulté : identifiant différent
 ```{r}
 library(sf)
 # Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1
+library(lwgeom) # pour la validation de la géométrie
 library(cartography)
 ```
 
@@ -59,27 +60,20 @@ for (i in 1:length(noms)){
   unzip(zipfile =  paste0(chemin,noms[i]), exdir = chemin)
 }
 # assemblage
-noms <- list.files(chemin,pattern = ".shp")
+noms <- list.files(chemin, pattern = ".shp")
 data <- NULL
 i <- 1
 for (i in 1:length(noms)){
   tmp <- st_read(paste0(chemin, noms [i]))
-  tmp <- tmp [tmp$Code_cultu %in% c("MID", "MIE", "MIS"), ]
   tmp$an <- substring(noms [i],9,12)
   data <- rbind(data,tmp)
 }
-# exploration
-rpg <- data  [, c("Code_cultu", "an")]
-par(mar = c(4,4,4,4))
-tab <- table(rpg$Code_cultu, rpg$an)
-tab
-barplot(tab, beside = T, col = heat.colors(3), border = NA)
-# liste
-lrpg <- split(rpg, rpg$an)
-names(lrpg) <- c("rpg2015", "rpg2016", "rpg2017", "rpg2018")
-# Enregistrement en format .gpkg
+# Enregistrement en format .gpkg 972 363
+rpg <- data [,c("Code_cultu", "an"), drop = FALSE]
 st_write(rpg, "../dataS/chrysomele.gpkg", "rpg", row.names = FALSE,quiet = TRUE, delete_layer = TRUE)
 ```
+
+
 
 ### Zone test
 
@@ -122,28 +116,55 @@ st_write(alsace.sf, "../dataS/chrysomele.gpkg", "cantonAlsace", quiet = TRUE, de
 plot(alsace.sf$geometry)
 ```
 
+## Méthodes
+
 ### Opérateurs spatiaux
 
 ![](../img/opspatiaux.png)
-# Paramètres généraux
 
-## Taille moyenne des parcelles agricole
-
+### Suppression des unités m2
 
 ```{r}
-ldata <- list(rpg2015, rpg2016, rpg2017, rpg2018)
-calcul <- function(data) {
-  (sum(st_area(data)) / nrow(data))/10000
-} 
-sapply(ldata,calcul)
+library("units")
+drop_units(rpg)
 ```
 
-4,7 hac environ
+## Exploration rpg 
 
-## SAU moyenne
+### Nombre d'occurences
 
 ```{r}
+par(mar = c(4,4,4,4))
+tab <- addmargins(table(rpg$Code_cultu, rpg$an))
+knitr::kable(tab)
+```
 
+### Taille moyenne des parcelles agricole
+
+```{r, eval = TRUE}
+rpg <- st_read("../dataS/chrysomele.gpkg", "rpg", quiet = TRUE, stringsAsFactors = FALSE)
+calcul <- function(data) {
+  aire <- sum(st_area(data))/10000
+  moyenne <-(sum(st_area(data)) / nrow(data))/10000
+  res <- c(aire, moyenne)
+  } 
+# liste
+lrpg <- split(rpg, rpg$an)
+names(lrpg) <- c("rpg2015", "rpg2016", "rpg2017", "rpg2018")
+ttsCultures <- sapply(lrpg,calcul)
+# uniquement mais 275 234 obs
+rpgMais <- rpg [rpg$Code_cultu %in% c("MID", "MIE", "MIS"), ]
+st_write(rpgMais, "../dataS/chrysomele.gpkg", "rpgMais", quiet = TRUE, delete_layer = TRUE)
+# liste
+lrpgMais <- split(rpgMais, rpgMais$an)
+names(lrpgMais) <- c("rpg2015", "rpg2016", "rpg2017", "rpg2018")
+mais <- sapply(lrpgMais, calcul)
+# assemblage et moyenne
+total <- rbind(ttsCultures, mais)
+moyenne <- apply(total,1, mean)
+total <- cbind(total, moyenne)
+noms <- c("tts total", "tts moy", "tts mais", "moy mais")
+knitr::kable(total, digits = 2)
 ```
 
 
@@ -222,6 +243,8 @@ Cela permettra de vérifier la justesse de nos résultats par manipulations spat
 
 TO DO
 
+# Méthode utilisée : Manipulations spatiales
+
 
 ## Allègement des données, uniquement le maïs
 
@@ -243,8 +266,6 @@ for (i in 1:4) {
 ```
 
 ldataBTH est désormais notre objet de référence. 
-
-# Manipulations spatiales
 
 ## Uniquement le maïs sur les 4 ans
 
@@ -296,8 +317,6 @@ lunion <- lapply(ltestBTH, st_union)
 ```
 
 
-
-
 ## Uniquement mais en 2016, 2017, 2018
 
 On crée une fonction ayant pour paramètre l'année de la demande.
@@ -308,20 +327,20 @@ anneeUnique <- function(lunion, num) {
   lreste <- lunion
   lreste [[num]] <- NULL
   Y <- st_union(lreste [[1]], lreste [[2]], lreste [[3]])
-  res <- st_difference(X,Y )
+  res <- st_difference(X,Y)
   # graphique
   # par(mfrow = c(1, 3))
   # plot(X, main = num)
   # plot(Y, col = "blue", main = "autres")
   # plot(res, main = "difference")
-  round(st_area(res),0)
+  round(st_area(res)/10000,0)
 }
 ```
 
 
 ```{r}
 lnum <- c(1,2,3,4)
-sapply(lzone2, anneeUnique)
+sapply(lunion, anneeUnique)
 ```
 
 TODO pb géometries pas complètes
@@ -384,6 +403,10 @@ deuxAns <- function (num1,num2, lunion) {
 ```
 
 
+On a donc testé sur un très petit échantillon deux fonctions : annéeUnique et deuxAns.
+Il s'agit maintenant de l'appliquer à notre jeu de données unique.
+
+
 # Zone d'étude Alsace
 
 ## Mise en forme des données : agrégation aux 4 zones de l'Alsace
@@ -391,7 +414,7 @@ deuxAns <- function (num1,num2, lunion) {
 Les données du RPG, même pour une seule région, sont très lourdes et le R de base les manipule mal, 
 2 solutions explorées :
 - éclater les fichiers selon des zones géographiques et puis les années permettra de faciliter les traitements.
-- dissoudre les petites parcelles (st_join) sur chacune des zones et des années, il faut vérifier que cela allège
+- dissoudre les petites parcelles (cf taille moyenne très basse) sur chacune des zones et des années, il faut vérifier que cela allège
 
 Pour le faire, tout unir, et éclater.
 
@@ -403,8 +426,8 @@ TODO utiliser base postgis ?
 
 ```{r}
 alsace <- st_read("../dataS/chrysomele.gpkg", "cantonAlsace", quiet = TRUE, stringsAsFactors = FALSE)
-rpg <- st_read("../dataS/chrysomele.gpkg", "rpg", quiet = TRUE, stringsAsFactors = FALSE)
-# 275 234 obs
+rpg <- st_read("../dataS/chrysomele.gpkg", "rpgMais", quiet = TRUE, stringsAsFactors = FALSE)
+# 275 324 obs
 # agrégation par zones
 aggAlsace <- aggregate(alsace [,c("zone"), drop = FALSE], by = list (alsace$zone), length)
 names(aggAlsace)[1:2] <- c("groupe", "nb")
@@ -420,99 +443,65 @@ dev.off()
 # intersection très couteuse. géométrie du rpg nécessite de forcer la validité
 inter <- st_intersection(st_make_valid(rpg), aggAlsace)
 # On travaillera à partir de ce fichier désormais.
-a <- aggregate(rpg [,"an"], list (nb = lengths (st_intersects(rpg, aggAlsace))> 0), length)
-str(rpg)
+st_write(inter, "../dataS/chrysomele.gpkg", "inter", quiet = TRUE, delete_layer = TRUE)
 ```
 
 ![](../img/alsace.png)
 
 TODO Attention zone Strasbourg absente ?
 
-### Organiser la donnée par zone et année
+### Organiser la donnée par zone et année en fusionnant les parcelles adjacentes
+
+Trois fonctions correspondant à trois étapes de traitement
+Sur les données :
+- on éclate les données par zone puis par an
+Sur la géométrie : 
+- on la rend valide en supprimant les types multiples, afin d'obtenir uniquement des polygones
+- puis on efface les frontières entre parcelles
+  - union de tous les polygones
+  - nouvel éclatement
+
+TODO nb de polygones au départ / à l'arrivée
+
 
 ```{r}
-# on éclate les données par zone puis par an et on efface les frontières entre parcelles.
-# 
+inter <- st_read("../dataS/chrysomele.")
 lzone <- split(inter, inter$groupe)
-#df <-  lzone[[4]]
-recupPoly <- function (sfc) {
-  poly <- st_cast(sfc, "POLYGON")
+# Nettoyer les géométries, c'est supprimer les geometrycollection
+nettoyerGeom <- function (df) {
+  df <-df [st_geometry_type(df) != "GEOMETRYCOLLECTION",]
+  dfvalid <- st_make_valid(df)
+  dfpoly <- st_cast(dfvalid, "POLYGON")
 }
+# Fusionner les parcelles adjacentes : union de tous les polygones, puis éclatement
+polygoner <- function(df) {
+  dfunion <- st_union(df)
+  dfpoly <- st_cast(dfunion, "POLYGON")
+}
+# Eclater les zones et les années, car on va travailler sur la géométrie.
 eclater <- function (num) {
  df <- lzone[[num]]
  ldf <- split (df, df$an)
- # on unit toutes les géométries
-  lunion <- lapply(ldf, st_union)
-  lpoly <- lapply(lunion, recupPoly)
 }
-lzone1 <- eclater (1)
-lzone2 <- eclater (2)
-lzone3 <- eclater (3)
-lzone4 <- eclater (4)
-# 116 / 34.7 / 50.5 et 2.6 M°
-# enregistrement en fichiers pour qgis
+# boucle sur les zones
+i <- 1
+noms <- c("lzone1", "lzone2", "lzone3","lzone4")
+for (i in 1:4){
+  leclate <- eclater (i)
+  # lapply  sur les années
+    lpropre <- lapply(leclate, nettoyerGeom)
+    lpoly <- lapply(lpropre,polygoner)
+    assign(noms [i], lpoly)
+  }
+# 149 / 43.2 / 64.1 et 3 M°
+# enregistrement en fichiers pour qgis`
 enregistrer <- function(df,num) {
   #  on récupère le nom de la zone
-  zone <- substring(deparse(substitute(df)),1,6)
-  print(zone)
-  annee <- df [1, c("an"), drop = TRUE]
+  zone <- substring(deparse(substitute(lzone4$`2015`)),1,6)
+  annee <- substring(deparse(substitute(lzone4$`2015`)),9,12)
   st_write(df, dsn = "../dataS/chrysomelexport.gpkg", layer = paste0(zone,"_", annee), quiet = TRUE, delete_layer = TRUE)
 }
-
-for (i in 1:4) {
-  enregistrer(lzone1[[i]])
-}
-for (i in 1:4) {
-  enregistrer(lzone2[[i]])
-}
-for (i in 1:4) {
-  enregistrer(lzone3[[i]])
-}
-for (i in 1:4) {
-  enregistrer(lzone4[[i]])
-}
 ```
-
-
-
-
-
-
-## Contrôle validité des géométries après l'intersection zone, données
-
-### Cas des GEOMETRY COLLECTION 
-
-Cartographie des GEOMETRY COLLECTION
-
-```{r}
-# type de géométrie, on retient que les polygones / multipolygones
-# elimination des geometries pouvant poser pb
-table(st_geometry_type(inter))
-# 407 sur 275 M géometries....
-anomalie <- inter [st_geometry_type(inter) == "GEOMETRYCOLLECTION",]
-ghostLayer(aggAlsace [aggAlsace$groupe == 3,])
-plot(anomalie$geom, add = TRUE)
-library(units)
-anomalie$aire <- round(drop_units(st_area(anomalie$geom)/10000),0)
-plot(anomalie$aire)
-grosseAnomalie <- anomalie [anomalie$aire > 25,]
-ghostLayer(aggAlsace [aggAlsace$groupe == 3,])
-par(mfrow = c(2,3))
-for (i in 1:5) {
-  plot(grosseAnomalie$geom [i])
-  labelLayer(grosseAnomalie, txt = "aire", cex = 1.2,halo = 3)
-}
-petiteAnomalie <- anomalie [anomalie$aire < 0.5,]
-library(mapview)
-mapview(petiteAnomalie)
-st_write(grosseAnomalie, "../dataS/chrysomele.gpkg", "panomalie", delete_layer = TRUE, quiet = TRUE)
-st_write(petiteAnomalie, "../dataS/chrysomele.gpkg", "ganomalie", delete_layer = TRUE, quiet = TRUE)
-# Ces "geometry collection" ne se visionnent pas donc on les enlève.
-inter <- inter [st_geometry_type(inter) != "GEOMETRYCOLLECTION",]
-```
-
-
-
 
 ### Etude de la distribution de l'aire
 
@@ -544,35 +533,34 @@ abline (h = mean(interSel$aire))
 
 Une distribution très bipolaire... pb
 
-```{r}
-
-mapview(interSel)
-```
-
-
-
 ## Utilisation des fonctions anneeUnique et deuxAns
 
 ```{r}
-res <- anneeUnique(lzone2,1)
-sapply(lzone2, anneeUnique)
+#  Pour pouvoir appliquer la fonction, on fait l'union à nouveau
+# parcours de la zone
+objet <- c(lzone1, lzone2, lzone3, lzone4)
+j <- 4
+lSel <- NULL
+for (j in 1:4) {
+  # parcours de la zone
+  lSel <- objet [j]
+  # parcours de l'année
+  tot <- NULL
+  i <- 1
+  for (i in 1:4) {
+    selUnion <- st_union (lSel [[i]])
+    tot <- c(tot, selUnion)
+  }
+ str(tot)
+  
+    for (i in 1:4){
+    res <- c(res, anneeUnique(lunion,i))
+  }
+}
+
+
+
 ```
-
-
-### Récupération et filtrage de la donnée
-
-
-
-
-#### Vision des géométries
-
-
-
-
-### Eclatement des données par zone, puis par année
-
-TODO Est-ce nécessaire ?
-
 
 ### Nouvelle méthode : R + QGIS
 
@@ -666,9 +654,10 @@ Donc supprimer les polygones trop petits, faire sous Qgis
 
 TODO macro R sous Qgis pour éviter les AR voire python
 
-
+Nettoyage couche chrysomele
 
 ```{r}
-
+library(rgdal)
+ogrListLayers("../dataS/chrysomele.gpkg")
 ```
 

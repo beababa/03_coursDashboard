@@ -398,7 +398,16 @@ deuxAns <- function (num1,num2, lunion) {
   #plot(res2 [indice], main = "retenu")
   res3 <- round(res2 [indice],0)
   return(res3)
-  }
+}
+# Surface cultivé 3 ans et sans mais sur une année unique
+# union des 3 ans et différence avec l'année cultivé
+troisAns <- function (lunion, num) {
+  Y <- lunion [[num]]
+  lreste <- lunion [[-num]]
+  X <- st_union(lreste [[1]], lreste [[2]], lreste [[3]])
+  diff <- st_difference(X,Y)
+  round(st_area(diff)/10000,0)
+}
 
 ```
 
@@ -422,7 +431,7 @@ TODO exploration diplyr plus efficace que le R de base ?
 
 TODO utiliser base postgis ?
 
-### Intersection zones et rpb
+### Intersection zones et rpg
 
 ```{r}
 alsace <- st_read("../dataS/chrysomele.gpkg", "cantonAlsace", quiet = TRUE, stringsAsFactors = FALSE)
@@ -465,8 +474,7 @@ TODO nb de polygones au départ / à l'arrivée
 
 
 ```{r}
-inter <- st_read("../dataS/chrysomele.")
-lzone <- split(inter, inter$groupe)
+inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFactors = TRUE)
 # Nettoyer les géométries, c'est supprimer les geometrycollection
 nettoyerGeom <- function (df) {
   df <-df [st_geometry_type(df) != "GEOMETRYCOLLECTION",]
@@ -483,82 +491,141 @@ eclater <- function (num) {
  df <- lzone[[num]]
  ldf <- split (df, df$an)
 }
+# de 207 334 à 207 018
+inter <- nettoyerGeom(inter)
+summary(inter$geom)
+lzone <- split(inter, inter$groupe)
 # boucle sur les zones
 i <- 1
 noms <- c("lzone1", "lzone2", "lzone3","lzone4")
 for (i in 1:4){
   leclate <- eclater (i)
   # lapply  sur les années
-    lpropre <- lapply(leclate, nettoyerGeom)
-    lpoly <- lapply(lpropre,polygoner)
+    lpoly <- lapply(leclate,polygoner)
     assign(noms [i], lpoly)
   }
-# 149 / 43.2 / 64.1 et 3 M°
-# enregistrement en fichiers pour qgis`
-enregistrer <- function(df,num) {
-  #  on récupère le nom de la zone
-  zone <- substring(deparse(substitute(lzone4$`2015`)),1,6)
-  annee <- substring(deparse(substitute(lzone4$`2015`)),9,12)
-  st_write(df, dsn = "../dataS/chrysomelexport.gpkg", layer = paste0(zone,"_", annee), quiet = TRUE, delete_layer = TRUE)
+# 90 / 27 / 39 et 2 M°
+# enregistrement en fichiers pour qgis
+enregistrer <- function(df, num) {
+  #  on récupère le nom de la zone et l'année sur le df même
+  zone <- substring(deparse(substitute(df)),2,6)
+  st_write(df, dsn = "../dataS/chrysomelexport.gpkg", 
+           layer = paste0(zone,"_", num), quiet = TRUE, delete_layer = TRUE)
 }
+for (i in 1:4){
+enregistrer(lzone1 [[i]],i)
+}
+for (i in 1:4){
+enregistrer(lzone2 [[i]],i)
+}
+for (i in 1:4){
+enregistrer(lzone3 [[i]],i)
+}
+for (i in 1:4){
+enregistrer(lzone4 [[i]],i)
+}
+
 ```
 
-### Etude de la distribution de l'aire
+
+
+### Validation de la transformation de la géométrie
+
+
+Afin de valider le travail de géométrie effectué, on compare les aires moyennes / totales
+avec les premiers résultats d'exploration
+
+
+Reconstitution du fichier inter
 
 ```{r}
-summary(inter$aire)
-# on supprime toutes les aires < 0.5
-inter$aire <- round(drop_units(st_area(inter$geom)/10000),0)
-inter <- inter [inter$aire > 0.5,]
-# 207 334 obs
-# on ne peut pas faire un st_is_valid. trop long
-# sauvegarde pour éviter de refaire les manip trop coûteuse
+inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFactors = TRUE)
+inter <- nettoyerGeom(inter)
+inter$aire <-  st_area(inter)/10000
+# on agrège avec la géométrie
+a <- aggregate(inter[,"aire"], by = list(inter$groupe, inter$an), sum)
+names(a)[1:3] <- c("groupe", "an", "aire")
+st_write(a, "../dataS/chrysomele.gpkg", "agg", delete_layer = TRUE, quiet = TRUE)
+aSansGeom <-  aggregate(inter[,"aire", drop = TRUE], by = list( inter$an), sum)
+aSansGeomMoy <-  aggregate(inter[,"aire", drop = TRUE], by = list(inter$an), mean)
+names(aSansGeom) <- c("an", "aire totale")
+names(aSansGeomMoy) <- c( "an", "aire moyenne")
+aSansGeom [order(aSansGeom$an),]
+summary(a)
+tab <- merge(aSansGeom [,c("an", "aire totale")], aSansGeomMoy [, c("an","aire moyenne")], by = "an")
+library(units)
+tab <- drop_units(tab)
+knitr::kable (tab)
+# Nouvel enregistrement d'une table inter propre
 st_write(inter, "../dataS/chrysomele.gpkg", "inter", quiet = TRUE, delete_layer = TRUE)
 ```
 
-```{r, eval=TRUE}
-inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFactors = FALSE)
-# 274 083 obs, tous en multipolygone
-# verif
-summary(inter)
-par(mfrow = c(1,2))
-barplot(sort(inter$aire))
-abline (h = mean(inter$aire))
-# Un minimum à 500 pour 2015 et 2018, mais pour 2016 2017 on le monte à 10 000 (1 ha)
-interSel <- inter [inter$aire > 1,]
-barplot(sort(interSel$aire))
-abline (h = mean(interSel$aire))
-# 144 034 obs
+
+On a gagné 1/2 hac de moyenne mais la surface a disparu...
+
+
+### Proposition : grossir légèrement pour avoir des polygones adjacents
+
+```{r}
+compter <- function (liste) {
+  an <- c("2015","2016","2017","2018")
+tab <-  NULL
+for (i in 1:4) {
+  lav <- length(liste [[i]])
+  test <- st_buffer(liste [[i]], 1)
+  test <- polygoner(test)
+  lap <- length(test)
+  l <- c(lav, lap, round(((lav-lap )/lav)*100,0))
+  tab <- rbind(tab, l)
+}
+rownames(tab) <- an
+colnames(tab ) <- c("Avant", "Après", "pct")
+return(tab)
+}
+df1 <- compter(lzone1)
+df2 <- compter(lzone2)
+df3 <- compter(lzone3)
+df4 <- compter(lzone4)
+df <- cbind(df1, df2, df3, df4)
+knitr::kable(df)
 ```
 
-Une distribution très bipolaire... pb
+Cela permet de simplifier la géométrie. Les données seront plus faciles à manipuler.
+
+
+```{r}
+inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFactors = TRUE)
+inter <- st_buffer(inter,1)
+lzone <- split(inter, inter$groupe)
+v <- seq(1:4)
+l <- lapply(v,eclater)
+lunion1 <- lapply(l[[1]], st_union)
+lunion2 <- lapply(l[[2]], st_union)
+lunion3 <- lapply(l[[3]], st_union)
+lunion4 <- lapply(l[[4]], st_union)
+#54 / 17 / 23 / 1.4
+l <- list(lunion1,lunion2, lunion3, lunion4)
+```
+
+
+
 
 ## Utilisation des fonctions anneeUnique et deuxAns
 
 ```{r}
-#  Pour pouvoir appliquer la fonction, on fait l'union à nouveau
-# parcours de la zone
-objet <- c(lzone1, lzone2, lzone3, lzone4)
+TOT <- NULL
 j <- 4
-lSel <- NULL
 for (j in 1:4) {
-  # parcours de la zone
-  lSel <- objet [j]
-  # parcours de l'année
+  lunionSel <- l [[j]]
   tot <- NULL
-  i <- 1
   for (i in 1:4) {
-    selUnion <- st_union (lSel [[i]])
-    tot <- c(tot, selUnion)
+    res <- anneeUnique(lunionSel, i)
+    tot <- cbind(tot, res)
   }
- str(tot)
-  
-    for (i in 1:4){
-    res <- c(res, anneeUnique(lunion,i))
-  }
+  TOT <- rbind(TOT, tot)
 }
 
-
+TOT
 
 ```
 
@@ -589,13 +656,6 @@ enregistrerAnneeUnique <- function(df, num) {
 ```
 
 
-Essai de nettoyage de la donnée
-```{r}
-anomalie <- st_is_valid(zone1, reason = TRUE)
-table(anomalie, useNA = "always")
-sf_extSoftVersion()["lwgeom"]
-# inutile de faire st_make_valid, lwgeom n'existe pas
-```
 
 
 Enregistrement des données pour Qgis

@@ -490,35 +490,30 @@ st_difference
   
 TODO préparer mail CNRS pour voir si solution
 
-### Nouvelle méthode : R + QGIS
+# Nouvelle méthode : R + QGIS
 
 On enregistre les fichiers nécessaires sans utiliser et on fait la différence sous QGIS.
 Puis on importe les résultats dans R a afin de faire les tableaux.
 Du coup, on transforme les 3 fonctions (la première avec les st_intersection rend un résultat)
+Au lieu d'utiliser les listes, il est plus simple de repartir de la base.
 
+
+## annee unique
 
 ```{r}
-# on repart des enregistrements
-for (i in 1:4) {
-	assign(paste0("zone_",i), st_read ("../dataS/chrysomelexport.gpkg", paste0("zone2_",i), quiet = TRUE))
-	}
-l <- list(zone_1, zone_2, zone_3, zone_4)
- num <- 1
+df <- zone2
+num <- 1
 # plus simple de repartir d'inter !
 enregistrerAnneeUnique <- function(df, num) {
-  zone <- deparse(substitute(df))
-  print(zone)
-  nomAn <- c("2015","2016","2017", "2018")
-  X <- df [df$an == nomAn [num], ]
-  Y <- df [df$an != nomAn [num],]
-  # L'union peut se faire sous R quand même non ?
-  X <- st_union(X)
-  Y <- st_union(Y)
-  #res <- st_difference(Xunion,Yunion )
+  # récupération du nom pour nommer le fichier, df reste l'objet
+  nomZone <-  df$groupe [1]
+  an <-  c("2015", "2016","2017","2018")
+  X <- df [df$an == an [num] , ]
+  Y <- df [df$an !=  an [num],]
   # obligation d'enregistrer dans des gpkg sinon qgis ne les voit pas
-  nomgpkg <- paste0("../dataS/chrysomelexport",zone,".gpkg")
-  st_write(X, dsn = nomgpkg, layer = paste0(zone,"_", nomAn[num]), quiet = TRUE, delete_layer = TRUE)
-  st_write(Y, dsn = nomgpkg, layer = paste0(zone,"_autres_", nomAn[num]), quiet = TRUE, delete_layer = TRUE)
+  nomgpkg <- paste0("../dataS/chrysomelexport",nomZone,".gpkg")
+  st_write(X, dsn = nomgpkg, layer = paste0(nomZone,"_", an[num]), quiet = TRUE, delete_layer = TRUE)
+  st_write(Y, dsn = nomgpkg, layer = paste0(nomZone,"_autres_", an [num]), quiet = TRUE, delete_layer = TRUE)
 }
 ```
 
@@ -533,12 +528,11 @@ Pour chaque année, deux couches, celle de l'année X et celle de toutes les ann
 #boucle pour les zones
 i <- 1
 for (i in 1:4) {
-  assign(paste0("zone",i), inter [inter$groupe == i,] )
-  nom <- paste0("zone",i)
+  df <-  inter [inter$groupe == i,] 
   j <- 1
     # boucle pour les années
   for (j in 1:4) {
-    enregistrerAnneeUnique(nom, j)
+    enregistrerAnneeUnique(df, j)
   }
 }
 ```
@@ -590,6 +584,8 @@ ogrListLayers("../dataS/chrysomele.gpkg")
 ```
 
 
+gestion d'erreur
+
 ```{r}
 print(try(log("a"), TRUE))
 log("a")
@@ -597,5 +593,158 @@ res <- lapply (c(1, "a",2), function (i) try(log(i), TRUE) )
 res
 ```
 
+## Deux ans
 
+
+```{r, eval=TRUE}
+enregistrerDeuxAns <- function (df) {
+  nomZone <-  df$groupe [1]
+  print(nomZone)
+  # choix des paires dans 4 elements
+  nb <- 2
+  els <- seq (1:4)
+  i <- 2
+  for (i in 2:4) {
+    paire <- c(1, i)
+    nomPaire <- paste0(paire[1], paire[2])
+    print (nomPaire)
+    an <-  c("2015", "2016", "2017", "2018")
+    X <- df   [df$an %in% an[paire], ]
+    Y <- df [!df$an %in% an[paire], ]
+    nomgpkg <-
+      paste0("../dataS/chrysomelexportDeux", nomZone, ".gpkg")
+    st_write(
+      X,
+      dsn = nomgpkg,
+      layer = paste0(nomZone, "_", nomPaire),
+      quiet = TRUE,
+      delete_layer = TRUE
+    )
+    st_write(
+      Y,
+      dsn = nomgpkg,
+      layer = paste0(nomZone, "_autres_", nomPaire),
+      quiet = TRUE,
+      delete_layer = TRUE
+    )
+  }
+  
+}
+
+
+# sur chaque zone
+for (i in 1:4) {
+  enregistrerDeuxAns(inter [inter$groupe == i,])
+}
+
+```
+
+
+## Trois ans
+
+```{r}
+enregistrerTroisAns <- function (df) {
+  nomZone <-  df$groupe [1]
+  print(nomZone)
+  # choix des paires dans 4 elements
+  els <- seq (1:4)
+  i <- 1
+  for (i in 1:4) {
+    nbY <- i 
+    nbX <- els [-i]
+    nomX <- paste0(nbX[1],nbX[2], nbX[3])
+    an <-  c("2015", "2016", "2017", "2018")
+    an [nbX]
+    X <- df   [df$an %in% an[nbX], ]
+    Y <- df [df$an %in% an[nbY], ]
+    nomgpkg <-
+      paste0("../dataS/chrysomelexportTrois", nomZone, ".gpkg")
+    st_write(
+      X,
+      dsn = nomgpkg,
+      layer = paste0(nomZone, "_", nomX),
+      quiet = TRUE,
+      delete_layer = TRUE
+    )
+    st_write(
+      Y,
+      dsn = nomgpkg,
+      layer = paste0(nomZone, "_autres_", nomX),
+      quiet = TRUE,
+      delete_layer = TRUE
+    )
+  }
+  
+}
+
+# sur chaque zone
+for (i in 1:4) {
+  enregistrerTroisAns(inter [inter$groupe == i,])
+  }
+```
+
+
+# Extraction 3 ans
+
+```{r, eval = TRUE}
+total <- NULL
+totalZone <- NULL
+noms <- NULL
+i <- 1
+#parcours des zones
+for (i in 1:4) {
+ print(i)
+  # parcours des années
+  for (j in c(123,124,134,234)){
+  nomfic <- paste0("../dataS/chrysomelediff", i,"_",j, ".gpkg")
+  nomcouche <- paste0("chrysomelediff", i,"_",j)
+  diff <-
+    st_read(nomfic,
+            layer = nomcouche,
+            quiet = TRUE)
+    total <- rbind(total,sum(st_area(diff)))
+  }
+   colnames(total) <- i
+   total <- round(total/10000,0)
+   totalZone <-  cbind(totalZone, total)
+   total <- NULL
+}
+rownames(totalZone) <- c(123,124,134,234)
+
+# total des différences années et autres années (aires en ha)
+totalZoneTrois <- totalZone
+```
+
+# Extraction 2 ans
+
+
+
+```{r, eval = TRUE}
+total <- NULL
+totalZone <- NULL
+noms <- NULL
+i <- 1
+#parcours des zones
+for (i in 1:4) {
+ print(i)
+  # parcours des années
+  for (j in c(12,13,14)){
+  nomfic <- paste0("../dataS/chrysomelediff", i,"_",j, ".gpkg")
+  nomcouche <- paste0("chrysomelediff", i,"_",j)
+  diff <-
+    st_read(nomfic,
+            layer = nomcouche,
+            quiet = TRUE)
+    total <- rbind(total,sum(st_area(diff)))
+  }
+   colnames(total) <- i
+   total <- round(total/10000,0)
+   totalZone <-  cbind(totalZone, total)
+   total <- NULL
+}
+rownames(totalZone) <- c(12,13,14)
+
+# total des différences années et autres années (aires en ha)
+totalZonedeux <- totalZone
+```
 

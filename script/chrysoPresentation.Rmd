@@ -217,7 +217,7 @@ TODO vérfier par rapport aux aires totales
 
 ```{r}
 inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFactors = FALSE)
-# Nettoyer les géométries, c'est supprimer les geometrycollection, n'avoir que des polygones.
+# 207 734 Nettoyer les géométries, c'est supprimer les geometrycollection, n'avoir que des polygones.
 nettoyerGeom <- function (df) {
   df <-df [st_geometry_type(df) != "GEOMETRYCOLLECTION",]
   dfvalid <- st_make_valid(df)
@@ -340,7 +340,7 @@ On crée une fonction ayant pour paramètre l'année de la demande.
 lunion <- lzone2
 num <- 1
 anneeUnique <- function(lunion, num) {
-  X <- st_union(lunion [[num]] ) %>% st_set_precision(1000000) %>% st_make_valid()
+  X <- st_union(lunion [[num]] ) %>% st_set_precision(10000) %>% st_make_valid()
   lreste <- lunion
   lreste [[num]] <- NULL
   # on unit les 3 années. mais le st_union fait produit cartésien. il faut d'abord
@@ -372,8 +372,14 @@ for (i in 1:4) {
 }
 toc()
 tic()
-res <- sapply(1:4, function(i){anneeUnique(lzone4,i)})
+res <- sapply(1:1, function(i){anneeUnique(lzone1,i)})
 toc()
+# 581 s , 5 600s
+res
+reszone2 <- c(2044, 1054  ,927, 1135)
+reszone3 <- c(2183, 1731, 1532, 1387)
+# pour la 1 14558 erreur, on enlève deux zéros sur la précision
+
 ```
 
 

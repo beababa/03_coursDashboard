@@ -117,8 +117,11 @@ knitr::kable(tab)
 
 ##### Taille moyenne des parcelles agricole
 
+Sur l'ensemble du rpg téléchargé, 972 M obsb
+en liste 929 M°, le mais 259 M°
+
 ```{r, eval = TRUE}
-# rpg <- st_read("../dataS/chrysomele.gpkg", "rpg", quiet = TRUE, stringsAsFactors = FALSE)
+rpg <- st_read("../dataS/chrysomele.gpkg", "rpg", quiet = TRUE, stringsAsFactors = FALSE)
 calcul <- function(data) {
   aire <- (sum(st_area(data))/10000)/10000
   # résultat en milliers d'ha
@@ -193,19 +196,29 @@ labelLayer(aggAlsace, txt = "groupe", halo = 2 )
 layoutLayer(title = "Zones d'étude Alsace")
 dev.off()
 # intersection très couteuse. géométrie du rpg nécessite de forcer la validité
+tic()
 inter <- st_intersection(st_make_valid(rpg), aggAlsace)
+toc()
 # modification du nom de la 4e zone
 table(inter$groupe)
 inter$groupe [inter$groupe == "côté Lorrain"] <- 4
 # On travaillera à partir de ce fichier désormais.
 st_write(inter, "../dataS/chrysomele.gpkg", "inter", quiet = TRUE, delete_layer = TRUE)
-#  275 985
+#  275 985 au lieu de 275 234, ce sont les parcelles sur les frontières.
 ```
 
 ![](../img/alsace.png)
 
 TODO Attention zone Strasbourg absente ?
 
+
+### Cartographie des parcelles coupées 
+
+```{r}
+
+
+
+```
 
 
 ### Nettoyage de la donnée spatiale

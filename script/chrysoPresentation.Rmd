@@ -40,9 +40,9 @@ Remarque : la démarche
 ## Librairies et répertoire
 
 ```{r}
+library(lwgeom) # pour la validation de la géométrie
 library(sf)
 # Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1
-library(lwgeom) # pour la validation de la géométrie
 library(cartography)
 library(units) # pour le pb des unités des aires. on supprime.
 library(tictoc) # mesure des opérations géométriques st_union
@@ -259,7 +259,9 @@ eclater <- function (num) {
  ldf <- split (df, df$an)
 }
 # de 207 334 à 207 018
+# 275 578 !
 inter <- nettoyerGeom(inter)
+
 summary(inter$geom)
 lzone <- split(inter, inter$groupe)
 # boucle sur les zones
@@ -517,18 +519,22 @@ Du coup, on transforme les 3 fonctions (la première avec les st_intersection re
 Au lieu d'utiliser les listes, il est plus simple de repartir de la base.
 
 
-## annee unique
+## Annee unique
 
 ```{r}
-df <- zone2
-num <- 1
+df <- inter [inter$groupe == 4,]
+str(df)
+table(df$groupe)
+num <- 4
 # plus simple de repartir d'inter !
 enregistrerAnneeUnique <- function(df, num) {
   # récupération du nom pour nommer le fichier, df reste l'objet
-  nomZone <-  df$groupe [1]
   an <-  c("2015", "2016","2017","2018")
   X <- df [df$an == an [num] , ]
   Y <- df [df$an !=  an [num],]
+  nomZone <-  X$groupe [1]
+  X <- st_union(X) %>% st_set_precision(1000000) %>% st_make_valid()
+  Y <- st_union(Y) %>% st_set_precision(1000000) %>% st_make_valid()
   # obligation d'enregistrer dans des gpkg sinon qgis ne les voit pas
   nomgpkg <- paste0("../dataS/chrysomelexport",nomZone,".gpkg")
   st_write(X, dsn = nomgpkg, layer = paste0(nomZone,"_", an[num]), quiet = TRUE, delete_layer = TRUE)
@@ -579,38 +585,6 @@ total
 
 TODO 2016 et 17 ne passent pas sous Qgis, sans doute pour un pb de polygone trop petit provoquant une 
 erreur de topologie. 
-
-![](../img/qgisdiffpb.png)
-
-
-....et l'explication
-
-
-![](../img/cause.png)
-
-reférence : https://github.com/Turfjs/turf/issues/1575
-
-Donc supprimer les polygones trop petits, faire sous Qgis
-... Et vérifier que cela ne passe pas sous R (voir st_make_valid, st_valid et st_geometry_type)
-
-TODO macro R sous Qgis pour éviter les AR voire python
-
-Nettoyage couche chrysomele
-
-```{r}
-library(rgdal)
-ogrListLayers("../dataS/chrysomele.gpkg")
-```
-
-
-gestion d'erreur
-
-```{r}
-print(try(log("a"), TRUE))
-log("a")
-res <- lapply (c(1, "a",2), function (i) try(log(i), TRUE) )
-res
-```
 
 ## Deux ans
 

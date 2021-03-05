@@ -46,6 +46,7 @@ library(lwgeom) # pour la validation de la géométrie
 library(cartography)
 library(units) # pour le pb des unités des aires. on supprime.
 library(tictoc) # mesure des opérations géométriques st_union
+library(mapview)
 ```
 
 ## Données
@@ -117,8 +118,11 @@ knitr::kable(tab)
 
 ##### Taille moyenne des parcelles agricole
 
+Sur l'ensemble du rpg téléchargé, 972 M obsb
+en liste 929 M°, le mais 259 M°
+
 ```{r, eval = TRUE}
-# rpg <- st_read("../dataS/chrysomele.gpkg", "rpg", quiet = TRUE, stringsAsFactors = FALSE)
+rpg <- st_read("../dataS/chrysomele.gpkg", "rpg", quiet = TRUE, stringsAsFactors = FALSE)
 calcul <- function(data) {
   aire <- (sum(st_area(data))/10000)/10000
   # résultat en milliers d'ha
@@ -192,20 +196,62 @@ plot(aggAlsace$geometry, col = "antiquewhite1", border = "grey", add= TRUE)
 labelLayer(aggAlsace, txt = "groupe", halo = 2 )
 layoutLayer(title = "Zones d'étude Alsace")
 dev.off()
+# afin d'identifier les géométries, on rajoute un fid sur le rpg
+rpg$id <- seq(1, nrow(rpg))
 # intersection très couteuse. géométrie du rpg nécessite de forcer la validité
+tic()
 inter <- st_intersection(st_make_valid(rpg), aggAlsace)
+toc()
 # modification du nom de la 4e zone
 table(inter$groupe)
 inter$groupe [inter$groupe == "côté Lorrain"] <- 4
 # On travaillera à partir de ce fichier désormais.
 st_write(inter, "../dataS/chrysomele.gpkg", "inter", quiet = TRUE, delete_layer = TRUE)
-#  275 985
+#  275 985 au lieu de 275 234, ce sont les parcelles sur les frontières.
 ```
 
 ![](../img/alsace.png)
 
 TODO Attention zone Strasbourg absente ?
 
+
+### Cartographie des parcelles coupées 
+
+L'enjeu est ici de détecter de possibles problèmes de géométries.
+
+```{r}
+inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE)
+tab <- table(inter$id, useNA = "always")
+table(tab)
+# c'est quoi ce zéro. et ourquoi chiffre impaire pour les doublons ?
+abb <- names (tab) [is.null(tab) ]
+nomSplit <- names(tab)[tab>1]
+parcelleSplit <- inter [inter$id %in% nomSplit,]
+png("../img/idsplit.png")
+par(mar=c(0,0,1.2,0))
+ghostLayer(aggAlsace, bg = "lightblue1")
+plot(fond, col = "antiquewhite3", border = NA, add = TRUE)
+plot(dpt$geom, add = TRUE, col = "antiquewhite2", border = NA)
+plot(aggAlsace$geometry, col = "antiquewhite1", border = "grey", add= TRUE)
+plot(parcelleSplit, add = TRUE)
+layoutLayer(title = paste0(
+                    length(nomSplit)/2,
+                   " parcelles intersectées sur ", 
+                   length(inter$id), " _  aire moyenne : ", 
+                   round(mean(st_area(parcelleSplit))/10000,0)
+                   )
+            )
+dev.off()
+st_write(parcelleSplit,"../dataS/chrysomele.gpkg", "parcelleSplit", delete_layer=TRUE, quiet = TRUE)
+plot(sort(st_area(parcelleSplit)), ylim = c(0, 50000))
+abline(5000,0)
+```
+
+![](../img/idsplit.png)
+
+
+
+### ... Et si on prenait plutôt les centroïdes
 
 
 ### Nettoyage de la donnée spatiale
@@ -217,7 +263,7 @@ TODO vérfier par rapport aux aires totales
 
 ```{r}
 inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFactors = FALSE)
-# Nettoyer les géométries, c'est supprimer les geometrycollection, n'avoir que des polygones.
+# 207 734 Nettoyer les géométries, c'est supprimer les geometrycollection, n'avoir que des polygones.
 nettoyerGeom <- function (df) {
   df <-df [st_geometry_type(df) != "GEOMETRYCOLLECTION",]
   dfvalid <- st_make_valid(df)
@@ -338,7 +384,7 @@ On crée une fonction ayant pour paramètre l'année de la demande.
 lunion <- lzone2
 num <- 1
 anneeUnique <- function(lunion, num) {
-  X <- st_union(lunion [[num]] ) %>% st_set_precision(1000000) %>% st_make_valid()
+  X <- st_union(lunion [[num]] ) %>% st_set_precision(10000) %>% st_make_valid()
   lreste <- lunion
   lreste [[num]] <- NULL
   # on unit les 3 années. mais le st_union fait produit cartésien. il faut d'abord
@@ -370,8 +416,14 @@ for (i in 1:4) {
 }
 toc()
 tic()
-res <- sapply(1:4, function(i){anneeUnique(lzone4,i)})
+res <- sapply(1:1, function(i){anneeUnique(lzone1,i)})
 toc()
+# 581 s , 5 600s
+res
+reszone2 <- c(2044, 1054  ,927, 1135)
+reszone3 <- c(2183, 1731, 1532, 1387)
+# pour la 1 14558 erreur, on enlève deux zéros sur la précision
+
 ```
 
 
@@ -747,4 +799,3 @@ rownames(totalZone) <- c(12,13,14)
 # total des différences années et autres années (aires en ha)
 totalZonedeux <- totalZone
 ```
-

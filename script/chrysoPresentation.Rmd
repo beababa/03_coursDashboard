@@ -183,7 +183,7 @@ Il faut donc intersecter la zone d'étude et le rpg.
 ```{r}
 alsace <- st_read("../dataS/chrysomele.gpkg", "cantonAlsace", quiet = TRUE, stringsAsFactors = FALSE)
 rpg <- st_read("../dataS/chrysomele.gpkg", "rpgMais", quiet = TRUE, stringsAsFactors = FALSE)
-# 275 324 obs
+# 275 234 obs
 # agrégation par zones
 aggAlsace <- aggregate(alsace [,c("zone"), drop = FALSE], by = list (alsace$zone), length)
 names(aggAlsace)[1:2] <- c("groupe", "nb")
@@ -237,8 +237,8 @@ plot(parcelleSplit, add = TRUE)
 layoutLayer(title = paste0(
                     length(nomSplit)/2,
                    " parcelles intersectées sur ", 
-                   length(inter$id), " _  aire moyenne : ", 
-                   round(mean(st_area(parcelleSplit))/10000,0)
+                   length(inter$id), " -  aire moyenne : ", 
+                   round(mean(st_area(parcelleSplit))/10000,0, "ha")
                    )
             )
 dev.off()
@@ -248,10 +248,6 @@ abline(5000,0)
 ```
 
 ![](../img/idsplit.png)
-
-
-
-### ... Et si on prenait plutôt les centroïdes
 
 
 ### Nettoyage de la donnée spatiale
@@ -264,6 +260,7 @@ TODO vérfier par rapport aux aires totales
 ```{r}
 inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFactors = FALSE)
 # 207 734 Nettoyer les géométries, c'est supprimer les geometrycollection, n'avoir que des polygones.
+# 275 985
 nettoyerGeom <- function (df) {
   df <-df [st_geometry_type(df) != "GEOMETRYCOLLECTION",]
   dfvalid <- st_make_valid(df)
@@ -279,7 +276,8 @@ supprimer <- function (df) {
   df <- df [df$aire > bks [2]/2,]
   }
 
-# Fusionner les parcelles adjacentes : union de tous les polygones, puis éclatement
+# Fusionner les parcelles adjacentes : union de tous les polygones, puis éclatement /
+# à n'utiliser qu'après avoir extrait les couches, sinon pb années
 polygoner <- function(df) {
   dfunion <- st_union(df)
   dfpoly <- st_cast(dfunion, "POLYGON")
@@ -292,6 +290,7 @@ eclater <- function (num) {
  ldf <- split (df, df$an)
 }
 # de 207 334 à 207 018
+# 275578
 inter <- nettoyerGeom(inter)
 summary(inter$geom)
 lzone <- split(inter, inter$groupe)
@@ -304,6 +303,8 @@ for (i in 1:4){
 }
 
 # 90 / 27 / 39 et 2 M°
+# 115 / 34 50 2.6
+# ces couches sont plus propres ?
 # enregistrement en fichiers pour qgis
 enregistrer <- function(df, num) {
   #  on récupère le nom de la zone et l'année sur le df même
@@ -333,8 +334,8 @@ Allègement pour fin de test
 
 ```{r}
 leger2 <- lapply(lzone2, supprimer)
-# 24 M°OK
-# 17 M° OK
+# 34 M°OK
+# 27 M° OK
 ```
 
 
@@ -353,7 +354,7 @@ Sur 4 ans, les carreaux maïs et rien d'autre. C'est l'intersection de toutes le
 Fonction récursive.
 
 ```{r}
-uniquementCulture <- function(l) {
+quatreAns <- function(l) {
   f <- length (l)
   i <- 2
   prem <- st_intersection(l[[i-1]], l [[i]])
@@ -365,26 +366,30 @@ uniquementCulture <- function(l) {
   return(aire)
 }
 # test sur petite zone
-res <- UniquementCulture(lzone4)
+res <- quatreAns(lzone4)
 library("units")
 res <-  drop_units(res)
 # test sur la liste imbrique
-sapply(limbrique,uniquementCulture)
-# stockage du résultat
-maisUnique <- c(41062.10 , 8854.05 , 8628.70 ,  158.15)
+tic()
+maisUnique <- sapply(limbrique, quatreAns)
+toc()
+# stockage du résultat 34 s 
 ```
+
+Les intersections fonctionnent, même sur des gros fichiers.
 
 
 ## Uniquement mais sur une année
 
-
-On crée une fonction ayant pour paramètre l'année de la demande.
+On crée une fonction ayant pour paramètre la zone concernée et l'année de la demande.
+On reste d'abord sur la structure de liste.
 
 ```{r, eval=TRUE}
 lunion <- lzone2
 num <- 1
 anneeUnique <- function(lunion, num) {
-  X <- st_union(lunion [[num]] ) %>% st_set_precision(10000) %>% st_make_valid()
+  X <- st_union(lunion [[num]] ) %>% st_set_precision(100000) %>% st_make_valid()
+  # la précision génère des erreurs topologiques
   lreste <- lunion
   lreste [[num]] <- NULL
   # on unit les 3 années. mais le st_union fait produit cartésien. il faut d'abord
@@ -397,7 +402,7 @@ anneeUnique <- function(lunion, num) {
   # objet sf et crs
   tot <- st_as_sf(st_as_sfc(tot))
   st_crs(tot) <- 2154
-  Y <- st_union(tot) %>% st_set_precision(1000000) %>% st_make_valid()
+  Y <- st_union(tot) %>% st_set_precision(100000) %>% st_make_valid()
   res <- st_difference(X, Y)
   res <-round(st_area(res)/10000,0)
   res <- drop_units(res)
@@ -415,57 +420,22 @@ for (i in 1:4) {
   tot <- c(tot,res)
 }
 toc()
+# 11 s
+# l'appel à la fonction totale serait
 tic()
-res <- sapply(1:1, function(i){anneeUnique(lzone1,i)})
+res <- sapply(1:4, function(i){anneeUnique(lzone2,i)})
 toc()
 # 581 s , 5 600s
-res
+# 34.4 M0 et 50 M°
 reszone2 <- c(2044, 1054  ,927, 1135)
 reszone3 <- c(2183, 1731, 1532, 1387)
-# pour la 1 14558 erreur, on enlève deux zéros sur la précision
+# pour la 1 14558 erreur, on met la précision très bas - 100, erreur quand meme
+# allègement des données nécessaires.
 
 ```
 
 
-parallélisation
 
-```{r, eval=TRUE}
-
-library(parallel)
-detectCores()
-cl <- makeCluster(4)
-
-
-
-result <- parSapply(cl, 1:4, function(x)x+2)
-result
-
-tic()
-result <- parSapply(cl,1:4, function(i){
-  lunion <- lzone4
-  X <- st_union(lunion [[num]] ) %>% st_set_precision(1000000) %>% st_make_valid()
-  lreste <- lunion
-  lreste [[num]] <- NULL
-  # on unit les 3 années. mais le st_union fait produit cartésien. il faut d'abord
-  # créer une seule table
-  tot <- NULL
-  for (i in 1:3) {
-    g <- lreste[[i]][, 1, drop = TRUE]
-    tot <- c(tot,g)
-  }
-  # objet sf et crs
-  tot <- st_as_sf(st_as_sfc(tot))
-  st_crs(tot) <- 2154
-  Y <- st_union(tot) %>% st_set_precision(1000000) %>% st_make_valid()
-  res <- st_difference(X, Y)
-  res <-round(st_area(res)/10000,0)
-  res <- drop_units(res)
-})
-stopCluster(cl)
-toc()
-
-
-```
 
 ```{r}
 
@@ -495,53 +465,6 @@ toc()
 ```
 
 
-## Deux ans sur les quatre ans
-
-Intersection des années et différence entre les deux géométries créées
-Directement en fonction
-
-```{r, eval=TRUE}
-deuxAns <- function (num1,num2, lunion) {
-  X <- st_union(lunion [[num1]], lunion [[num2]])
-  lreste <-lunion [c(-num1,-num2)]
-  Y <- st_union (lreste [[1]], lreste [[2]])
-  # Toutes les géométries de X qui ne sont pas dans Y
-  res <- 
-    st_cast(st_difference(X,Y ), "MULTIPOLYGON")
-  res2 <- sapply(st_as_sf(res), st_area)
-  indice <- which(round(res2,0) > 500)
-  #plot(res2 [indice], main = "retenu")
-  res3 <- round(res2 [indice],0)
-  return(res3)
-}
-```
-
-
-
-## trois ans sur les quatre ans
-
- Surface cultivé 3 ans et sans mais sur une année unique
-union des 3 ans et différence avec l'année cultivé
-
-
-```{r, eval=TRUE}
-troisAns <- function (lunion, num) {
-  Y <- lunion [[num]]
-  lreste <- lunion [[-num]]
-  X <- st_union(lreste [[1]], lreste [[2]], lreste [[3]])
-  diff <- st_difference(X,Y)
-  round(st_area(diff)/10000,0)
-}
-
-```
-
-Les fonctions ne peuvent utiliser de gros jeux de données, le pb identifié est le
-st_difference 
-  - nécessité de faire un st_union (le poids des fichiers +++)
-  - opération lourde
-  
-TODO préparer mail CNRS pour voir si solution
-
 # Nouvelle méthode : R + QGIS
 
 On enregistre les fichiers nécessaires sans utiliser et on fait la différence sous QGIS.
@@ -558,10 +481,10 @@ num <- 1
 # plus simple de repartir d'inter !
 enregistrerAnneeUnique <- function(df, num) {
   # récupération du nom pour nommer le fichier, df reste l'objet
-  nomZone <-  df$groupe [1]
   an <-  c("2015", "2016","2017","2018")
   X <- df [df$an == an [num] , ]
   Y <- df [df$an !=  an [num],]
+  nomZone <-  df$groupe [1]
   # obligation d'enregistrer dans des gpkg sinon qgis ne les voit pas
   nomgpkg <- paste0("../dataS/chrysomelexport",nomZone,".gpkg")
   st_write(X, dsn = nomgpkg, layer = paste0(nomZone,"_", an[num]), quiet = TRUE, delete_layer = TRUE)
@@ -610,40 +533,8 @@ total <- round(total/10000,0)
 total
 ```
 
-TODO 2016 et 17 ne passent pas sous Qgis, sans doute pour un pb de polygone trop petit provoquant une 
-erreur de topologie. 
-
-![](../img/qgisdiffpb.png)
 
 
-....et l'explication
-
-
-![](../img/cause.png)
-
-reférence : https://github.com/Turfjs/turf/issues/1575
-
-Donc supprimer les polygones trop petits, faire sous Qgis
-... Et vérifier que cela ne passe pas sous R (voir st_make_valid, st_valid et st_geometry_type)
-
-TODO macro R sous Qgis pour éviter les AR voire python
-
-Nettoyage couche chrysomele
-
-```{r}
-library(rgdal)
-ogrListLayers("../dataS/chrysomele.gpkg")
-```
-
-
-gestion d'erreur
-
-```{r}
-print(try(log("a"), TRUE))
-log("a")
-res <- lapply (c(1, "a",2), function (i) try(log(i), TRUE) )
-res
-```
 
 ## Deux ans
 

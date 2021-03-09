@@ -1,0 +1,358 @@
+---
+title: "Chrysomele"
+author: "B. Maranget"
+date: "25/01/2021"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+    toc_float: true
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+# Passer la valeur suivante à TRUE pour reproduire les extractions.
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+# Cadre
+
+## Objet
+
+Paramètres à estimer à partir fichiers rpg sur plusieurs années pour 4 zones de l'Alsace
+
+- taille moyenne parcelles
+- SAU moyenne
+- surface moyenne mais
+- idem mais en monoculture
+- idem mais 1e fois
+
+difficulté : identifiant différent
+
+
+Remarque : la démarche
+
+## Librairies et répertoire
+
+```{r}
+library(sf)
+# Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1
+library(lwgeom) # pour la validation de la géométrie
+library(cartography)
+library(units) # pour le pb des unités des aires. on supprime.
+library(tictoc) # mesure des opérations géométriques st_union
+library(mapview)
+```
+
+## Données
+
+### Générales
+
+```{r}
+# communes sans la corse
+commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
+dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
+canton2015 <- st_read("../dataE/00_ADMIN/canton2015/CANTON.SHP")
+fond <- st_read("../dataE/00_ADMIN/nuts.gpkg", "pays", quiet = TRUE, stringsAsFactors =F)
+```
+
+
+
+
+
+
+## Nettoyage de la donnée spatiale
+
+Le but est d'obtenir uniquement des polygones afin d'éviter les erreurs topologiques dans les fonctions d'intersection.
+
+TODO vérfier par rapport aux aires totales
+
+
+```{r}
+inter <- st_read("../dataS/chrysomele.gpkg", "inter", quiet = TRUE, stringsAsFactors = FALSE)
+# 207 734 Nettoyer les géométries, c'est supprimer les geometrycollection, n'avoir que des polygones.
+# 275 985
+nettoyerGeom <- function (df) {
+  df <-df [st_geometry_type(df) != "GEOMETRYCOLLECTION",]
+  dfvalid <- st_make_valid(df)
+  dfpoly <- st_cast(dfvalid, "POLYGON")
+}
+
+# Supprimer les petits polygones, ceux qui sont milieu 1e classe
+# à n'utiliser que si pb topologique... et même la
+supprimer <- function (df) {
+  df <- st_as_sf(df)
+  df$aire <- drop_units(st_area(df) /10000)
+  bks <- getBreaks(df$aire, nclass = 8, method ="fisher")
+  df <- df [df$aire > bks [2]/2,]
+  }
+
+# Fusionner les parcelles adjacentes : union de tous les polygones, puis éclatement /
+# à n'utiliser qu'après avoir extrait les couches, sinon pb années
+polygoner <- function(df) {
+  dfunion <- st_union(df)
+  dfpoly <- st_cast(dfunion, "POLYGON")
+}
+
+
+# Eclater les zones et les années, car on va travailler sur la géométrie.
+eclater <- function (num) {
+ df <- lzone[[num]]
+ ldf <- split (df, df$an)
+}
+# de 207 334 à 207 018
+# 275578
+inter <- nettoyerGeom(inter)
+summary(inter$geom)
+lzone <- split(inter, inter$groupe)
+# boucle sur les zones
+i <- 1
+noms <- c("lzone1", "lzone2", "lzone3","lzone4")
+for (i in 1:4){
+  # on imbrique et on nomme
+    assign(noms [i], lapply(eclater (i),polygoner))
+}
+
+# 90 / 27 / 39 et 2 M°
+# 115 / 34 50 2.6
+# ces couches sont plus propres ?
+
+# pour utiliser lapply, on imbrique les listes de zone dans une liste (cet objet
+# est différent du lzone)
+limbrique <- list(lzone1, lzone2, lzone3, lzone4)
+```
+
+
+Allègement pour fin de test
+
+```{r}
+leger2 <- lapply(lzone2, supprimer)
+# 34 M°OK
+# 27 M° OK
+```
+
+
+# Fonctions permettant d'extraire les objets spatiaux prêts à l'emploi
+
+
+
+
+Par ailleurs, on utilise des lapply
+
+## Uniquement le maïs sur les 4 ans
+
+Sur 4 ans, les carreaux maïs et rien d'autre. C'est l'intersection de toutes les années.
+Fonction récursive.
+
+```{r}
+quatreAns <- function(l) {
+  f <- length (l)
+  i <- 2
+  prem <- st_intersection(l[[i-1]], l [[i]])
+  for (i in 2:(f-1)){
+    inter <- st_intersection(prem, l[[i+1]])
+  }
+  aire <- round(sum(st_area(inter))/10000,2)
+  aire <- drop_units(aire)
+  return(aire)
+}
+# test sur petite zone
+res <- quatreAns(lzone4)
+library("units")
+res <-  drop_units(res)
+# test sur la liste imbrique
+tic()
+maisUnique <- sapply(limbrique, quatreAns)
+toc()
+# stockage du résultat 34 s 
+```
+
+Les intersections fonctionnent, même sur des gros fichiers.
+
+
+## Uniquement mais sur une année
+
+On crée une fonction ayant pour paramètre la zone concernée et l'année de la demande.
+On reste d'abord sur la structure de liste.
+
+```{r, eval=TRUE}
+lunion <- lzone2
+num <- 1
+anneeUnique <- function(lunion, num) {
+  X <- st_union(lunion [[num]] ) %>% st_set_precision(100000) %>% st_make_valid()
+  # la précision génère des erreurs topologiques
+  lreste <- lunion
+  lreste [[num]] <- NULL
+  # on unit les 3 années. mais le st_union fait produit cartésien. il faut d'abord
+  # créer une seule table
+  tot <- NULL
+  for (i in 1:3) {
+    g <- lreste[[i]][, 1, drop = TRUE]
+    tot <- c(tot,g)
+  }
+  # objet sf et crs
+  tot <- st_as_sf(st_as_sfc(tot))
+  st_crs(tot) <- 2154
+  Y <- st_union(tot) %>% st_set_precision(100000) %>% st_make_valid()
+  res <- st_difference(X, Y)
+  res <-round(st_area(res)/10000,0)
+  res <- drop_units(res)
+}
+```
+
+
+```{r, eval=TRUE}
+# test sur petite zone
+# le Y est à 227 M ° puis 
+tic()
+tot <- NULL
+for (i in 1:4) {
+  res <- anneeUnique(lzone4,i)
+  tot <- c(tot,res)
+}
+toc()
+# 11 s
+# l'appel à la fonction totale serait
+tic()
+res <- sapply(1:4, function(i){anneeUnique(lzone2,i)})
+toc()
+# 581 s , 5 600s
+# 34.4 M0 et 50 M°
+reszone2 <- c(2044, 1054  ,927, 1135)
+reszone3 <- c(2183, 1731, 1532, 1387)
+# pour la 1 14558 erreur, on met la précision très bas - 100, erreur quand meme
+# allègement des données nécessaires.
+
+```
+
+
+
+
+```{r}
+
+
+
+tot
+zone4anneUnique <- c(691,  773 ,1019 , 804)
+# 2 mn pour une zone de 2.4  77 s
+tic()
+tot <- NULL
+for (i in 1:4) {
+  res <- anneeUnique(lzone2,i)
+  tot <- c(tot,res)
+}
+toc()
+# zone de 27 M° 1135
+zone2anneeUnique <- c( 2044, 1054,  927, 1135)
+
+tic()
+tot <- NULL
+for (i in 1:4) {
+  res <- anneeUnique(lzone3,i)
+  tot <- c(tot,res)
+}
+toc()
+
+```
+
+on allège pour la zone1 et on le fait pour la zone4 pour comparer les chiffres
+
+```{r}
+tic()
+tot <- NULL
+for (i in 1:4) {
+  alleger <- lapply(lzone1, supprimer) 
+  res <- anneeUnique(alleger,i)
+  tot <- c(tot,res)
+}
+toc()
+```
+
+
+## Deux ans
+
+
+```{r, eval=TRUE}
+deuxAns <- function (df) {
+  nomZone <-  df$groupe [1]
+  print(nomZone)
+  # choix des paires dans 4 elements
+  nb <- 2
+  els <- seq (1:4)
+  i <- 2
+  tot <- NULL
+  for (i in 2:4) {
+    paire <- c(1, i)
+    nomPaire <- paste0(paire[1], paire[2])
+    print (nomPaire)
+    an <-  c("2015", "2016", "2017", "2018")
+    X <- polygoner(df   [df$an %in% an[paire], ])
+    Y <- polygoner(df [!df$an %in% an[paire], ])
+    # fixer la précision
+    X <- st_union(X) %>% st_set_precision(100000) %>% st_make_valid()
+    Y <- st_union(X) %>% st_set_precision(100000) %>% st_make_valid()
+    res <- st_area(st_difference(X,Y))/10000
+    tot <- c(tot, res)
+  }
+  return(tot)
+}
+
+# sur chaque zone, une à une
+tic()
+i <- 2
+res <- deuxAns(inter [inter$groupe == i,])
+toc()
+res
+res3 <- c( 0.0002378717, 0.0004579938 ,0.0001671771)
+res2 <- c(0.0004830697, 0.0004754893, 0.0006075894)
+# 400 s pour le 3
+# 2529 s pour le 2
+
+```
+
+
+## Trois ans
+
+```{r}
+troisAns <- function (df) {
+  nomZone <-  df$groupe [1]
+  print(nomZone)
+  # choix des paires dans 4 elements
+  els <- seq (1:4)
+  i <- 1
+  for (i in 1:4) {
+    nbY <- i 
+    nbX <- els [-i]
+    nomX <- paste0(nbX[1],nbX[2], nbX[3])
+    an <-  c("2015", "2016", "2017", "2018")
+    an [nbX]
+    X <- df   [df$an %in% an[nbX], ]
+    Y <- df [df$an %in% an[nbY], ]
+    X <- polygoner(X)  %>%  st_union() %>% st_set_precision(100000) %>% st_make_valid()
+    Y <- polygoner(Y) %>% st_union(X) %>% st_set_precision(100000) %>% st_make_valid()
+    res <- st_area(st_difference(X,Y))/10000
+    tot <- c(tot, res)
+  }
+  return(tot)
+}
+
+# sur chaque zone sauf la une
+tic()
+res2 <- troisAns(inter [inter$groupe == 2,])
+toc()
+tic()
+res3 <- troisAns(inter [inter$groupe == 3,])
+toc()
+tic()
+res4 <- troisAns(inter [inter$groupe == 4,])
+toc()
+```
+
+
+
+```

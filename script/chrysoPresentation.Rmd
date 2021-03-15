@@ -595,19 +595,23 @@ On récupère la couche de différence
 ```{r, eval = TRUE}
 couche <- c("2015", "2016", "2017", "2018")
 total <- NULL
-i <- 1
-for (i in 1:4) {
-  diff <-
-    st_read("../dataS/chrysomelediff.gpkg",
-            layer = couche [i],
-            quiet = TRUE)
-    total <- rbind(total,sum(st_area(diff)))
+totalfin <- NULL
+j <- 1
+for (j in 1:4) {
+  i <- 1
+  # boucle année
+  for (i in 1:4) {
+    nom <- paste0("../dataS/chrysomelediff", j, "_", couche [i], ".gpkg")
+    diff <- st_read(nom,  quiet = TRUE)
+    total <- rbind(total, sum(st_area(diff)))
+    names(total) <- paste0("an ", i)
+  }
+  #rownames(total) <- couche [i]
+  total <- round(total / 10000, 0)
+  # total des différences années et autres années (aires en ha)
+  totalfin <- cbind(totalfin, total)
 }
-rownames(total) <- couche
-colnames(total) <- "zone1"
-total <- round(total/10000,0)
-# total des différences années et autres années (aires en ha)
-total
+totalfin
 ```
 
 TODO 2016 et 17 ne passent pas sous Qgis, sans doute pour un pb de polygone trop petit provoquant une 
@@ -764,7 +768,8 @@ for (i in 1:4) {
 rownames(totalZone) <- c(123,124,134,234)
 
 # total des différences années et autres années (aires en ha)
-totalZoneTrois <- totalZone
+totalTrois <- totalZone
+totalZone
 ```
 
 # Extraction 2 ans
@@ -797,5 +802,13 @@ for (i in 1:4) {
 rownames(totalZone) <- c(12,13,14)
 
 # total des différences années et autres années (aires en ha)
-totalZonedeux <- totalZone
+totalDeux <- totalZone
 ```
+
+fichier final
+```{r}
+fin <- rbind (totalDeux, totalTrois)
+fin
+write.csv(fin, "../dataS/chrysomeleTotal.csv")
+```
+

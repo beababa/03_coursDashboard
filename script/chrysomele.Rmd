@@ -721,3 +721,110 @@ library(rgdal)
 ogrListLayers("../dataS/chrysomele.gpkg")
 ```
 
+
+parallélisation
+
+```{r, eval=TRUE}
+
+library(parallel)
+detectCores()
+cl <- makeCluster(4)
+
+
+
+result <- parSapply(cl, 1:4, function(x)x+2)
+result
+
+tic()
+result <- parSapply(cl,1:4, function(i){
+  lunion <- lzone4
+  X <- st_union(lunion [[num]] ) %>% st_set_precision(1000000) %>% st_make_valid()
+  lreste <- lunion
+  lreste [[num]] <- NULL
+  # on unit les 3 années. mais le st_union fait produit cartésien. il faut d'abord
+  # créer une seule table
+  tot <- NULL
+  for (i in 1:3) {
+    g <- lreste[[i]][, 1, drop = TRUE]
+    tot <- c(tot,g)
+  }
+  # objet sf et crs
+  tot <- st_as_sf(st_as_sfc(tot))
+  st_crs(tot) <- 2154
+  Y <- st_union(tot) %>% st_set_precision(1000000) %>% st_make_valid()
+  res <- st_difference(X, Y)
+  res <-round(st_area(res)/10000,0)
+  res <- drop_units(res)
+})
+stopCluster(cl)
+toc()
+
+
+```
+
+
+## Deux ans sur les quatre ans
+
+Intersection des années et différence entre les deux géométries créées
+Directement en fonction
+
+```{r, eval=TRUE}
+deuxAns <- function (num1,num2, lunion) {
+  X <- st_union(lunion [[num1]], lunion [[num2]])
+  lreste <-lunion [c(-num1,-num2)]
+  Y <- st_union (lreste [[1]], lreste [[2]])
+  # Toutes les géométries de X qui ne sont pas dans Y
+  res <- 
+    st_cast(st_difference(X,Y ), "MULTIPOLYGON")
+  res2 <- sapply(st_as_sf(res), st_area)
+  indice <- which(round(res2,0) > 500)
+  #plot(res2 [indice], main = "retenu")
+  res3 <- round(res2 [indice],0)
+  return(res3)
+}
+```
+
+
+
+## trois ans sur les quatre ans
+
+ Surface cultivé 3 ans et sans mais sur une année unique
+union des 3 ans et différence avec l'année cultivé
+
+
+```{r, eval=TRUE}
+troisAns <- function (lunion, num) {
+  Y <- lunion [[num]]
+  lreste <- lunion [[-num]]
+  X <- st_union(lreste [[1]], lreste [[2]], lreste [[3]])
+  diff <- st_difference(X,Y)
+  round(st_area(diff)/10000,0)
+}
+
+```
+
+Les fonctions ne peuvent utiliser de gros jeux de données, le pb identifié est le
+st_difference 
+  - nécessité de faire un st_union (le poids des fichiers +++)
+  - opération lourde
+  
+TODO préparer mail CNRS pour voir si solution
+
+
+
+Nettoyage couche chrysomele
+
+```{r}
+library(rgdal)
+ogrListLayers("../dataS/chrysomele.gpkg")
+```
+
+
+gestion d'erreur
+
+```{r}
+print(try(log("a"), TRUE))
+log("a")
+res <- lapply (c(1, "a",2), function (i) try(log(i), TRUE) )
+res
+```

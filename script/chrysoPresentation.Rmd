@@ -1,5 +1,5 @@
 ---
-title: "Chrysomele"
+title: "Chrysomele presentation"
 author: "B. Maranget"
 date: "25/01/2021"
 output: 
@@ -46,8 +46,10 @@ library(lwgeom) # pour la validation de la géométrie
 library(cartography)
 library(units) # pour le pb des unités des aires. on supprime.
 library(tictoc) # mesure des opérations géométriques st_union
-library(mapview)
 ```
+
+
+
 
 ## Données
 
@@ -55,10 +57,10 @@ library(mapview)
 
 ```{r}
 # communes sans la corse
-commune <- st_read("../dataE/00_ADMIN/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
-dpt <- st_read("../dataE/00_ADMIN/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
-canton2015 <- st_read("../dataE/00_ADMIN/canton2015/CANTON.SHP")
-fond <- st_read("../dataE/00_ADMIN/nuts.gpkg", "pays", quiet = TRUE, stringsAsFactors =F)
+commune <- st_read("../dataE/ign.gpkg", "commune", quiet = TRUE,stringsAsFactors = F)
+dpt <- st_read("../dataE/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
+canton2015 <- st_read("../dataE/CANTON.SHP")
+fond <- st_read("../dataE/nuts.gpkg", "pays", quiet = TRUE, stringsAsFactors =F)
 ```
 
 
@@ -73,10 +75,11 @@ https://draaf.grand-est.agriculture.gouv.fr/RPG,2161
 
 ```{r, eval=FALSE}
 # rpg dezipage
-chemin <-"../dataE/01_CULTURES/rpg/"
+chemin <-"../dataE/rpg/"
 noms <- list.files(chemin)
 for (i in 1:length(noms)){
   unzip(zipfile =  paste0(chemin,noms[i]), exdir = chemin)
+  # pb sous windwos
 }
 # assemblage
 noms <- list.files(chemin, pattern = ".shp")
@@ -111,18 +114,20 @@ drop_units(rpg)
 
 ##### Nombre d'occurences
 
+
 ```{r}
 rpg <- st_read("../dataS/chrysomele.gpkg", "rpg", quiet = TRUE)
 tab <- addmargins(table(rpg$Code_cultu, rpg$an))
 knitr::kable(tab)
 ```
 
+MID / MIE / MIS mais doux, mais ensilage, mais
 
 
 ##### Taille moyenne des parcelles agricole
 
 Sur l'ensemble du rpg téléchargé, 972 M obsb
-en liste 929 M°, le mais 259 M°
+en liste 929 M°, le mais 275 M°
 
 ```{r, eval = TRUE}
 rpg <- st_read("../dataS/chrysomele.gpkg", "rpg", quiet = TRUE, stringsAsFactors = FALSE)
@@ -148,7 +153,8 @@ total <- rbind(ttsCultures, mais)
 moyenne <- apply(total,1, mean)
 total <- cbind(total, moyenne)
 rownames(total) <-  c("tts total", "tts moy", "mais total", "mais moy")
-knitr::kable(total, digits = 1, caption = "Aires moyennes et totales (en milliers ha) toutes cultures et mais - RPG 2019")
+knitr::kable(total, digits = 1, caption = "Aires moyennes et totales (en dizaine de milliers ha) toutes cultures et mais - RPG 2019")
+write.csv(total, "../dataS/totaux.csv")
 ```
 
 
@@ -201,7 +207,8 @@ layoutLayer(title = "Zones d'étude Alsace")
 dev.off()
 # afin d'identifier les géométries, on rajoute un fid sur le rpg
 rpg$id <- seq(1, nrow(rpg))
-# intersection très couteuse. géométrie du rpg nécessite de forcer la validité
+# intersection très couteuse. (359 s)
+# géométrie du rpg nécessite de forcer la validité
 tic()
 inter <- st_intersection(st_make_valid(rpg), aggAlsace)
 toc()
@@ -210,12 +217,50 @@ table(inter$groupe)
 inter$groupe [inter$groupe == "côté Lorrain"] <- 4
 # On travaillera à partir de ce fichier désormais.
 st_write(inter, "../dataS/chrysomele.gpkg", "inter", quiet = TRUE, delete_layer = TRUE)
-#  275 985 au lieu de 275 234, ce sont les parcelles sur les frontières.
+#  275 985 parcelles le rpg 275 234. Il y a donc scission des parcelles entre les différentes
+# zones
+nomZone <- c("zone1", "zone2", "zone3", "zone4")
 ```
 
 ![](../img/alsace.png)
 
 TODO Attention zone Strasbourg absente ?
+
+### Distribution par zone
+
+
+On reprend la fonction de calcul mais cette fois sur chacune des zones.
+
+```{r}
+lzone <- split(inter, inter$groupe)
+names(lzone) <- c("zone1")
+# fonction pour éclater en année chacune des zones
+eclaterAn <- function(df) {
+  lan <- split(df, df$an)
+  names(lan) <- c("rpg2015", "rpg2016", "rpg2017", "rpg2018")
+  return(lan)
+  }
+lzoneAn <- lapply(lzone, eclaterAn)
+total <- NULL
+for (i in 1:4){
+  res <- sapply(lzoneAn[[i]], calcul)
+  total <- rbind(total, res)
+}
+
+# assemblage et moyenne
+extr <- NULL
+for (nom in nomZone){
+  extr <-  c(extr,
+             rep ( c(paste0("total ", nom), 
+                     paste0( "moyenne " , nom))
+                  )
+              )
+}
+rownames(total) <- extr
+knitr::kable(total, digits = 1, caption = "Aires moyennes et totales (en dizaine de milliers ha) par zone")
+write.csv(total, "../dataS/totauxZone.csv")
+
+```
 
 
 ### Cartographie des parcelles coupées 
@@ -304,7 +349,24 @@ for (i in 1:4){
   # on imbrique et on nomme
     assign(noms [i], lapply(eclater (i),polygoner))
 }
-
+# on revérifie par rapport au premier calcul
+total
+# changement nrow pour length car il n'existe plus que la colonne géométrie
+calcul2 <- function(data) {
+  aire <- (sum(st_area(data))/10000)/10000
+  # résultat en milliers d'ha
+  moyenne <-(sum(st_area(data)) / length(data))/10000
+  res <- c(aire, moyenne)
+} 
+tot <- NULL
+for (nom in noms){
+  data <- get(nom)
+  res <- sapply(data, calcul2)
+  tot <- rbind(tot, res)
+}
+tot
+total - tot
+# les moyennes ont toutes baissé ! alors que recherche fusion !
 # 90 / 27 / 39 et 2 M°
 # 115 / 34 50 2.6
 # ces couches sont plus propres ?
@@ -377,6 +439,12 @@ tic()
 maisUnique <- sapply(limbrique, quatreAns)
 toc()
 # stockage du résultat 34 s 
+# autre test 45 s
+# rapport au total
+names(maisUnique) <- nomZone
+maisUnique <- as.data.frame(maisUnique)
+maisUnique
+write.csv(maisUnique, "../dataS/res.csv")
 ```
 
 Les intersections fonctionnent, même sur des gros fichiers.
@@ -423,28 +491,31 @@ for (i in 1:4) {
   tot <- c(tot,res)
 }
 toc()
+reszone4 <- tot
 # 11 s
 # l'appel à la fonction totale serait
 tic()
-res <- sapply(1:4, function(i){anneeUnique(lzone2,i)})
+reszone4 <- sapply(1:4, function(i){anneeUnique(lzone2,i)})
 toc()
 # 581 s , 5 600s
 # 34.4 M0 et 50 M°
+reszone1 <- NA
 reszone2 <- c(2044, 1054  ,927, 1135)
 reszone3 <- c(2183, 1731, 1532, 1387)
 # pour la 1 14558 erreur, on met la précision très bas - 100, erreur quand meme
 # allègement des données nécessaires.
-
+# enregistrement dans le tableau res
+nomTab <- c("annéeUnique1","annéeUnique2", "annéeUnique3", "annéeUnique4")
+res <- cbind(reszone1, reszone2, reszone3, reszone4)
+colnames(res) <- nomTab
+dataf <- cbind(maisUnique, res)
+write.csv(dataf, "../dataS/res.csv")
 ```
 
 
 
 
 ```{r}
-
-
-
-tot
 zone4anneUnique <- c(691,  773 ,1019 , 804)
 # 2 mn pour une zone de 2.4  77 s
 tic()
@@ -456,7 +527,6 @@ for (i in 1:4) {
 toc()
 # zone de 27 M° 1135
 zone2anneeUnique <- c( 2044, 1054,  927, 1135)
-
 tic()
 tot <- NULL
 for (i in 1:4) {
@@ -464,7 +534,6 @@ for (i in 1:4) {
   tot <- c(tot,res)
 }
 toc()
-
 ```
 
 
@@ -520,20 +589,31 @@ On récupère la couche de différence
 
 ```{r, eval = TRUE}
 couche <- c("2015", "2016", "2017", "2018")
-total <- NULL
-i <- 1
-for (i in 1:4) {
-  diff <-
-    st_read("../dataS/chrysomelediff.gpkg",
-            layer = couche [i],
-            quiet = TRUE)
-    total <- rbind(total,sum(st_area(diff)))
+
+totalfin <- NULL
+j <- 1
+for (j in 1:4) {
+  i <- 1
+  total <- NULL
+  # boucle année
+  for (i in 1:4) {
+    nom <- paste0("../dataS/chrysomelediff", j, "_", couche [i], ".gpkg")
+    print(nom)
+    diff <- st_read(nom,  quiet = TRUE)
+    total <- rbind(total, sum(st_area(diff)))
+    names(total) <- paste0("an ", i)
+  }
+  #rownames(total) <- couche [i]
+  total <- round(total / 10000, 0)
+  totalfin <-  cbind(total, totalfin)
+
 }
-rownames(total) <- couche
-colnames(total) <- "zone1"
-total <- round(total/10000,0)
-# total des différences années et autres années (aires en ha)
-total
+totalfin
+dataf
+noms <- c("idemQGIS4", "idemQGIS3", "idemQGIS2", "idemQGIS1")
+colnames(totalfin) <-  noms
+dataf <-  cbind(dataf, totalfin)
+write.csv(dataf, "../dataS/res.csv")
 ```
 
 
@@ -658,7 +738,8 @@ for (i in 1:4) {
 rownames(totalZone) <- c(123,124,134,234)
 
 # total des différences années et autres années (aires en ha)
-totalZoneTrois <- totalZone
+totalTrois <- totalZone
+totalZone
 ```
 
 # Extraction 2 ans
@@ -691,5 +772,13 @@ for (i in 1:4) {
 rownames(totalZone) <- c(12,13,14)
 
 # total des différences années et autres années (aires en ha)
-totalZonedeux <- totalZone
+totalDeux <- totalZone
 ```
+
+fichier final
+```{r}
+fin <- rbind (totalDeux, totalTrois)
+fin
+write.csv(fin, "../dataS/chrysomeleTotal.csv")
+```
+

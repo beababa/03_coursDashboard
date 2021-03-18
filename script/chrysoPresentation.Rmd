@@ -87,6 +87,9 @@ for (i in 1:length(noms)){
   tmp$an <- substring(noms [i],9,12)
   data <- rbind(data,tmp)
 }
+# champs rpg
+code <- sort(table(data$Code_cultu))
+knitr::kable(code)
 # Enregistrement en format .gpkg 972 363
 rpg <- data [,c("Code_cultu", "an"), drop = FALSE]
 st_write(rpg, "../dataS/chrysomele.gpkg", "rpg", row.names = FALSE,quiet = TRUE, delete_layer = TRUE)

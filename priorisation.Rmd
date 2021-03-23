@@ -1,0 +1,139 @@
+---
+title: "Priorisation"
+author: "B. Maranget"
+date: "19/03/2021"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+# Passer la valeur suivante à TRUE pour reproduire les extractions.
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+# Cadre
+
+## Objet
+
+Dans le cadre de la priorisation des achats de machine, faire 3 cartes :
+
+- diagrammes sur culture concernée maïs ou autres
+
+- moyenne des parcelles par département en mais et autres cultures
+
+
+## Librairies et répertoire
+
+```{r}
+library(sf)
+library(cartography)
+```
+
+# Données
+
+```{r}
+dpt <- st_read("../DATA/ign.gpkg", "dpt", quiet = TRUE, stringsAsFactors = F)
+data <- read.csv2("data/data.csv")
+fond <- st_read("../DATA/nuts.shp", quiet = TRUE)
+fond <- st_transform(fond, 2154)
+stations <- st_read("../DATA/station.shp")
+```
+
+# Calcul des moyennes par département
+
+
+Recodage maïs et autres
+
+```{r}
+str(data)
+table(data$ESPECE)
+mais <- c("MAIS FOURRAGE", "MAIS GRAIN ", "MAIS SEMENCES")
+data$categ [data$ESPECE %in% mais] <-  "Maïs"
+data$categ [!(data$ESPECE %in% mais)] <-  "Autres cultures"
+table(data$categ)
+```
+
+Agregation par département (moyenne)
+
+```{r}
+agg <- aggregate(data$NB_PARCELLE..rdt15., by = list(data$ID_DEPARTEMENT, data$DEPARTEMENT, data$categ), mean)
+names(agg) <- c("NUM_dept", "NOM_DPT", "CATEGORIE", "moyenne")
+```
+
+Jointure
+
+```{r}
+str(dpt)
+data <- merge(agg, dpt [, c("NUM_dept")], by = "NUM_dept")
+dataSansGeom <- data [, ,drop = TRUE]
+write.csv(dataSansGeom, "data/final.csv")
+```
+
+Cartographie
+
+Mise en forme, par département, maïs et autres cultures
+
+```{r}
+data
+data$mais <- ifelse(data$CATEGORIE == "Maïs", data$moyenne, 0)
+data$autres <- ifelse(data$CATEGORIE == "Autres cultures", data$moyenne, 0)
+agg <- aggregate (data [,c("mais", "autres"), drop = TRUE], by = list(data$NUM_dept), FUN = sum)
+data
+agg
+names(agg)[1] <- c("NUM_dept")
+data <- merge(agg, dpt [,c("NOM_DEP", "NUM_dept")], by = "NUM_dept")
+data <- st_as_sf(data)
+stations$var <- 1
+```
+
+
+
+
+```{r}
+png("img/mais.png")
+par(mar = c(0,0,1.2,0))
+ghostLayer(dpt, bg = "lightblue")
+plot(fond$geometry, col = "antiquewhite2", border = NA, add = TRUE)
+plot(dpt$geom, col = "antiquewhite1", border = "white", add = TRUE)
+plot(stations, pch = 8, col = "red", add = TRUE)
+summary(data)
+#waffleLayer(data, var = c( "mais", "autres"), cellvalue = 20, cellsize = 1, 
+        #    cellrnd = "ceiling", ncols = 6, col = c("tomato1","lightblue"), 
+ #           add = TRUE)
+propSymbolsLayer(data, var = "mais", border = NA, col = "tomato2" ,
+                 legend.pos = "topright", add = TRUE)
+data$lmais <- ifelse(data$mais == 0, NA, round(data$mais,0))
+data$lmais
+labelLayer(data, txt = "lmais", halo = 0.5, bg = "tomato4", cex = 1, col = "white")
+layoutLayer("Moyenne du nombre de parcelles récoltées sur 3 campagnes", author = "Arvalis, 2020",
+            sources = "Eurostat, IGN, internes", col = "tomato3")
+dev.off()
+```
+
+```{r}
+png("img/autre.png")
+par(mar = c(0,0,1.2,0))
+ghostLayer(dpt, bg = "lightblue")
+plot(fond$geometry, col = "antiquewhite2", border = NA, add = TRUE)
+plot(dpt$geom, col = "antiquewhite1", border = "white", add = TRUE)
+plot(stations, pch = 8, col = "red", add = TRUE)
+summary(data)
+#waffleLayer(data, var = c( "mais", "autres"), cellvalue = 20, cellsize = 1, 
+        #    cellrnd = "ceiling", ncols = 6, col = c("tomato1","lightblue"), 
+ #           add = TRUE)
+propSymbolsLayer(data, var = "autres", border = NA, col = "tomato2" ,
+                 legend.pos = "topright", add = TRUE)
+data$lautre <- round(data$autres,0)
+labelLayer(data, txt = "lautre", halo = 0.5, bg = "tomato4", cex = 0.8, col = "white")
+layoutLayer("Moyenne du nombre de parcelles récoltées sur 3 campagnes", author = "Arvalis, 2020",
+            sources = "Eurostat, IGN, internes", col = "tomato3")
+dev.off()
+```

@@ -24,13 +24,29 @@ knitr::opts_chunk$set(warning = FALSE)
 Introduction au cours 2e semestre 
 
 
-# Librairies
+# Librairies R
 
 ```{r}
+# mise en forme / traitement de données
 library(rmarkdown)
+library(flexdashboard)
+library(tidyverse)
+library(shiny)
+library(DT)
+library(knitr)
+# données spatiales
 library(sp)
 library(sf)
 library(mapsf)
-library(flexdashboard)
+library(terra)
+# web carto
+library(leaflet)
+# osm
+library(osmdata)
+# couleurs
+library(RColorBrewer)
 ```
+
+Git : installation commande git sous windows
+SublimeText : pour codage css / html / javascript 
 

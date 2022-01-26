@@ -21,105 +21,57 @@ knitr::opts_chunk$set(warning = FALSE)
 
 # Objet
 
-projet R, markdown et git (galère technique à prévoir pour le git)
+Bases R
 
-# Projet R et Markdown
-
-## Créer un projet R
-
-File / Nouveau projet
-
-Le projet permet de conserver l'emplacement des fichiers.
-
-Créer l'arborescence suivante
-
-![](../img/arbo.png)
+source : https://github.com/rstudio/cheatsheets/blob/main/base-r.pdf
 
 
-## Le markdown
-
-Créer un markdown dans le répertoire script dans Rstudio, le knitter.
-
-![](../img/knit.png)
-
-## paramétrage de la TOC et de l'execution des chunks
-
-Copier - coller les commandes suivantes
-
-````
-output: 
-  html_document: 
-    number_sections: yes
-    toc: yes
-editor_options: 
-  chunk_output_type: console
-````
+# Objets R
 
 
-source :
+## Vecteur et dataframe
 
-https://blog.wax-o.com/2014/04/tutoriel-un-guide-pour-bien-commencer-avec-markdown/
+### Creation
 
+```{r}
+nom <- c("Zachary", "Pierre", "Linda")
+notes <- c(16,12,13)
+df <- as.data.frame(cbind(nom, notes))
+df 
+```
 
+2 trucs pour survivre :
 
+- Alt + - pour l'opérateur d'assignation
 
+- tabulation pour la complétion
 
+### Indexation
 
-# Git
+```{r}
+nom [1]
+notes [2]
+df [1,2]
+```
 
-## Compte et projet
+```{r}
+df$nom
+df$notes
+```
 
-Créer un compte GIT et un projet
+### Operation
 
-![](../img/projetGIT.png)
+```{r}
+#sum(df$notes)
+sum(notes)
+```
 
-## Cloner le projet sur sa machine
-
-cloner le projet sur son pc avec la commande *git clone* et le lien vers le répertoire
-
-![](../img/GITclone.png)
-![](../img/GITcloneShell.png)
-## Clés SSH
-
-
-### Génération des clés
-
-Pour pouvoir travailler ainsi, il faut avoir générer des clés
-
-Ouvrir une fenêtre avec la commande cmd et saisir *ssh-keygen*
-
-Le répertoire où la clé est créée est, par défaut, le répertoire utilisateur.
-(afficher les fichiers cachés est nécessaire)
-
-
-source :
-
-https://www.lojiciels.com/comment-generer-des-cles-publiques-privees-ssh-sous-windows/
-
-
-### Copie de la clé publique sur le serveur
-
-Au niveau du github, coin haut droit *settings* puis *ssh keys*
-
-Il s'agit de récupérer le contenu de la clé, la commande en ligne 
-
-*clip < .ssh/id_rsa.pub*
+## Exercice
 
 
-(Sinon ouvrir le fichier et faire un copier - coller)
+Créer un dataframe sur 3 villes et leur nombre d'habitants
+Trouver la moyenne du nombre d'habitants.
 
 
 
-source :
-
-https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
-
-
-### Test
-
-* ssh -T git@github.com*
-
-
-
-### Cloner à nouveau le projet
 

@@ -1,0 +1,22 @@
+name: "L6ECSIG Construction et utilisation des SIG"
+navbar:
+  left:
+    - text: "Introduction"
+      href: 01_intro.html
+    - text: "environnement"
+      href: 02_environnement.html
+    - text: "bases R"
+      href: 03_basesR.html 
+  right:
+    - icon: fa-github
+      href: https://github.com/beababa/beababa.github.io
+output: 
+  html_document:
+    toc_float: TRUE  
+    theme: united
+    highlight: tango
+    include:
+      after_body: footer.html
+    number_sections: yes
+    exclude: [data-raw, data]
+    css: css/styles.css

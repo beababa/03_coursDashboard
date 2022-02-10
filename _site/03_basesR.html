@@ -407,10 +407,13 @@ div.tocify {
   <a href="01_intro.html">Introduction</a>
 </li>
 <li>
-  <a href="02_environnement.html">environnement</a>
+  <a href="02_environnement.html">Environnement</a>
 </li>
 <li>
-  <a href="03_basesR.html">bases R</a>
+  <a href="03_basesR.html">Bases R</a>
+</li>
+<li>
+  <a href="04_Rspatial.html">R spatial</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -603,7 +606,11 @@ div.tocify {
 ##  3rd Qu.: 14.00                                       
 ##  Max.   :361.00                                       
 ## </code></pre>
-<p>Problème des champs totaux</p>
+</div>
+<div id="nettoyage" class="section level2" number="3.2">
+<h2 number="3.2"><span class="header-section-number">3.2</span> Nettoyage</h2>
+<div id="problème-des-champs-totaux" class="section level3" number="3.2.1">
+<h3 number="3.2.1"><span class="header-section-number">3.2.1</span> Problème des champs totaux</h3>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>Bureau.de.vote</span></code></pre></div>
 <pre><code>##  [1] &quot;BV1&quot;        &quot;BV2&quot;        &quot;BV3&quot;        &quot;BV4&quot;        &quot;BV5&quot;       
 ##  [6] &quot;BV6&quot;        &quot;BV7&quot;        &quot;BV8&quot;        &quot;BV9&quot;        &quot;BV10&quot;      
@@ -613,7 +620,9 @@ div.tocify {
 ## [26] &quot;BV26&quot;       &quot;BV27&quot;       &quot;BV28&quot;       &quot;BV29&quot;       &quot;BV30&quot;      
 ## [31] &quot;BV31&quot;       &quot;BV32&quot;       &quot;TOTAL&quot;      &quot;Total en %&quot;</code></pre>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span>  data [<span class="sc">-</span><span class="fu">c</span>(<span class="dv">33</span>,<span class="dv">34</span>),]</span></code></pre></div>
-<p>Les noms des candidats</p>
+</div>
+<div id="les-noms-des-candidats" class="section level3" number="3.2.2">
+<h3 number="3.2.2"><span class="header-section-number">3.2.2</span> Les noms des candidats</h3>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>candidat  <span class="ot">&lt;-</span> <span class="fu">names</span>(data)[<span class="dv">8</span><span class="sc">:</span><span class="dv">12</span>]</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>candidat</span></code></pre></div>
 <pre><code>## [1] &quot;Résultats.liste.1...Liste.de.la.gauche.unie.pour.Bondy....Sylvine.THOMASSIN.&quot;              
@@ -633,6 +642,10 @@ div.tocify {
 ##  [7] &quot;Suffrages.exprimés&quot;        &quot;.Sylvine.THOMASSIN.&quot;      
 ##  [9] &quot;.Stephen.HERVE&quot;            &quot;.Jamal.AMMOURI&quot;           
 ## [11] &quot;Vincent.DUGUET&quot;            &quot;Sylvie.BADOUX&quot;</code></pre>
+</div>
+</div>
+<div id="graphique" class="section level2" number="3.3">
+<h2 number="3.3"><span class="header-section-number">3.3</span> Graphique</h2>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">png</span>(<span class="at">height =</span> <span class="dv">800</span>, <span class="at">width =</span> <span class="dv">600</span>, <span class="at">filename =</span> <span class="st">&quot;img/resultat.png&quot;</span>)</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">3</span>))</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">12</span>){</span>

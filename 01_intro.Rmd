@@ -103,8 +103,7 @@ barplot(tab, col =heat.colors(4), border = NA, legend.text = T, main = "Présent
 
 source : 
 
-
-
+https://juba.github.io/tidyverse/09-recodages.html
 
 
 ```{r}

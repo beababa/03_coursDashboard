@@ -81,3 +81,66 @@ barplot(tab, col = heat.colors(5), border = NA, xlab = "appétence, (1 oui - 4 n
 
 
 ## Exercice : mettre en graphique les autres vecteurs
+
+Pendant l'exercice, on regarde l'aide (F1) et on chercdhe les options de barplot pour :
+
+- étiquettes (names.arg) 
+- verticales (las)
+- legende (legend.text)
+
+L'aide ne permet pas de trouver ces éléments, il faut souvent se reporter plutôt sur internet.
+
+```{r}
+# choix de la variable : présent et dénombrement
+tab <- table (cours1$présent)
+barplot(tab, col =heat.colors(4), border = NA, names.arg = names(tab), las = 2, main = "Présent des étudiants")
+barplot(tab, col =heat.colors(4), border = NA, legend.text = T, main = "Présent des étudiants")
+```
+
+
+
+## Recodage
+
+source : 
+
+
+
+
+
+```{r}
+tab <- table(cours1$futur)
+etik <- names(tab)
+names(tab)
+barplot(tab, names.arg = names(tab), las = 2)
+```
+
+Il s'agit ici de diminuer le nombre de modalités de la variable.
+
+### Un exemple : les urbanistes
+
+
+```{r}
+motif <- grep("rba", cours1$futur)
+cours1$futur [motif]
+cours1$futur [motif] <- "urbanisme"
+```
+
+
+
+### Exercice : quel autre recodage possible ?
+
+## Valeurs manquantes
+
+NA (Not Avalaible)
+
+? et absence de réponse n'ont pas la même valeur.
+On décide de recoder les réponses nulles en NA
+
+
+```{r}
+cours1$futur == ""
+cours1$futur [cours1$futur == ""]
+cours1$futur [cours1$futur == ""] <- NA
+tab <- table(cours1$futur, useNA  = "always")
+``` 
+

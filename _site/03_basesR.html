@@ -482,63 +482,167 @@ div.tocify {
 <p>Créer un dataframe sur 3 villes et leur nombre d’habitants Trouver la moyenne du nombre d’habitants.</p>
 </div>
 </div>
-<div id="import-de-données-spatiales-et-première-carte" class="section level1" number="3">
-<h1 number="3"><span class="header-section-number">3</span> Import de données spatiales et première carte</h1>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code></pre></div>
-<pre><code>## Linking to GEOS 3.9.0, GDAL 3.2.1, PROJ 7.2.1</code></pre>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>zone <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;zone&quot;</span>)</span></code></pre></div>
-<pre><code>## Reading layer `zone&#39; from data source 
-##   `D:\sauveGIT\03_coursDashboard\data\vote.gpkg&#39; using driver `GPKG&#39;
-## Simple feature collection with 32 features and 5 fields
-## Geometry type: MULTIPOLYGON
-## Dimension:     XY
-## Bounding box:  xmin: 661088.1 ymin: 6865338 xmax: 663354.7 ymax: 6869043
-## Projected CRS: RGF93 / Lambert-93</code></pre>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># quel contenu pour le fichier ?</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(zone)</span></code></pre></div>
-<pre><code>## Classes &#39;sf&#39; and &#39;data.frame&#39;:   32 obs. of  6 variables:
-##  $ Layer     : chr  &quot;_Bureau 32&quot; &quot;_Bureau 24&quot; &quot;_Bureau 15&quot; &quot;_Bureau 14&quot; ...
-##  $ bureauNo_1: chr  NA &quot;ECOLE ELEMENTAIRE OLYMPE DE GOUGES&quot; &quot;SALLE MAURICE PETITJEAN&quot; &quot;ECOLE MATERNELLE LEO LAGRANGE&quot; ...
-##  $ aire      : int  129558 260846 253109 229099 104115 230670 54899 91995 70288 140443 ...
-##  $ numBureau : int  32 24 15 14 12 30 5 9 28 26 ...
-##  $ txVotants : int  NA 50 41 53 55 54 46 50 66 52 ...
-##  $ geom      :sfc_MULTIPOLYGON of length 32; first list element: List of 1
-##   ..$ :List of 1
-##   .. ..$ : num [1:21, 1:2] 662713 662894 662926 663008 662925 ...
-##   ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;XY&quot; &quot;MULTIPOLYGON&quot; &quot;sfg&quot;
-##  - attr(*, &quot;sf_column&quot;)= chr &quot;geom&quot;
-##  - attr(*, &quot;agr&quot;)= Factor w/ 3 levels &quot;constant&quot;,&quot;aggregate&quot;,..: NA NA NA NA NA
-##   ..- attr(*, &quot;names&quot;)= chr [1:5] &quot;Layer&quot; &quot;bureauNo_1&quot; &quot;aire&quot; &quot;numBureau&quot; ...</code></pre>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># carte avec commande rbase</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zone<span class="sc">$</span>geom, <span class="at">col =</span> <span class="fu">terrain.colors</span> (<span class="dv">31</span>),</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">border =</span> <span class="cn">NA</span>,</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;31 bureaux de vote de Bondy&quot;</span>)</span></code></pre></div>
-<p><img src="03_basesR_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># carte avec mapsf</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapsf)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(zone, <span class="at">type =</span> <span class="st">&quot;choro&quot;</span>, <span class="at">border =</span> <span class="cn">NA</span>,<span class="at">var =</span> <span class="st">&quot;aire&quot;</span>)</span></code></pre></div>
-<p><img src="03_basesR_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># éliminer les bureaux 31 et 32</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>zone <span class="ot">&lt;-</span> zone [zone<span class="sc">$</span>numBureau <span class="sc">%in%</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">30</span>),]</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(zone)</span></code></pre></div>
-<pre><code>##     Layer            bureauNo_1             aire          numBureau    
-##  Length:30          Length:30          Min.   : 54899   Min.   : 1.00  
-##  Class :character   Class :character   1st Qu.:102057   1st Qu.: 8.25  
-##  Mode  :character   Mode  :character   Median :146437   Median :15.50  
-##                                        Mean   :163750   Mean   :15.50  
-##                                        3rd Qu.:223232   3rd Qu.:22.75  
-##                                        Max.   :367989   Max.   :30.00  
-##    txVotants                geom   
-##  Min.   :35.00   MULTIPOLYGON :30  
-##  1st Qu.:42.25   epsg:2154    : 0  
-##  Median :50.00   +proj=lcc ...: 0  
-##  Mean   :50.30                     
-##  3rd Qu.:55.00                     
-##  Max.   :69.00</code></pre>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(zone, <span class="at">type =</span> <span class="st">&quot;choro&quot;</span>, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>,</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">var =</span> <span class="st">&quot;txVotants&quot;</span>)</span></code></pre></div>
-<p><img src="03_basesR_files/figure-html/unnamed-chunk-5-3.png" width="672" /></p>
-<p>source : <a href="https://riatelab.github.io/mapsf/articles/web_only/cheat_sheet.html" class="uri">https://riatelab.github.io/mapsf/articles/web_only/cheat_sheet.html</a></p>
+<div id="boucles" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Boucles</h1>
+<p>On cherche à faire un graphique de chacun des résultats</p>
+<div id="import-de-la-donnée" class="section level2" number="3.1">
+<h2 number="3.1"><span class="header-section-number">3.1</span> Import de la donnée</h2>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/bondyElection.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>, <span class="at">dec =</span> <span class="st">&quot;,&quot;</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)</span></code></pre></div>
+<pre><code>##   Bureau.de.vote Nb.d.électeurs.inscrits Nb.de.votants
+## 1            BV1                     715           296
+## 2            BV2                     808           368
+## 3            BV3                     961           302
+## 4            BV4                     848           270
+## 5            BV5                     812           280
+## 6            BV6                     876           321
+##   Taux.de.participation.... Nb.votes.nuls Nb.votes.blancs Suffrages.exprimés
+## 1                  41.39860             3               3                290
+## 2                  45.54455             6               3                359
+## 3                  31.42560             1               6                295
+## 4                  31.83962             4               3                263
+## 5                  34.48276             1              11                268
+## 6                  36.64384             3               3                315
+##   Résultats.liste.1...Liste.de.la.gauche.unie.pour.Bondy....Sylvine.THOMASSIN.
+## 1                                                                           78
+## 2                                                                           84
+## 3                                                                          111
+## 4                                                                          110
+## 5                                                                          148
+## 6                                                                          181
+##   Résultats.liste.2....Pour.Bondy.allons.plus.loin....Stephen.HERVE
+## 1                                                               168
+## 2                                                               221
+## 3                                                               132
+## 4                                                               120
+## 5                                                               104
+## 6                                                               118
+##   Résultats.liste.3....Bondy.pour.une.gauche.sociale.insoumise.et.populaire....Jamal.AMMOURI
+## 1                                                                                         19
+## 2                                                                                         14
+## 3                                                                                         17
+## 4                                                                                         14
+## 5                                                                                          8
+## 6                                                                                          7
+##   Résultats.liste.4....Bondy.autrement...Vincent.DUGUET
+## 1                                                    17
+## 2                                                    26
+## 3                                                    27
+## 4                                                     8
+## 5                                                     2
+## 6                                                     2
+##   Résultats.liste.5....Bondy.c.est.vous...Sylvie.BADOUX
+## 1                                                     8
+## 2                                                    14
+## 3                                                     8
+## 4                                                    11
+## 5                                                     6
+## 6                                                     7</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data)</span></code></pre></div>
+<pre><code>##  Bureau.de.vote     Nb.d.électeurs.inscrits Nb.de.votants   
+##  Length:34          Min.   :  517           Min.   : 200.0  
+##  Class :character   1st Qu.:  749           1st Qu.: 270.0  
+##  Mode  :character   Median :  808           Median : 296.0  
+##                     Mean   : 1539           Mean   : 571.5  
+##                     3rd Qu.:  876           3rd Qu.: 326.0  
+##                     Max.   :25391           Max.   :9429.0  
+##                     NA&#39;s   :1               NA&#39;s   :1       
+##  Taux.de.participation.... Nb.votes.nuls    Nb.votes.blancs  
+##  Min.   :31.26             Min.   : 0.000   Min.   :  0.000  
+##  1st Qu.:33.89             1st Qu.: 2.000   1st Qu.:  2.250  
+##  Median :35.73             Median : 3.000   Median :  3.000  
+##  Mean   :37.37             Mean   : 5.677   Mean   :  7.747  
+##  3rd Qu.:41.19             3rd Qu.: 4.000   3rd Qu.:  6.000  
+##  Max.   :48.94             Max.   :96.000   Max.   :131.000  
+##  NA&#39;s   :2                                                   
+##  Suffrages.exprimés
+##  Min.   : 194.0    
+##  1st Qu.: 261.0    
+##  Median : 290.0    
+##  Mean   : 557.7    
+##  3rd Qu.: 320.0    
+##  Max.   :9202.0    
+##  NA&#39;s   :1         
+##  Résultats.liste.1...Liste.de.la.gauche.unie.pour.Bondy....Sylvine.THOMASSIN.
+##  Min.   :  36.73                                                             
+##  1st Qu.:  84.25                                                             
+##  Median : 105.50                                                             
+##  Mean   : 199.90                                                             
+##  3rd Qu.: 123.75                                                             
+##  Max.   :3380.00                                                             
+##                                                                              
+##  Résultats.liste.2....Pour.Bondy.allons.plus.loin....Stephen.HERVE
+##  Min.   :  49.89                                                  
+##  1st Qu.: 115.75                                                  
+##  Median : 143.50                                                  
+##  Mean   : 271.53                                                  
+##  3rd Qu.: 167.50                                                  
+##  Max.   :4591.00                                                  
+##                                                                   
+##  Résultats.liste.3....Bondy.pour.une.gauche.sociale.insoumise.et.populaire....Jamal.AMMOURI
+##  Min.   :  4.00                                                                            
+##  1st Qu.:  7.25                                                                            
+##  Median : 11.00                                                                            
+##  Mean   : 21.88                                                                            
+##  3rd Qu.: 15.75                                                                            
+##  Max.   :370.00                                                                            
+##                                                                                            
+##  Résultats.liste.4....Bondy.autrement...Vincent.DUGUET
+##  Min.   :  1.00                                       
+##  1st Qu.: 10.25                                       
+##  Median : 15.00                                       
+##  Mean   : 29.57                                       
+##  3rd Qu.: 19.00                                       
+##  Max.   :500.00                                       
+##                                                       
+##  Résultats.liste.5....Bondy.c.est.vous...Sylvie.BADOUX
+##  Min.   :  1.00                                       
+##  1st Qu.:  7.00                                       
+##  Median :  9.00                                       
+##  Mean   : 21.35                                       
+##  3rd Qu.: 14.00                                       
+##  Max.   :361.00                                       
+## </code></pre>
+<p>Problème des champs totaux</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>Bureau.de.vote</span></code></pre></div>
+<pre><code>##  [1] &quot;BV1&quot;        &quot;BV2&quot;        &quot;BV3&quot;        &quot;BV4&quot;        &quot;BV5&quot;       
+##  [6] &quot;BV6&quot;        &quot;BV7&quot;        &quot;BV8&quot;        &quot;BV9&quot;        &quot;BV10&quot;      
+## [11] &quot;BV11&quot;       &quot;BV12&quot;       &quot;BV13&quot;       &quot;BV14&quot;       &quot;BV15&quot;      
+## [16] &quot;BV16&quot;       &quot;BV17&quot;       &quot;BV18&quot;       &quot;BV19&quot;       &quot;BV20&quot;      
+## [21] &quot;BV21&quot;       &quot;BV22&quot;       &quot;BV23&quot;       &quot;BV24&quot;       &quot;BV25&quot;      
+## [26] &quot;BV26&quot;       &quot;BV27&quot;       &quot;BV28&quot;       &quot;BV29&quot;       &quot;BV30&quot;      
+## [31] &quot;BV31&quot;       &quot;BV32&quot;       &quot;TOTAL&quot;      &quot;Total en %&quot;</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span>  data [<span class="sc">-</span><span class="fu">c</span>(<span class="dv">33</span>,<span class="dv">34</span>),]</span></code></pre></div>
+<p>Les noms des candidats</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>candidat  <span class="ot">&lt;-</span> <span class="fu">names</span>(data)[<span class="dv">8</span><span class="sc">:</span><span class="dv">12</span>]</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>candidat</span></code></pre></div>
+<pre><code>## [1] &quot;Résultats.liste.1...Liste.de.la.gauche.unie.pour.Bondy....Sylvine.THOMASSIN.&quot;              
+## [2] &quot;Résultats.liste.2....Pour.Bondy.allons.plus.loin....Stephen.HERVE&quot;                         
+## [3] &quot;Résultats.liste.3....Bondy.pour.une.gauche.sociale.insoumise.et.populaire....Jamal.AMMOURI&quot;
+## [4] &quot;Résultats.liste.4....Bondy.autrement...Vincent.DUGUET&quot;                                     
+## [5] &quot;Résultats.liste.5....Bondy.c.est.vous...Sylvie.BADOUX&quot;</code></pre>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>liste <span class="ot">&lt;-</span> <span class="fu">strsplit</span>(candidat,<span class="st">&quot;</span><span class="sc">\\</span><span class="st">.</span><span class="sc">\\</span><span class="st">.</span><span class="sc">\\</span><span class="st">.&quot;</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>liste [[<span class="dv">5</span>]][<span class="dv">3</span>]</span></code></pre></div>
+<pre><code>## [1] &quot;Sylvie.BADOUX&quot;</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>candidat <span class="ot">&lt;-</span> <span class="fu">sapply</span>(liste, <span class="st">&#39;[&#39;</span>, <span class="dv">3</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span> (data) [<span class="dv">8</span><span class="sc">:</span><span class="dv">12</span>] <span class="ot">&lt;-</span> candidat</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(data)</span></code></pre></div>
+<pre><code>##  [1] &quot;Bureau.de.vote&quot;            &quot;Nb.d.électeurs.inscrits&quot;  
+##  [3] &quot;Nb.de.votants&quot;             &quot;Taux.de.participation....&quot;
+##  [5] &quot;Nb.votes.nuls&quot;             &quot;Nb.votes.blancs&quot;          
+##  [7] &quot;Suffrages.exprimés&quot;        &quot;.Sylvine.THOMASSIN.&quot;      
+##  [9] &quot;.Stephen.HERVE&quot;            &quot;.Jamal.AMMOURI&quot;           
+## [11] &quot;Vincent.DUGUET&quot;            &quot;Sylvie.BADOUX&quot;</code></pre>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">png</span>(<span class="at">height =</span> <span class="dv">800</span>, <span class="at">width =</span> <span class="dv">600</span>, <span class="at">filename =</span> <span class="st">&quot;img/resultat.png&quot;</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">3</span>))</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">12</span>){</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">barplot</span>(data [,i], <span class="at">main =</span> <span class="fu">names</span>(data) [i])</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code></pre></div>
+<pre><code>## png 
+##   2</code></pre>
+<p><img src="img/resultat.png" /></p>
+</div>
 </div>
 
 <br><br><br><br><br><br><br><br><br><br><br><br>

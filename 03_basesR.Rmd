@@ -74,32 +74,56 @@ sum(notes)
 Créer un dataframe sur 3 villes et leur nombre d'habitants
 Trouver la moyenne du nombre d'habitants.
 
-# Import de données spatiales et première carte
 
+
+# Boucles
+
+
+On cherche à faire un graphique de chacun des résultats
+
+
+## Import de la donnée
 
 
 ```{r}
-library(sf)
-zone <- st_read("data/vote.gpkg", "zone")
-# quel contenu pour le fichier ?
-str(zone)
-# carte avec commande rbase
-plot(zone$geom, col = terrain.colors (31),
-     border = NA,
-     main = "31 bureaux de vote de Bondy")
-# carte avec mapsf
-library(mapsf)
-mf_map(zone, type = "choro", border = NA,var = "aire")
-# éliminer les bureaux 31 et 32
-zone <- zone [zone$numBureau %in% seq(1,30),]
-summary(zone)
-mf_map(zone, type = "choro", pal = "Burg",
-       border = NA, var = "txVotants")
-``` 
+data <- read.csv("data/bondyElection.csv", fileEncoding = "UTF-8", dec = ",")
+head(data)
+summary(data)
+```
 
-source :
-https://riatelab.github.io/mapsf/articles/web_only/cheat_sheet.html
+## Nettoyage
+
+### Problème des champs totaux
+
+```{r}
+data$Bureau.de.vote
+data <-  data [-c(33,34),]
+```
 
 
+### Les noms des candidats
 
+```{r}
+candidat  <- names(data)[8:12]
+candidat
+liste <- strsplit(candidat,"\\.\\.\\.")
+liste [[5]][3]
+candidat <- sapply(liste, '[', 3)
+names (data) [8:12] <- candidat
+names(data)
+```
+
+
+## Graphique
+
+```{r}
+png(height = 800, width = 600, filename = "img/resultat.png")
+par(mfrow = c(4,3))
+for (i in 2:12){
+  barplot(data [,i], main = names(data) [i])
+}
+dev.off()
+```
+
+![](img/resultat.png)
 

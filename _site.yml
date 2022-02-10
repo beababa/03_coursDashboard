@@ -3,10 +3,12 @@ navbar:
   left:
     - text: "Introduction"
       href: 01_intro.html
-    - text: "environnement"
+    - text: "Environnement"
       href: 02_environnement.html
-    - text: "bases R"
+    - text: "Bases R"
       href: 03_basesR.html 
+    - text: "R spatial"
+      href: 04_Rspatial.html 
   right:
     - icon: fa-github
       href: https://github.com/beababa/beababa.github.io

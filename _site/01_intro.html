@@ -601,6 +601,79 @@ div.tocify {
 <p><img src="01_intro_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <div id="exercice-mettre-en-graphique-les-autres-vecteurs" class="section level2" number="6.1">
 <h2 number="6.1"><span class="header-section-number">6.1</span> Exercice : mettre en graphique les autres vecteurs</h2>
+<p>Pendant l’exercice, on regarde l’aide (F1) et on chercdhe les options de barplot pour :</p>
+<ul>
+<li>étiquettes (names.arg)</li>
+<li>verticales (las)</li>
+<li>legende (legend.text)</li>
+</ul>
+<p>L’aide ne permet pas de trouver ces éléments, il faut souvent se reporter plutôt sur internet.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># choix de la variable : présent et dénombrement</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">table</span> (cours1<span class="sc">$</span>présent)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tab, <span class="at">col =</span><span class="fu">heat.colors</span>(<span class="dv">4</span>), <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">names.arg =</span> <span class="fu">names</span>(tab), <span class="at">las =</span> <span class="dv">2</span>, <span class="at">main =</span> <span class="st">&quot;Présent des étudiants&quot;</span>)</span></code></pre></div>
+<p><img src="01_intro_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tab, <span class="at">col =</span><span class="fu">heat.colors</span>(<span class="dv">4</span>), <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">legend.text =</span> T, <span class="at">main =</span> <span class="st">&quot;Présent des étudiants&quot;</span>)</span></code></pre></div>
+<p><img src="01_intro_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+</div>
+<div id="recodage" class="section level2" number="6.2">
+<h2 number="6.2"><span class="header-section-number">6.2</span> Recodage</h2>
+<p>source :</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">table</span>(cours1<span class="sc">$</span>futur)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>etik <span class="ot">&lt;-</span> <span class="fu">names</span>(tab)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(tab)</span></code></pre></div>
+<pre><code>##  [1] &quot;&quot;                                                            
+##  [2] &quot;?&quot;                                                           
+##  [3] &quot;égyptologie&quot;                                                 
+##  [4] &quot;géographe et archéologue&quot;                                    
+##  [5] &quot;Géomatique Environnementale&quot;                                 
+##  [6] &quot;jsp&quot;                                                         
+##  [7] &quot;logisticienne&quot;                                               
+##  [8] &quot;Master de jsp&quot;                                               
+##  [9] &quot;master en géopolitique aucune idée de métier&quot;                
+## [10] &quot;Recherche archéo du récent/esclavage ou médiation culturelle&quot;
+## [11] &quot;Recherche en Archéologie du genre&quot;                           
+## [12] &quot;SIG appliqué à l&#39;archéologie&quot;                                
+## [13] &quot;Urbanisme&quot;                                                   
+## [14] &quot;Urbanisme &quot;                                                  
+## [15] &quot;urbanisme dans collectivités territoriales&quot;                  
+## [16] &quot;Urbaniste&quot;                                                   
+## [17] &quot;urbaniste ?&quot;                                                 
+## [18] &quot;Urbaniste ville durable&quot;</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tab, <span class="at">names.arg =</span> <span class="fu">names</span>(tab), <span class="at">las =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="01_intro_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Il s’agit ici de diminuer le nombre de modalités de la variable.</p>
+<div id="un-exemple-les-urbanistes" class="section level3" number="6.2.1">
+<h3 number="6.2.1"><span class="header-section-number">6.2.1</span> Un exemple : les urbanistes</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>motif <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">&quot;rba&quot;</span>, cours1<span class="sc">$</span>futur)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur [motif]</span></code></pre></div>
+<pre><code>##  [1] &quot;Urbaniste&quot;                                 
+##  [2] &quot;Urbanisme&quot;                                 
+##  [3] &quot;Urbaniste ville durable&quot;                   
+##  [4] &quot;Urbaniste&quot;                                 
+##  [5] &quot;Urbaniste&quot;                                 
+##  [6] &quot;urbaniste ?&quot;                               
+##  [7] &quot;Urbanisme &quot;                                
+##  [8] &quot;Urbanisme&quot;                                 
+##  [9] &quot;Urbanisme&quot;                                 
+## [10] &quot;urbanisme dans collectivités territoriales&quot;</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur [motif] <span class="ot">&lt;-</span> <span class="st">&quot;urbanisme&quot;</span></span></code></pre></div>
+</div>
+<div id="exercice-quel-autre-recodage-possible" class="section level3" number="6.2.2">
+<h3 number="6.2.2"><span class="header-section-number">6.2.2</span> Exercice : quel autre recodage possible ?</h3>
+</div>
+</div>
+<div id="valeurs-manquantes" class="section level2" number="6.3">
+<h2 number="6.3"><span class="header-section-number">6.3</span> Valeurs manquantes</h2>
+<p>NA (Not Avalaible)</p>
+<p>? et absence de réponse n’ont pas la même valeur. On décide de recoder les réponses nulles en NA</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur <span class="sc">==</span> <span class="st">&quot;&quot;</span></span></code></pre></div>
+<pre><code>##  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE FALSE FALSE
+## [13] FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE
+## [25] FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur [cours1<span class="sc">$</span>futur <span class="sc">==</span> <span class="st">&quot;&quot;</span>]</span></code></pre></div>
+<pre><code>##  [1] &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot;</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur [cours1<span class="sc">$</span>futur <span class="sc">==</span> <span class="st">&quot;&quot;</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">table</span>(cours1<span class="sc">$</span>futur, <span class="at">useNA  =</span> <span class="st">&quot;always&quot;</span>)</span></code></pre></div>
 </div>
 </div>
 

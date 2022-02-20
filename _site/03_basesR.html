@@ -485,11 +485,15 @@ div.tocify {
 <p>Créer un dataframe sur 3 villes et leur nombre d’habitants Trouver la moyenne du nombre d’habitants.</p>
 </div>
 </div>
-<div id="boucles" class="section level1" number="3">
-<h1 number="3"><span class="header-section-number">3</span> Boucles</h1>
+<div id="boucles-et-autres" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Boucles et autres</h1>
+<p>Avec l’exemple, du fichier des élections, on introduit la notion de boucle.</p>
+<p>Avec celui du fichier des présences, on explore les listes et les fonctions apply.</p>
+<div id="exemple-1-les-résultats-des-élections" class="section level2" number="3.1">
+<h2 number="3.1"><span class="header-section-number">3.1</span> Exemple 1 : les résultats des élections</h2>
 <p>On cherche à faire un graphique de chacun des résultats</p>
-<div id="import-de-la-donnée" class="section level2" number="3.1">
-<h2 number="3.1"><span class="header-section-number">3.1</span> Import de la donnée</h2>
+<div id="import-de-la-donnée" class="section level3" number="3.1.1">
+<h3 number="3.1.1"><span class="header-section-number">3.1.1</span> Import de la donnée</h3>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/bondyElection.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>, <span class="at">dec =</span> <span class="st">&quot;,&quot;</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)</span></code></pre></div>
 <pre><code>##   Bureau.de.vote Nb.d.électeurs.inscrits Nb.de.votants
@@ -607,10 +611,10 @@ div.tocify {
 ##  Max.   :361.00                                       
 ## </code></pre>
 </div>
-<div id="nettoyage" class="section level2" number="3.2">
-<h2 number="3.2"><span class="header-section-number">3.2</span> Nettoyage</h2>
-<div id="problème-des-champs-totaux" class="section level3" number="3.2.1">
-<h3 number="3.2.1"><span class="header-section-number">3.2.1</span> Problème des champs totaux</h3>
+<div id="nettoyage" class="section level3" number="3.1.2">
+<h3 number="3.1.2"><span class="header-section-number">3.1.2</span> Nettoyage</h3>
+<div id="problème-des-champs-totaux" class="section level4" number="3.1.2.1">
+<h4 number="3.1.2.1"><span class="header-section-number">3.1.2.1</span> Problème des champs totaux</h4>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>Bureau.de.vote</span></code></pre></div>
 <pre><code>##  [1] &quot;BV1&quot;        &quot;BV2&quot;        &quot;BV3&quot;        &quot;BV4&quot;        &quot;BV5&quot;       
 ##  [6] &quot;BV6&quot;        &quot;BV7&quot;        &quot;BV8&quot;        &quot;BV9&quot;        &quot;BV10&quot;      
@@ -621,8 +625,8 @@ div.tocify {
 ## [31] &quot;BV31&quot;       &quot;BV32&quot;       &quot;TOTAL&quot;      &quot;Total en %&quot;</code></pre>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span>  data [<span class="sc">-</span><span class="fu">c</span>(<span class="dv">33</span>,<span class="dv">34</span>),]</span></code></pre></div>
 </div>
-<div id="les-noms-des-candidats" class="section level3" number="3.2.2">
-<h3 number="3.2.2"><span class="header-section-number">3.2.2</span> Les noms des candidats</h3>
+<div id="les-noms-des-candidats" class="section level4" number="3.1.2.2">
+<h4 number="3.1.2.2"><span class="header-section-number">3.1.2.2</span> Les noms des candidats</h4>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>candidat  <span class="ot">&lt;-</span> <span class="fu">names</span>(data)[<span class="dv">8</span><span class="sc">:</span><span class="dv">12</span>]</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>candidat</span></code></pre></div>
 <pre><code>## [1] &quot;Résultats.liste.1...Liste.de.la.gauche.unie.pour.Bondy....Sylvine.THOMASSIN.&quot;              
@@ -644,8 +648,8 @@ div.tocify {
 ## [11] &quot;Vincent.DUGUET&quot;            &quot;Sylvie.BADOUX&quot;</code></pre>
 </div>
 </div>
-<div id="graphique" class="section level2" number="3.3">
-<h2 number="3.3"><span class="header-section-number">3.3</span> Graphique</h2>
+<div id="graphique" class="section level3" number="3.1.3">
+<h3 number="3.1.3"><span class="header-section-number">3.1.3</span> Graphique</h3>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">png</span>(<span class="at">height =</span> <span class="dv">800</span>, <span class="at">width =</span> <span class="dv">600</span>, <span class="at">filename =</span> <span class="st">&quot;img/resultat.png&quot;</span>)</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">3</span>))</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">12</span>){</span>
@@ -656,6 +660,692 @@ div.tocify {
 ##   2</code></pre>
 <p><img src="img/resultat.png" /></p>
 </div>
+</div>
+<div id="exemple-2-les-présents-dans-le-cours" class="section level2" number="3.2">
+<h2 number="3.2"><span class="header-section-number">3.2</span> Exemple 2 : les présents dans le cours</h2>
+<p>Cet exemple montrer les 3 types possibles de code.</p>
+<ul>
+<li><p>code séquentiel</p></li>
+<li><p>code en boucle classique</p></li>
+<li><p>code R : liste et apply</p></li>
+</ul>
+<p>source : <a href="https://r-coder.com/merge-r/" class="uri">https://r-coder.com/merge-r/</a></p>
+<div id="lecture-et-concaténation-des-tableaux" class="section level3" number="3.2.1">
+<h3 number="3.2.1"><span class="header-section-number">3.2.1</span> Lecture et concaténation des tableaux</h3>
+<p>Il s’agit d’importer les .csv dans R et de les lier par prénom.</p>
+<div id="sans-boucle-code-séquentiel" class="section level4" number="3.2.1.1">
+<h4 number="3.2.1.1"><span class="header-section-number">3.2.1.1</span> Sans boucle : code séquentiel</h4>
+<div id="import-des-fichiers" class="section level5" number="3.2.1.1.1">
+<h5 number="3.2.1.1.1"><span class="header-section-number">3.2.1.1.1</span> Import des fichiers</h5>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Intégration des tableaux</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>cours1 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/cours1.csv&quot;</span>, <span class="at">encoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>cours2 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/cours2.csv&quot;</span>, <span class="at">encoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>cours3 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/cours3.csv&quot;</span>,<span class="at">encoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>cours4 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/cours4.csv&quot;</span>, <span class="at">encoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Examen de la nature des champs</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cours1)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    32 obs. of  14 variables:
+##  $ Prénom                            : chr  &quot;Louis&quot; &quot;Gaëlle&quot; &quot;Anne&quot; &quot;Mariam&quot; ...
+##  $ nom                               : chr  &quot;PERRAUD&quot; &quot;ROUSSEAU&quot; &quot;Simon&quot; &quot;Ouattara&quot; ...
+##  $ adresse.mail                      : chr  &quot;louisperraud@orange.fr&quot; &quot;gaelle.e.m.rousseau@gmail.com&quot; &quot;annesimon94@sfr.fr&quot; &quot;moreliaivy@gmail.com&quot; ...
+##  $ X44223                            : chr  &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; ...
+##  $ passé                             : chr  &quot;archéologie-géographie&quot; &quot;L2 archéo-géographie&quot; &quot;Classe préparatoire Khâgne/Hypokhâgne Lakanal&quot; &quot;L2 Géographie et aménagement&quot; ...
+##  $ présent                           : chr  &quot;L3 archéologie géographie&quot; &quot;L3 archéologie géographie&quot; &quot;L3 géographie et aménagement&quot; &quot;L3 géographie et aménagement&quot; ...
+##  $ futur                             : chr  &quot;égyptologie&quot; &quot;SIG appliqué à l&#39;archéologie&quot; &quot;Urbaniste&quot; &quot;logisticienne&quot; ...
+##  $ appétence.codage..1.fort.4.mauvais: int  2 1 2 3 1 1 3 3 4 3 ...
+##  $ Niveau.de.codage.de.0.à.5         : int  0 0 0 1 NA NA 2 NA 1 0 ...
+##  $ désinscription                    : chr  &quot;&quot; &quot;oui&quot; &quot;&quot; &quot;&quot; ...
+##  $ X                                 : logi  NA NA NA NA NA NA ...
+##  $ X.1                               : logi  NA NA NA NA NA NA ...
+##  $ X.2                               : logi  NA NA NA NA NA NA ...
+##  $ X.3                               : logi  NA NA NA NA NA NA ...</code></pre>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cours2)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    34 obs. of  14 variables:
+##  $ Prénom                   : chr  &quot;Louis&quot; &quot;Gaëlle&quot; &quot;Anne&quot; &quot;Mariam&quot; ...
+##  $ cours2..oui.             : chr  &quot;oui&quot; &quot;autre TD&quot; &quot;oui&quot; &quot;oui&quot; ...
+##  $ lien.internet.du.site.git: chr  &quot;https://github.com/Beatdvtbea/Exercice&quot; &quot;&quot; &quot;&quot; &quot;&quot; ...
+##  $ X                        : logi  NA NA NA NA NA NA ...
+##  $ X.1                      : logi  NA NA NA NA NA NA ...
+##  $ X.2                      : logi  NA NA NA NA NA NA ...
+##  $ X.3                      : logi  NA NA NA NA NA NA ...
+##  $ X.4                      : logi  NA NA NA NA NA NA ...
+##  $ X.5                      : logi  NA NA NA NA NA NA ...
+##  $ X.6                      : logi  NA NA NA NA NA NA ...
+##  $ X.7                      : logi  NA NA NA NA NA NA ...
+##  $ X.8                      : logi  NA NA NA NA NA NA ...
+##  $ X.9                      : logi  NA NA NA NA NA NA ...
+##  $ X.10                     : logi  NA NA NA NA NA NA ...</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cours3)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    30 obs. of  7 variables:
+##  $ Prénom      : chr  &quot;Louis&quot; &quot;Anne&quot; &quot;Mariam&quot; &quot;Selin&quot; ...
+##  $ cours3..oui.: chr  &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;Oui&quot; ...
+##  $ X           : chr  &quot;https://github.com/Beatdvtbea/Exercice&quot; &quot;https://github.com/annesimon94/momo.git&quot; &quot;https://github.com/MariamOuatt/monrepository&quot; &quot;https://github.com/selinhacer/Cactus&quot; ...
+##  $ X.1         : chr  &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; ...
+##  $ X.2         : logi  NA NA NA NA NA NA ...
+##  $ X.3         : logi  NA NA NA NA NA NA ...
+##  $ X.4         : logi  NA NA NA NA NA NA ...</code></pre>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cours4)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    19 obs. of  7 variables:
+##  $ Prénom                                   : chr  &quot;Louis&quot; &quot;Anne&quot; &quot;Mariam&quot; &quot;Selin&quot; ...
+##  $ cours4..oui.                             : chr  &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; ...
+##  $ lien.git                                 : chr  &quot;https://beatdvtbea.github.io/Exercice/01_intro.html&quot; &quot;https://github.com/annesimon94/momo.git&quot; &quot;https://github.com/MariamOuatt/monrepository&quot; &quot; https://selinhacer.github.io/L6ECSIG/&quot; ...
+##  $ X                                        : chr  &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; ...
+##  $ Article.à.lire..https...pages.github.com.: logi  NA NA NA NA NA NA ...
+##  $ X.1                                      : logi  NA NA NA NA NA NA ...
+##  $ X.2                                      : logi  NA NA NA NA NA NA ...</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># rappel : pour supprimer les facteurs, le paramètre est stringsAsFactor = F</span></span></code></pre></div>
+<p>On remarque que c’est toujours la 2e colonne qui nous intéresse sauf pour le cours1</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>coursBase <span class="ot">&lt;-</span> cours1 [, <span class="fu">c</span>(<span class="st">&quot;Prénom&quot;</span>, <span class="st">&quot;X44223&quot;</span>)]</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span> (coursBase)[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="st">&quot;cours1..oui.&quot;</span></span></code></pre></div>
+</div>
+<div id="fusionner-les-cours-par-prénom" class="section level5" number="3.2.1.1.2">
+<h5 number="3.2.1.1.2"><span class="header-section-number">3.2.1.1.2</span> Fusionner les cours par prénom</h5>
+<p>C’est la fonction <em>merge</em> que l’on retrouvera en R-spatial.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Première fusion</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>cours1_2 <span class="ot">&lt;-</span> <span class="fu">merge</span>(coursBase,cours2, <span class="at">all =</span> T)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="co"># l&#39;option all = T permet de récupérer tous les prénoms</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Première vérification : nb de lignes du cours</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cours1_2)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    34 obs. of  15 variables:
+##  $ Prénom                   : chr  &quot;Alaya&quot; &quot;Anna&quot; &quot;Anne&quot; &quot;Aurélie&quot; ...
+##  $ cours1..oui.             : chr  &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; ...
+##  $ cours2..oui.             : chr  &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; ...
+##  $ lien.internet.du.site.git: chr  &quot;&quot; &quot;https://github.com/AnnaMauclet/SIG1.git&quot; &quot;&quot; &quot;&quot; ...
+##  $ X                        : logi  NA NA NA NA NA NA ...
+##  $ X.1                      : logi  NA NA NA NA NA NA ...
+##  $ X.2                      : logi  NA NA NA NA NA NA ...
+##  $ X.3                      : logi  NA NA NA NA NA NA ...
+##  $ X.4                      : logi  NA NA NA NA NA NA ...
+##  $ X.5                      : logi  NA NA NA NA NA NA ...
+##  $ X.6                      : logi  NA NA NA NA NA NA ...
+##  $ X.7                      : logi  NA NA NA NA NA NA ...
+##  $ X.8                      : logi  NA NA NA NA NA NA ...
+##  $ X.9                      : logi  NA NA NA NA NA NA ...
+##  $ X.10                     : logi  NA NA NA NA NA NA ...</code></pre>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>cours1_2 [, <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)]</span></code></pre></div>
+<pre><code>##           Prénom cours1..oui. cours2..oui.
+## 1          Alaya          oui          oui
+## 2           Anna          oui          oui
+## 3           Anne          oui          oui
+## 4        Aurélie          non          non
+## 5        Camille          oui     autre TD
+## 6     Chang-Beom          oui          oui
+## 7          Chloé          oui          oui
+## 8           Eah           oui          non
+## 9  Elif-Delphine          oui          non
+## 10         Elisa          oui     autre TD
+## 11          Emma          non          non
+## 12        Gaëlle          oui     autre TD
+## 13         Galli         &lt;NA&gt;          oui
+## 14      Gianluca          oui          oui
+## 15       Guénolé          oui          oui
+## 16         Ianis          oui          oui
+## 17          Iman          oui          oui
+## 18      Jennifer          oui          oui
+## 19        Laura           oui     autre TD
+## 20         Linda          oui             
+## 21         Louis          oui          oui
+## 22         LUCAS          oui          oui
+## 23        Mariam          oui          oui
+## 24        Marion          oui          oui
+## 25      Matthieu          non          non
+## 26         SALIF          oui          non
+## 27         Sanaa          oui          oui
+## 28         sarah         &lt;NA&gt;          oui
+## 29      Savannah          oui          oui
+## 30         Selin          oui          Oui
+## 31         Théo           non          non
+## 32        Thomas          oui          oui
+## 33        Yanis           non          oui
+## 34       Zachary          oui          oui</code></pre>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pour la fusion suivante, les titres des colonnes sont nécessaires.</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>cours1_3 <span class="ot">&lt;-</span> <span class="fu">merge</span>(cours1_2 [, <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)], cours3 [, <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>)], <span class="at">by.x =</span> <span class="st">&quot;Prénom&quot;</span>, <span class="at">by.y =</span> <span class="st">&quot;Prénom&quot;</span>, <span class="at">all =</span> T)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cours1_3)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    34 obs. of  4 variables:
+##  $ Prénom      : chr  &quot;Alaya&quot; &quot;Anna&quot; &quot;Anne&quot; &quot;Aurélie&quot; ...
+##  $ cours1..oui.: chr  &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; ...
+##  $ cours2..oui.: chr  &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; ...
+##  $ cours3..oui.: chr  &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; ...</code></pre>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recodage nom des colonnes dans le tableau final</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(cours1_3) [<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>] <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">&quot;cours1&quot;</span>,<span class="st">&quot;cours2&quot;</span>,<span class="st">&quot;cours3&quot;</span>)</span></code></pre></div>
+</div>
+<div id="exercice-utiliser-la-fonction-merge" class="section level5" number="3.2.1.1.3">
+<h5 number="3.2.1.1.3"><span class="header-section-number">3.2.1.1.3</span> Exercice : utiliser la fonction merge</h5>
+<p>Rajouter le 4e cours</p>
+<p>Déposer le .Rmd dans le moodle avant la fin du cours. N’oubliez pas les commentaires !</p>
+</div>
+</div>
+</div>
+<div id="avec-une-boucle" class="section level3" number="3.2.2">
+<h3 number="3.2.2"><span class="header-section-number">3.2.2</span> Avec une boucle</h3>
+<div id="exercice-poser-lalgo" class="section level4" number="3.2.2.1">
+<h4 number="3.2.2.1"><span class="header-section-number">3.2.2.1</span> Exercice : poser l’algo</h4>
+</div>
+<div id="code" class="section level4" number="3.2.2.2">
+<h4 number="3.2.2.2"><span class="header-section-number">3.2.2.2</span> Code</h4>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On liste les fichiers du répertoire data</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>contenu <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">&quot;data/&quot;</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="co"># On remonte les indices des noms contenant &quot;cours&quot;</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>ind <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">&quot;cours&quot;</span>, contenu)</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="co"># verif : il doit y en avoir 4 puisqu&#39;il y a eu 4 cours</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="co"># on sort cours1.csv dont la structure est différente</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>i <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(ind)){</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  tmp <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">paste0</span>(<span class="st">&quot;data/&quot;</span>, contenu [i]), <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  coursMerge <span class="ot">&lt;-</span> <span class="fu">merge</span>(coursBase,tmp [,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)], <span class="at">all =</span> T, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;Prénom&quot;</span>, <span class="st">&quot;Prénom&quot;</span>))</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>  coursBase <span class="ot">&lt;-</span> coursMerge</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>coursMerge</span></code></pre></div>
+<pre><code>##           Prénom cours1..oui.           nom cours2..oui. cours3..oui.
+## 1          Alaya          oui       Irissou          oui          oui
+## 2           Anna          oui       MAUCLET          oui          oui
+## 3           Anne          oui         Simon          oui          oui
+## 4        Aurélie          non     Levasseur          non          non
+## 5        Camille          oui        Bouron     autre TD         &lt;NA&gt;
+## 6     Chang-Beom          oui           LEE          oui          oui
+## 7          Chloé          oui     de Soyres          oui          oui
+## 8           Eah           oui         Opitz          non          non
+## 9  Elif-Delphine          oui       ILGINSU          non          non
+## 10         Elisa          oui     Dieudonné     autre TD         &lt;NA&gt;
+## 11          Emma          non       Lesieur          non          non
+## 12        Gaëlle          oui      ROUSSEAU     autre TD         &lt;NA&gt;
+## 13         Galli         &lt;NA&gt;          &lt;NA&gt;          oui          non
+## 14      Gianluca          oui    Giovannini          oui          non
+## 15       Guénolé          oui     Reucheron          oui          non
+## 16         Ianis          oui         Ngoma          oui          oui
+## 17          Iman          oui      Zourdani          oui          non
+## 18      Jennifer          oui          Diep          oui          non
+## 19        Laura           oui       SAUNIER     autre TD         &lt;NA&gt;
+## 20         Linda          oui       Besnard                       non
+## 21         Louis          oui       PERRAUD          oui          oui
+## 22         LUCAS          oui  DO CARMO GIL          oui          non
+## 23        Mariam          oui      Ouattara          oui          oui
+## 24        Marion          oui      BLONDEAU          oui          Oui
+## 25      Matthieu          non          Dein          non          non
+## 26         SALIF          oui       SISSOKO          non          non
+## 27         Sanaa          oui          roux          oui          oui
+## 28         sarah         &lt;NA&gt;          &lt;NA&gt;          oui          oui
+## 29      Savannah          oui       LAURENT          oui          non
+## 30         Selin          oui                        Oui          Oui
+## 31         Théo           non  Deleplancque          non          non
+## 32        Thomas          oui        Médard          oui          non
+## 33        Yanis           non     Belahcene          oui          non
+## 34       Zachary          oui abdi-mechouar          oui          oui</code></pre>
+</div>
+</div>
+<div id="en-utilisant-les-listes-et-les-apply" class="section level3" number="3.2.3">
+<h3 number="3.2.3"><span class="header-section-number">3.2.3</span> En utilisant les listes et les apply</h3>
+<p>source : <a href="https://thinkr.fr/comment-faire-des-boucles-en-r-ou-pas/" class="uri">https://thinkr.fr/comment-faire-des-boucles-en-r-ou-pas/</a></p>
+<div id="modèle-à-proposer" class="section level4" number="3.2.3.1">
+<h4 number="3.2.3.1"><span class="header-section-number">3.2.3.1</span> Modèle à proposer</h4>
+<p>source : <a href="https://thinkr.fr/operations-sur-les-fichiers-et-les-dossiers-sous-r/" class="uri">https://thinkr.fr/operations-sur-les-fichiers-et-les-dossiers-sous-r/</a></p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># liste des csv à importer :</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>liste_csv <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">&quot;csv_a_importer&quot;</span>, <span class="at">pattern =</span> <span class="st">&quot;.csv&quot;</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="co"># import des données :</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>all_csv <span class="ot">&lt;-</span> <span class="fu">lapply</span>(liste_csv, readr<span class="sc">::</span>read_csv)</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="co"># un data.frame unique :</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>df_csv <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(all_csv)</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="co"># enregistrement du dataframe :</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>readr<span class="sc">::</span><span class="fu">write_csv</span>(df_csv, <span class="at">file =</span> <span class="st">&quot;df_csv.csv&quot;</span>)</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="co"># on renomme le dossier</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a><span class="fu">file.rename</span>(<span class="at">from =</span> <span class="st">&quot;csv_a_importer&quot;</span>, <span class="at">to =</span> <span class="st">&quot;csv_importes&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="pour-notre-cas" class="section level3" number="3.2.4">
+<h3 number="3.2.4"><span class="header-section-number">3.2.4</span> Pour notre cas</h3>
+<p>le faire évoluer pour qu’il corresponde au cours</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># liste des csv à importer :</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>liste_cours <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">&quot;data/&quot;</span>, <span class="at">pattern =</span> <span class="st">&quot;cours&quot;</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="co"># import des données :</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="co"># fonction read.csv.UTF</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>read.csv.UTF <span class="ot">&lt;-</span> <span class="cf">function</span>(fic) {<span class="fu">read.csv</span>(fic, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)}</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>liste <span class="ot">&lt;-</span> <span class="fu">lapply</span>(liste_cours, read.csv.UTF)</span></code></pre></div>
+<p>Indexation des listes</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>liste[[<span class="dv">1</span>]]</span></code></pre></div>
+<pre><code>##           Prénom           nom                      adresse.mail X44223
+## 1          Louis       PERRAUD            louisperraud@orange.fr    oui
+## 2         Gaëlle      ROUSSEAU     gaelle.e.m.rousseau@gmail.com    oui
+## 3           Anne         Simon                annesimon94@sfr.fr    oui
+## 4         Mariam      Ouattara              moreliaivy@gmail.com    oui
+## 5        Camille        Bouron            camillebrn12@gmail.com    oui
+## 6          Elisa     Dieudonné       elisa.dieudonne46@gmail.com    oui
+## 7          Selin                              selin.3@outlook.fr    oui
+## 8          Sanaa          roux                sanaaroux@yahoo.fr    oui
+## 9           Eah          Opitz                elzoop@outlook.com    oui
+## 10         Chloé     de Soyres            chloedesoyres@yahoo.fr    oui
+## 11         Ianis         Ngoma             ian.ngoma38@gmail.com    oui
+## 12      Jennifer          Diep             shayden.dj@icloud.com    oui
+## 13         Linda       Besnard          besnardlinda28@gmail.com    oui
+## 14          Anna       MAUCLET            annamauclet@hotmail.fr    oui
+## 15        Marion      BLONDEAU               marionbdu@gmail.com    oui
+## 16      Gianluca    Giovannini gianluca.giovannini.pro@gmail.com    oui
+## 17      Savannah       LAURENT       Savannah_laurent@outlook.fr    oui
+## 18         LUCAS  DO CARMO GIL        lucas.docarmogil@gmail.com    oui
+## 19          Iman      Zourdani            iman.zourdani@yahoo.fr    oui
+## 20         Alaya       Irissou            alayairissou@gmail.com    oui
+## 21       Guénolé     Reucheron       guenole.reucheron@gmail.com    oui
+## 22        Thomas        Médard          thomas.medard@outlook.fr    oui
+## 23        Laura        SAUNIER          saunierlaura99@gmail.com    oui
+## 24         SALIF       SISSOKO          SISSOKOSALIf94@gmail.com    oui
+## 25    Chang-Beom           LEE               lcb900813@gmail.com    oui
+## 26       Zachary abdi-mechouar       zachary.abdi.crew@gmail.com    oui
+## 27       Aurélie     Levasseur     aurelie.levasseur03@gmail.com    non
+## 28        Yanis      Belahcene          yanisbelahcene@gmail.com    non
+## 29         Théo   Deleplancque       theo.deleplancque@gmail.com    non
+## 30          Emma       Lesieur           emma.lesieur@hotmail.fr    non
+## 31      Matthieu          Dein           dein.matthieu@gmail.com    non
+## 32 Elif-Delphine       ILGINSU            elif.ilginsu@gmail.com    oui
+##                                            passé                      présent
+## 1                         archéologie-géographie    L3 archéologie géographie
+## 2                           L2 archéo-géographie    L3 archéologie géographie
+## 3  Classe préparatoire Khâgne/Hypokhâgne Lakanal L3 géographie et aménagement
+## 4                   L2 Géographie et aménagement L3 géographie et aménagement
+## 5                         archéologie-géographie    L3 archéologie géographie
+## 6                                       CPGE B/L    L3 archéologie géographie
+## 7                   L1 - L2 - Géo. &amp; Aménagement L3 géographie et aménagement
+## 8             Erasmus Lettres Modernes - Italien L3 géographie et aménagement
+## 9                         archéologie géographie    L3 archéologie géographie
+## 10                                      CPGE A/L L3 géographie et aménagement
+## 11                            L2 Geo aménagement L3 géographie et aménagement
+## 12                  CPGE spé histoire-géographie L3 géographie et aménagement
+## 13                  L2 géographie et amenagement L3 géographie et aménagement
+## 14                   Licence 2 Géographie (Nice) L3 géographie et aménagement
+## 15                     CPGE en spé histoire-géo  L3 géographie et aménagement
+## 16                                 L2 geo et ame L3 géographie et aménagement
+## 17    L2 Géographie et aménagement du territoire L3 géographie et aménagement
+## 18    L2 géographie et aménagement du territoire L3 géographie et aménagement
+## 19                            Erasmus géographie L3 géographie et aménagement
+## 20                  L2 géographie et aménagement L3 géographie et aménagement
+## 21                                 M1 Géographie       M2 Géopolitique Geoint
+## 22                MSc en sécurité internationale       M2 Géopolitique Geoint
+## 23                  L2 Géographie et Aménagement L3 géographie et aménagement
+## 24                     geographie et aménagement L3 géographie et aménagement
+## 25                                       Unistra L3 géographie et aménagement
+## 26                  L2 geographie et amenagement L3 géographie et aménagement
+## 27                                                                           
+## 28                                                     M2 Géopolitique Geoint
+## 29                                                     M2 Géopolitique Geoint
+## 30                                                     M2 Géopolitique Geoint
+## 31                                                     M2 Géopolitique Geoint
+## 32                               CPGE littéraire L3 géographie et aménagement
+##                                                           futur
+## 1                                                   égyptologie
+## 2                                  SIG appliqué à l&#39;archéologie
+## 3                                                     Urbaniste
+## 4                                                 logisticienne
+## 5  Recherche archéo du récent/esclavage ou médiation culturelle
+## 6                             Recherche en Archéologie du genre
+## 7                                                     Urbanisme
+## 8                                                              
+## 9                                      géographe et archéologue
+## 10                                                             
+## 11                                                          jsp
+## 12                                                Master de jsp
+## 13                                      Urbaniste ville durable
+## 14                                                    Urbaniste
+## 15                                                    Urbaniste
+## 16                                                             
+## 17                                                  urbaniste ?
+## 18                                                            ?
+## 19                                                   Urbanisme 
+## 20                 master en géopolitique aucune idée de métier
+## 21                                                            ?
+## 22                                                             
+## 23                                  Géomatique Environnementale
+## 24                                                    Urbanisme
+## 25                                                    Urbanisme
+## 26                   urbanisme dans collectivités territoriales
+## 27                                                             
+## 28                                                             
+## 29                                                             
+## 30                                                             
+## 31                                                             
+## 32                                                             
+##    appétence.codage..1.fort.4.mauvais Niveau.de.codage.de.0.à.5 désinscription
+## 1                                   2                         0               
+## 2                                   1                         0            oui
+## 3                                   2                         0               
+## 4                                   3                         1               
+## 5                                   1                        NA               
+## 6                                   1                        NA            oui
+## 7                                   3                         2            oui
+## 8                                   3                        NA               
+## 9                                   4                         1               
+## 10                                  3                         0               
+## 11                                  2                        NA               
+## 12                                  1                        NA               
+## 13                                  3                         1               
+## 14                                  2                        NA               
+## 15                                  3                        NA               
+## 16                                  2                        NA               
+## 17                                  2                        NA               
+## 18                                  2                        NA               
+## 19                                  3                        NA               
+## 20                                  3                        NA               
+## 21                                  1                         0               
+## 22                                 NA                        NA               
+## 23                                  1                        NA            oui
+## 24                                  3                        NA               
+## 25                                  1                         0               
+## 26                                  1                         0               
+## 27                                 NA                        NA               
+## 28                                 NA                        NA               
+## 29                                 NA                        NA               
+## 30                                 NA                        NA               
+## 31                                 NA                        NA               
+## 32                                  0                         0               
+##     X X.1 X.2 X.3
+## 1  NA  NA  NA  NA
+## 2  NA  NA  NA  NA
+## 3  NA  NA  NA  NA
+## 4  NA  NA  NA  NA
+## 5  NA  NA  NA  NA
+## 6  NA  NA  NA  NA
+## 7  NA  NA  NA  NA
+## 8  NA  NA  NA  NA
+## 9  NA  NA  NA  NA
+## 10 NA  NA  NA  NA
+## 11 NA  NA  NA  NA
+## 12 NA  NA  NA  NA
+## 13 NA  NA  NA  NA
+## 14 NA  NA  NA  NA
+## 15 NA  NA  NA  NA
+## 16 NA  NA  NA  NA
+## 17 NA  NA  NA  NA
+## 18 NA  NA  NA  NA
+## 19 NA  NA  NA  NA
+## 20 NA  NA  NA  NA
+## 21 NA  NA  NA  NA
+## 22 NA  NA  NA  NA
+## 23 NA  NA  NA  NA
+## 24 NA  NA  NA  NA
+## 25 NA  NA  NA  NA
+## 26 NA  NA  NA  NA
+## 27 NA  NA  NA  NA
+## 28 NA  NA  NA  NA
+## 29 NA  NA  NA  NA
+## 30 NA  NA  NA  NA
+## 31 NA  NA  NA  NA
+## 32 NA  NA  NA  NA</code></pre>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>liste[[<span class="dv">1</span>]][<span class="dv">1</span>]</span></code></pre></div>
+<pre><code>##           Prénom
+## 1          Louis
+## 2         Gaëlle
+## 3           Anne
+## 4         Mariam
+## 5        Camille
+## 6          Elisa
+## 7          Selin
+## 8          Sanaa
+## 9           Eah 
+## 10         Chloé
+## 11         Ianis
+## 12      Jennifer
+## 13         Linda
+## 14          Anna
+## 15        Marion
+## 16      Gianluca
+## 17      Savannah
+## 18         LUCAS
+## 19          Iman
+## 20         Alaya
+## 21       Guénolé
+## 22        Thomas
+## 23        Laura 
+## 24         SALIF
+## 25    Chang-Beom
+## 26       Zachary
+## 27       Aurélie
+## 28        Yanis 
+## 29         Théo 
+## 30          Emma
+## 31      Matthieu
+## 32 Elif-Delphine</code></pre>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>liste[[<span class="dv">1</span>]][<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">4</span>)]</span></code></pre></div>
+<pre><code>##           Prénom X44223
+## 1          Louis    oui
+## 2         Gaëlle    oui
+## 3           Anne    oui
+## 4         Mariam    oui
+## 5        Camille    oui
+## 6          Elisa    oui
+## 7          Selin    oui
+## 8          Sanaa    oui
+## 9           Eah     oui
+## 10         Chloé    oui
+## 11         Ianis    oui
+## 12      Jennifer    oui
+## 13         Linda    oui
+## 14          Anna    oui
+## 15        Marion    oui
+## 16      Gianluca    oui
+## 17      Savannah    oui
+## 18         LUCAS    oui
+## 19          Iman    oui
+## 20         Alaya    oui
+## 21       Guénolé    oui
+## 22        Thomas    oui
+## 23        Laura     oui
+## 24         SALIF    oui
+## 25    Chang-Beom    oui
+## 26       Zachary    oui
+## 27       Aurélie    non
+## 28        Yanis     non
+## 29         Théo     non
+## 30          Emma    non
+## 31      Matthieu    non
+## 32 Elif-Delphine    oui</code></pre>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>liste [[<span class="dv">1</span>]] <span class="ot">&lt;-</span> liste [[<span class="dv">1</span>]][<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">4</span>)]</span></code></pre></div>
+</div>
+</div>
+<div id="explorations-statistiques" class="section level2" number="3.3">
+<h2 number="3.3"><span class="header-section-number">3.3</span> Explorations statistiques</h2>
+<p>Désormais, on utilise les apply dés que c’est possible</p>
+<p>Exemple : Nombre de présents pour chacun des 3 cours</p>
+<div id="simplification-de-la-liste" class="section level3" number="3.3.1">
+<h3 number="3.3.1"><span class="header-section-number">3.3.1</span> Simplification de la liste</h3>
+<p>On ne retient que les 2 premières colonnes.</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>listeOK <span class="ot">&lt;-</span> <span class="fu">lapply</span>(liste, <span class="st">&quot;[&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>listeOK</span></code></pre></div>
+<pre><code>## [[1]]
+##           Prénom X44223
+## 1          Louis    oui
+## 2         Gaëlle    oui
+## 3           Anne    oui
+## 4         Mariam    oui
+## 5        Camille    oui
+## 6          Elisa    oui
+## 7          Selin    oui
+## 8          Sanaa    oui
+## 9           Eah     oui
+## 10         Chloé    oui
+## 11         Ianis    oui
+## 12      Jennifer    oui
+## 13         Linda    oui
+## 14          Anna    oui
+## 15        Marion    oui
+## 16      Gianluca    oui
+## 17      Savannah    oui
+## 18         LUCAS    oui
+## 19          Iman    oui
+## 20         Alaya    oui
+## 21       Guénolé    oui
+## 22        Thomas    oui
+## 23        Laura     oui
+## 24         SALIF    oui
+## 25    Chang-Beom    oui
+## 26       Zachary    oui
+## 27       Aurélie    non
+## 28        Yanis     non
+## 29         Théo     non
+## 30          Emma    non
+## 31      Matthieu    non
+## 32 Elif-Delphine    oui
+## 
+## [[2]]
+##           Prénom cours2..oui.
+## 1          Louis          oui
+## 2         Gaëlle     autre TD
+## 3           Anne          oui
+## 4         Mariam          oui
+## 5        Camille     autre TD
+## 6          Elisa     autre TD
+## 7          Selin          Oui
+## 8          Sanaa          oui
+## 9           Eah           non
+## 10         Chloé          oui
+## 11         Ianis          oui
+## 12      Jennifer          oui
+## 13         Linda             
+## 14          Anna          oui
+## 15        Marion          oui
+## 16      Gianluca          oui
+## 17      Savannah          oui
+## 18         LUCAS          oui
+## 19          Iman          oui
+## 20         Alaya          oui
+## 21       Guénolé          oui
+## 22        Thomas          oui
+## 23        Laura      autre TD
+## 24         SALIF          non
+## 25    Chang-Beom          oui
+## 26       Zachary          oui
+## 27       Aurélie          non
+## 28        Yanis           oui
+## 29         Théo           non
+## 30          Emma          non
+## 31      Matthieu          non
+## 32 Elif-Delphine          non
+## 33         Galli          oui
+## 34         sarah          oui
+## 
+## [[3]]
+##           Prénom cours3..oui.
+## 1          Louis          oui
+## 2           Anne          oui
+## 3         Mariam          oui
+## 4          Selin          Oui
+## 5          Sanaa          oui
+## 6           Eah           non
+## 7          Chloé          oui
+## 8          Ianis          oui
+## 9       Jennifer          non
+## 10         Linda          non
+## 11          Anna          oui
+## 12        Marion          Oui
+## 13      Gianluca          non
+## 14      Savannah          non
+## 15         LUCAS          non
+## 16          Iman          non
+## 17         Alaya          oui
+## 18       Guénolé          non
+## 19        Thomas          non
+## 20         SALIF          non
+## 21    Chang-Beom          oui
+## 22       Zachary          oui
+## 23       Aurélie          non
+## 24        Yanis           non
+## 25         Théo           non
+## 26          Emma          non
+## 27      Matthieu          non
+## 28 Elif-Delphine          non
+## 29         Galli          non
+## 30         sarah          oui
+## 
+## [[4]]
+##        Prénom cours4..oui.
+## 1       Louis          oui
+## 2        Anne          oui
+## 3      Mariam          oui
+## 4       Selin          oui
+## 5       Sanaa          oui
+## 6       Chloé          oui
+## 7       Ianis          oui
+## 8    Jennifer          oui
+## 9        Anna          oui
+## 10     Marion          Oui
+## 11   Gianluca          oui
+## 12   Savannah          non
+## 13      Alaya          oui
+## 14    Guénolé          non
+## 15     Thomas          non
+## 16 Chang-Beom          oui
+## 17    Zachary          oui
+## 18      Galli          oui
+## 19      sarah          oui</code></pre>
+</div>
+</div>
+<div id="recodage" class="section level2" number="3.4">
+<h2 number="3.4"><span class="header-section-number">3.4</span> Recodage</h2>
+<p>Est-il nécessaire de recoder les NA ?</p>
+<p>Recodage des “Oui” en “oui”</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>listeOK[[<span class="dv">1</span>]]</span></code></pre></div>
+<pre><code>##           Prénom X44223
+## 1          Louis    oui
+## 2         Gaëlle    oui
+## 3           Anne    oui
+## 4         Mariam    oui
+## 5        Camille    oui
+## 6          Elisa    oui
+## 7          Selin    oui
+## 8          Sanaa    oui
+## 9           Eah     oui
+## 10         Chloé    oui
+## 11         Ianis    oui
+## 12      Jennifer    oui
+## 13         Linda    oui
+## 14          Anna    oui
+## 15        Marion    oui
+## 16      Gianluca    oui
+## 17      Savannah    oui
+## 18         LUCAS    oui
+## 19          Iman    oui
+## 20         Alaya    oui
+## 21       Guénolé    oui
+## 22        Thomas    oui
+## 23        Laura     oui
+## 24         SALIF    oui
+## 25    Chang-Beom    oui
+## 26       Zachary    oui
+## 27       Aurélie    non
+## 28        Yanis     non
+## 29         Théo     non
+## 30          Emma    non
+## 31      Matthieu    non
+## 32 Elif-Delphine    oui</code></pre>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>coder <span class="ot">&lt;-</span> <span class="cf">function</span> (data) {<span class="fu">sub</span> (<span class="st">&quot;Oui&quot;</span>,<span class="st">&quot;oui&quot;</span>, data [,<span class="dv">2</span>])}</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>listeRecodée <span class="ot">&lt;-</span> <span class="fu">lapply</span>(listeOK, coder)</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>listeRecodée</span></code></pre></div>
+<pre><code>## [[1]]
+##  [1] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot;
+## [13] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot;
+## [25] &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot;
+## 
+## [[2]]
+##  [1] &quot;oui&quot;      &quot;autre TD&quot; &quot;oui&quot;      &quot;oui&quot;      &quot;autre TD&quot; &quot;autre TD&quot;
+##  [7] &quot;oui&quot;      &quot;oui&quot;      &quot;non&quot;      &quot;oui&quot;      &quot;oui&quot;      &quot;oui&quot;     
+## [13] &quot;&quot;         &quot;oui&quot;      &quot;oui&quot;      &quot;oui&quot;      &quot;oui&quot;      &quot;oui&quot;     
+## [19] &quot;oui&quot;      &quot;oui&quot;      &quot;oui&quot;      &quot;oui&quot;      &quot;autre TD&quot; &quot;non&quot;     
+## [25] &quot;oui&quot;      &quot;oui&quot;      &quot;non&quot;      &quot;oui&quot;      &quot;non&quot;      &quot;non&quot;     
+## [31] &quot;non&quot;      &quot;non&quot;      &quot;oui&quot;      &quot;oui&quot;     
+## 
+## [[3]]
+##  [1] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot;
+## [13] &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;non&quot;
+## [25] &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot;
+## 
+## [[4]]
+##  [1] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot;
+## [13] &quot;oui&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot;</code></pre>
+</div>
+</div>
+<div id="explorations-statistiques-sur-les-présences" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Explorations statistiques sur les présences</h1>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>compter <span class="ot">&lt;-</span> <span class="cf">function</span> (vec) {<span class="fu">table</span>(vec <span class="sc">==</span> <span class="st">&quot;oui&quot;</span>)}</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>présence <span class="ot">&lt;-</span> <span class="fu">sapply</span>(listeRecodée, compter)</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(présence [<span class="dv">2</span>,], <span class="at">main =</span> <span class="st">&quot;Nombres d&#39;étudiants&quot;</span>,</span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">names.arg =</span> <span class="fu">c</span> (<span class="st">&quot;cours1&quot;</span>, <span class="st">&quot;cours2&quot;</span>, <span class="st">&quot;cours3&quot;</span>, <span class="st">&quot;cours4&quot;</span>))</span></code></pre></div>
+<p><img src="03_basesR_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 </div>
 
 <br><br><br><br><br><br><br><br><br><br><br><br>

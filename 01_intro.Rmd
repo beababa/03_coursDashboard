@@ -72,6 +72,11 @@ https://framabook.org/r-et-espace/
 
 # Profil étudiants
 
+Quelques précisions sur les étudiants qui suivent le cours. Cela permet également une première approche de R base.
+
+## L'appétence : graphique
+
+
 ```{r}
 cours1 <- read.csv("data/cours1.csv", fileEncoding = "UTF-8")
 str(cours1)
@@ -79,10 +84,18 @@ tab  <- table (cours1$appétence.codage..1.fort.4.mauvais)
 barplot(tab, col = heat.colors(5), border = NA, xlab = "appétence, (1 oui - 4 non)")
 ```
 
+### Commentaire 
+
+
+Les étudiants présents se répartissent auraient plutôt envie de faire du codage, mais pas tous.
+
+Le choix du zéro ressort d'une mauvaise lecture de la consigne (1 oui - 4 non)... Combien d'étudiants l'ont bien lu ?
+
+
 
 ## Exercice : mettre en graphique les autres vecteurs
 
-Pendant l'exercice, on regarde l'aide (F1) et on chercdhe les options de barplot pour :
+Pendant l'exercice, on regarde l'aide (F1) et on cherche les options de barplot pour :
 
 - étiquettes (names.arg) 
 - verticales (las)
@@ -96,7 +109,6 @@ tab <- table (cours1$présent)
 barplot(tab, col =heat.colors(4), border = NA, names.arg = names(tab), las = 2, main = "Présent des étudiants")
 barplot(tab, col =heat.colors(4), border = NA, legend.text = T, main = "Présent des étudiants")
 ```
-
 
 
 ## Recodage
@@ -128,6 +140,20 @@ cours1$futur [motif] <- "urbanisme"
 
 ### Exercice : quel autre recodage possible ?
 
+
+```{r}
+motif <- grep("rch", cours1$futur)
+cours1$futur [motif] <- "archéologie"
+```
+
+Les deux réponses "jsp" vont être classées avec les "?", ainsi que "aucune idée de métier"
+
+```{r}
+motif <- grep("jsp|aucune", cours1$futur)
+cours1$futur [motif] <- "?"
+```
+
+
 ## Valeurs manquantes
 
 NA (Not Avalaible)
@@ -141,5 +167,14 @@ cours1$futur == ""
 cours1$futur [cours1$futur == ""]
 cours1$futur [cours1$futur == ""] <- NA
 tab <- table(cours1$futur, useNA  = "always")
+par(mar = c(4,15,2,2))
+barplot(tab, col = terrain.colors(7), las = 2, horiz = T, main = "Quel futur imaginent les étudiants ?")
 ``` 
+
+
+
+
+
+
+
 

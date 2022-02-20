@@ -582,6 +582,9 @@ div.tocify {
 </div>
 <div id="profil-étudiants" class="section level1" number="6">
 <h1 number="6"><span class="header-section-number">6</span> Profil étudiants</h1>
+<p>Quelques précisions sur les étudiants qui suivent le cours. Cela permet également une première approche de R base.</p>
+<div id="lappétence-graphique" class="section level2" number="6.1">
+<h2 number="6.1"><span class="header-section-number">6.1</span> L’appétence : graphique</h2>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cours1 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/cours1.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cours1)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    32 obs. of  14 variables:
@@ -602,9 +605,15 @@ div.tocify {
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tab  <span class="ot">&lt;-</span> <span class="fu">table</span> (cours1<span class="sc">$</span>appétence.codage..<span class="fl">1.</span>fort.<span class="fl">4.</span>mauvais)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tab, <span class="at">col =</span> <span class="fu">heat.colors</span>(<span class="dv">5</span>), <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">xlab =</span> <span class="st">&quot;appétence, (1 oui - 4 non)&quot;</span>)</span></code></pre></div>
 <p><img src="01_intro_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
-<div id="exercice-mettre-en-graphique-les-autres-vecteurs" class="section level2" number="6.1">
-<h2 number="6.1"><span class="header-section-number">6.1</span> Exercice : mettre en graphique les autres vecteurs</h2>
-<p>Pendant l’exercice, on regarde l’aide (F1) et on chercdhe les options de barplot pour :</p>
+<div id="commentaire" class="section level3" number="6.1.1">
+<h3 number="6.1.1"><span class="header-section-number">6.1.1</span> Commentaire</h3>
+<p>Les étudiants présents se répartissent auraient plutôt envie de faire du codage, mais pas tous.</p>
+<p>Le choix du zéro ressort d’une mauvaise lecture de la consigne (1 oui - 4 non)… Combien d’étudiants l’ont bien lu ?</p>
+</div>
+</div>
+<div id="exercice-mettre-en-graphique-les-autres-vecteurs" class="section level2" number="6.2">
+<h2 number="6.2"><span class="header-section-number">6.2</span> Exercice : mettre en graphique les autres vecteurs</h2>
+<p>Pendant l’exercice, on regarde l’aide (F1) et on cherche les options de barplot pour :</p>
 <ul>
 <li>étiquettes (names.arg)</li>
 <li>verticales (las)</li>
@@ -618,8 +627,8 @@ div.tocify {
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tab, <span class="at">col =</span><span class="fu">heat.colors</span>(<span class="dv">4</span>), <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">legend.text =</span> T, <span class="at">main =</span> <span class="st">&quot;Présent des étudiants&quot;</span>)</span></code></pre></div>
 <p><img src="01_intro_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
 </div>
-<div id="recodage" class="section level2" number="6.2">
-<h2 number="6.2"><span class="header-section-number">6.2</span> Recodage</h2>
+<div id="recodage" class="section level2" number="6.3">
+<h2 number="6.3"><span class="header-section-number">6.3</span> Recodage</h2>
 <p>source :</p>
 <p><a href="https://juba.github.io/tidyverse/09-recodages.html" class="uri">https://juba.github.io/tidyverse/09-recodages.html</a></p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">table</span>(cours1<span class="sc">$</span>futur)</span>
@@ -646,8 +655,8 @@ div.tocify {
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tab, <span class="at">names.arg =</span> <span class="fu">names</span>(tab), <span class="at">las =</span> <span class="dv">2</span>)</span></code></pre></div>
 <p><img src="01_intro_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>Il s’agit ici de diminuer le nombre de modalités de la variable.</p>
-<div id="un-exemple-les-urbanistes" class="section level3" number="6.2.1">
-<h3 number="6.2.1"><span class="header-section-number">6.2.1</span> Un exemple : les urbanistes</h3>
+<div id="un-exemple-les-urbanistes" class="section level3" number="6.3.1">
+<h3 number="6.3.1"><span class="header-section-number">6.3.1</span> Un exemple : les urbanistes</h3>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>motif <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">&quot;rba&quot;</span>, cours1<span class="sc">$</span>futur)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur [motif]</span></code></pre></div>
 <pre><code>##  [1] &quot;Urbaniste&quot;                                 
@@ -662,22 +671,30 @@ div.tocify {
 ## [10] &quot;urbanisme dans collectivités territoriales&quot;</code></pre>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur [motif] <span class="ot">&lt;-</span> <span class="st">&quot;urbanisme&quot;</span></span></code></pre></div>
 </div>
-<div id="exercice-quel-autre-recodage-possible" class="section level3" number="6.2.2">
-<h3 number="6.2.2"><span class="header-section-number">6.2.2</span> Exercice : quel autre recodage possible ?</h3>
+<div id="exercice-quel-autre-recodage-possible" class="section level3" number="6.3.2">
+<h3 number="6.3.2"><span class="header-section-number">6.3.2</span> Exercice : quel autre recodage possible ?</h3>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>motif <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">&quot;rch&quot;</span>, cours1<span class="sc">$</span>futur)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur [motif] <span class="ot">&lt;-</span> <span class="st">&quot;archéologie&quot;</span></span></code></pre></div>
+<p>Les deux réponses “jsp” vont être classées avec les “?”, ainsi que “aucune idée de métier”</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>motif <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">&quot;jsp|aucune&quot;</span>, cours1<span class="sc">$</span>futur)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur [motif] <span class="ot">&lt;-</span> <span class="st">&quot;?&quot;</span></span></code></pre></div>
 </div>
 </div>
-<div id="valeurs-manquantes" class="section level2" number="6.3">
-<h2 number="6.3"><span class="header-section-number">6.3</span> Valeurs manquantes</h2>
+<div id="valeurs-manquantes" class="section level2" number="6.4">
+<h2 number="6.4"><span class="header-section-number">6.4</span> Valeurs manquantes</h2>
 <p>NA (Not Avalaible)</p>
 <p>? et absence de réponse n’ont pas la même valeur. On décide de recoder les réponses nulles en NA</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur <span class="sc">==</span> <span class="st">&quot;&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur <span class="sc">==</span> <span class="st">&quot;&quot;</span></span></code></pre></div>
 <pre><code>##  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE FALSE FALSE
 ## [13] FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE
 ## [25] FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE</code></pre>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur [cours1<span class="sc">$</span>futur <span class="sc">==</span> <span class="st">&quot;&quot;</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur [cours1<span class="sc">$</span>futur <span class="sc">==</span> <span class="st">&quot;&quot;</span>]</span></code></pre></div>
 <pre><code>##  [1] &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot;</code></pre>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur [cours1<span class="sc">$</span>futur <span class="sc">==</span> <span class="st">&quot;&quot;</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">table</span>(cours1<span class="sc">$</span>futur, <span class="at">useNA  =</span> <span class="st">&quot;always&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>cours1<span class="sc">$</span>futur [cours1<span class="sc">$</span>futur <span class="sc">==</span> <span class="st">&quot;&quot;</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">table</span>(cours1<span class="sc">$</span>futur, <span class="at">useNA  =</span> <span class="st">&quot;always&quot;</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">15</span>,<span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tab, <span class="at">col =</span> <span class="fu">terrain.colors</span>(<span class="dv">7</span>), <span class="at">las =</span> <span class="dv">2</span>, <span class="at">horiz =</span> T, <span class="at">main =</span> <span class="st">&quot;Quel futur imaginent les étudiants ?&quot;</span>)</span></code></pre></div>
+<p><img src="01_intro_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 </div>
 

@@ -54,6 +54,13 @@ Sélectionner le premier bureau et l'afficher.
 Quelle est la différence ?
 
 
+```{r}
+zone$numBureau
+zone [zone$numBureau == 1,]
+zone [1,2]
+
+```
+
 
 ## Operation
 

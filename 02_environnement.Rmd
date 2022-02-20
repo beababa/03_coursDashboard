@@ -80,9 +80,27 @@ Créer un compte GIT et un projet
 
 cloner le projet sur son pc avec la commande *git clone* et le lien vers le répertoire
 
+
+### Sur l'interface github
+
+Récupérer le lien https du projet dans code
+
 ![](img/GITclone.png)
+
+### Dans une fenêtre cmd de windows
+
+Pour ouvrir une fenêtre cmd, il suffit de faire le bouton windows et de taper *cmd*.
+
 ![](img/GITcloneShell.png)
 
+### Installation des commandes git
+
+Cela ne fonctionne pas ... il faut installer les commandes git sous votre machine (sous Mac et Linux c'est pré-installé)
+
+source : https://astuces-informatique.com/comment-installer-utiliser-git-sous-windows/
+
+
+Faire l'installation et essayer à nouveau de cloner...
 
 ## Clés SSH
 
@@ -96,6 +114,11 @@ Ouvrir une fenêtre avec la commande cmd et saisir *ssh-keygen*
 
 Le répertoire où la clé est créée est, par défaut, le répertoire utilisateur.
 (afficher les fichiers cachés est nécessaire)
+
+
+Le répertoire utilisateur est à la racine de votre profil.
+
+![](img/gitRepUtilisateur.png)
 
 
 source :

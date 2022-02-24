@@ -36,7 +36,7 @@ Ne pas oublier les cheat_sheet
 
 - https://github.com/rstudio/cheatsheets/blob/main/sf.pdf
 
-## Import
+# Import
 
 
 ```{r}
@@ -47,7 +47,7 @@ str(zone)
 ```
 
 
-## Indexation
+# Indexation
 
 Regarder l'indexation du dataframe dans la partie base R.
 Sélectionner le premier bureau et l'afficher.
@@ -58,14 +58,31 @@ Quelle est la différence ?
 zone$numBureau
 zone [zone$numBureau == 1,]
 zone [1,2]
-
 ```
 
 
-## Operation
+# Operations géométriques
 
-Fusion des bureaux de votes, trouver la fonction et l'appliquer en s'inspirant de l'article 3 du github sf/
+Fusion des bureaux de votes, trouver la fonction et l'appliquer en s'inspirant de l'article 3 du github sf
 
+
+```{r}
+plot(zone$geom)
+# première solution
+fusion <- st_union(zone)
+str(zone)
+plot(zone$geom)
+# deuxième solution
+enveloppe <- st_convex_hull(fusion)
+plot(enveloppe)
+# troisième solution
+tampon <- st_buffer(zone, 50)
+plot(tampon$geom)
+fusion <- st_union(tampon)
+plot(fusion)
+simplifier <- st_simplify(fusion,90, preserveTopology = F)
+plot(simplifier)
+```
 
 
 # Première carte

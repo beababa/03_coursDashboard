@@ -452,8 +452,9 @@ div.tocify {
 <li><p><a href="https://riatelab.github.io/mapsf/articles/web_only/cheat_sheet.html#" class="uri">https://riatelab.github.io/mapsf/articles/web_only/cheat_sheet.html#</a> Objets R spatiaux : le dataframe sf</p></li>
 <li><p><a href="https://github.com/rstudio/cheatsheets/blob/main/sf.pdf" class="uri">https://github.com/rstudio/cheatsheets/blob/main/sf.pdf</a></p></li>
 </ul>
-<div id="import" class="section level2" number="1.1">
-<h2 number="1.1"><span class="header-section-number">1.1</span> Import</h2>
+</div>
+<div id="import" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Import</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code></pre></div>
 <pre><code>## Linking to GEOS 3.9.0, GDAL 3.2.1, PROJ 7.2.1</code></pre>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>zone <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;zone&quot;</span>)</span></code></pre></div>
@@ -480,8 +481,8 @@ div.tocify {
 ##  - attr(*, &quot;agr&quot;)= Factor w/ 3 levels &quot;constant&quot;,&quot;aggregate&quot;,..: NA NA NA NA NA
 ##   ..- attr(*, &quot;names&quot;)= chr [1:5] &quot;Layer&quot; &quot;bureauNo_1&quot; &quot;aire&quot; &quot;numBureau&quot; ...</code></pre>
 </div>
-<div id="indexation" class="section level2" number="1.2">
-<h2 number="1.2"><span class="header-section-number">1.2</span> Indexation</h2>
+<div id="indexation" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Indexation</h1>
 <p>Regarder l’indexation du dataframe dans la partie base R. Sélectionner le premier bureau et l’afficher. Quelle est la différence ?</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>zone<span class="sc">$</span>numBureau</span></code></pre></div>
 <pre><code>##  [1] 32 24 15 14 12 30  5  9 28 26 27 22 21 25  7 23  1 19  3  2 18 29  8 17 13
@@ -505,25 +506,57 @@ div.tocify {
 ##   bureauNo_1                           geom
 ## 1       &lt;NA&gt; MULTIPOLYGON (((662713.3 68...</code></pre>
 </div>
-<div id="operation" class="section level2" number="1.3">
-<h2 number="1.3"><span class="header-section-number">1.3</span> Operation</h2>
-<p>Fusion des bureaux de votes, trouver la fonction et l’appliquer en s’inspirant de l’article 3 du github sf/</p>
-</div>
-</div>
-<div id="première-carte" class="section level1" number="2">
-<h1 number="2"><span class="header-section-number">2</span> Première carte</h1>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># carte avec commande rbase</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zone<span class="sc">$</span>geom, <span class="at">col =</span> <span class="fu">terrain.colors</span> (<span class="dv">31</span>),</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">border =</span> <span class="cn">NA</span>,</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;31 bureaux de vote de Bondy&quot;</span>)</span></code></pre></div>
+<div id="operations-géométriques" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Operations géométriques</h1>
+<p>Fusion des bureaux de votes, trouver la fonction et l’appliquer en s’inspirant de l’article 3 du github sf</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zone<span class="sc">$</span>geom)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># première solution</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>fusion <span class="ot">&lt;-</span> <span class="fu">st_union</span>(zone)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(zone)</span></code></pre></div>
+<pre><code>## Classes &#39;sf&#39; and &#39;data.frame&#39;:   32 obs. of  6 variables:
+##  $ Layer     : chr  &quot;_Bureau 32&quot; &quot;_Bureau 24&quot; &quot;_Bureau 15&quot; &quot;_Bureau 14&quot; ...
+##  $ bureauNo_1: chr  NA &quot;ECOLE ELEMENTAIRE OLYMPE DE GOUGES&quot; &quot;SALLE MAURICE PETITJEAN&quot; &quot;ECOLE MATERNELLE LEO LAGRANGE&quot; ...
+##  $ aire      : int  129558 260846 253109 229099 104115 230670 54899 91995 70288 140443 ...
+##  $ numBureau : int  32 24 15 14 12 30 5 9 28 26 ...
+##  $ txVotants : int  NA 50 41 53 55 54 46 50 66 52 ...
+##  $ geom      :sfc_MULTIPOLYGON of length 32; first list element: List of 1
+##   ..$ :List of 1
+##   .. ..$ : num [1:21, 1:2] 662713 662894 662926 663008 662925 ...
+##   ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;XY&quot; &quot;MULTIPOLYGON&quot; &quot;sfg&quot;
+##  - attr(*, &quot;sf_column&quot;)= chr &quot;geom&quot;
+##  - attr(*, &quot;agr&quot;)= Factor w/ 3 levels &quot;constant&quot;,&quot;aggregate&quot;,..: NA NA NA NA NA
+##   ..- attr(*, &quot;names&quot;)= chr [1:5] &quot;Layer&quot; &quot;bureauNo_1&quot; &quot;aire&quot; &quot;numBureau&quot; ...</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zone<span class="sc">$</span>geom)</span></code></pre></div>
 <p><img src="04_Rspatial_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># carte avec mapsf</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapsf)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(zone, <span class="at">type =</span> <span class="st">&quot;choro&quot;</span>, <span class="at">border =</span> <span class="cn">NA</span>,<span class="at">var =</span> <span class="st">&quot;aire&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># deuxième solution</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>enveloppe <span class="ot">&lt;-</span> <span class="fu">st_convex_hull</span>(fusion)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(enveloppe)</span></code></pre></div>
 <p><img src="04_Rspatial_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># éliminer les bureaux 31 et 32</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>zone <span class="ot">&lt;-</span> zone [zone<span class="sc">$</span>numBureau <span class="sc">%in%</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">30</span>),]</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(zone)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># troisième solution</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>tampon <span class="ot">&lt;-</span> <span class="fu">st_buffer</span>(zone, <span class="dv">50</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(tampon<span class="sc">$</span>geom)</span></code></pre></div>
+<p><img src="04_Rspatial_files/figure-html/unnamed-chunk-3-3.png" width="672" /></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fusion <span class="ot">&lt;-</span> <span class="fu">st_union</span>(tampon)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fusion)</span></code></pre></div>
+<p><img src="04_Rspatial_files/figure-html/unnamed-chunk-3-4.png" width="672" /></p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>simplifier <span class="ot">&lt;-</span> <span class="fu">st_simplify</span>(fusion,<span class="dv">90</span>, <span class="at">preserveTopology =</span> F)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(simplifier)</span></code></pre></div>
+<p><img src="04_Rspatial_files/figure-html/unnamed-chunk-3-5.png" width="672" /></p>
+</div>
+<div id="première-carte" class="section level1" number="5">
+<h1 number="5"><span class="header-section-number">5</span> Première carte</h1>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># carte avec commande rbase</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zone<span class="sc">$</span>geom, <span class="at">col =</span> <span class="fu">terrain.colors</span> (<span class="dv">31</span>),</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">border =</span> <span class="cn">NA</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;31 bureaux de vote de Bondy&quot;</span>)</span></code></pre></div>
+<p><img src="04_Rspatial_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># carte avec mapsf</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapsf)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(zone, <span class="at">type =</span> <span class="st">&quot;choro&quot;</span>, <span class="at">border =</span> <span class="cn">NA</span>,<span class="at">var =</span> <span class="st">&quot;aire&quot;</span>)</span></code></pre></div>
+<p><img src="04_Rspatial_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># éliminer les bureaux 31 et 32</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>zone <span class="ot">&lt;-</span> zone [zone<span class="sc">$</span>numBureau <span class="sc">%in%</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">30</span>),]</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(zone)</span></code></pre></div>
 <pre><code>##     Layer            bureauNo_1             aire          numBureau    
 ##  Length:30          Length:30          Min.   : 54899   Min.   : 1.00  
 ##  Class :character   Class :character   1st Qu.:102057   1st Qu.: 8.25  
@@ -538,24 +571,24 @@ div.tocify {
 ##  Mean   :50.30                     
 ##  3rd Qu.:55.00                     
 ##  Max.   :69.00</code></pre>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(zone, <span class="at">type =</span> <span class="st">&quot;choro&quot;</span>, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>,</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">var =</span> <span class="st">&quot;txVotants&quot;</span>)</span></code></pre></div>
-<p><img src="04_Rspatial_files/figure-html/unnamed-chunk-3-3.png" width="672" /></p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(zone, <span class="at">type =</span> <span class="st">&quot;choro&quot;</span>, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>,</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">var =</span> <span class="st">&quot;txVotants&quot;</span>)</span></code></pre></div>
+<p><img src="04_Rspatial_files/figure-html/unnamed-chunk-4-3.png" width="672" /></p>
 </div>
-<div id="jointure-attributaire" class="section level1" number="3">
-<h1 number="3"><span class="header-section-number">3</span> Jointure attributaire</h1>
+<div id="jointure-attributaire" class="section level1" number="6">
+<h1 number="6"><span class="header-section-number">6</span> Jointure attributaire</h1>
 <p>Mettre un lien entre la cartographie et le fichier de résultat des élections</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/bondyElection.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>, <span class="at">dec =</span> <span class="st">&quot;,&quot;</span>)</span></code></pre></div>
-<div id="les-clés" class="section level2" number="3.1">
-<h2 number="3.1"><span class="header-section-number">3.1</span> Les clés</h2>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>zone<span class="sc">$</span>Layer</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/bondyElection.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>, <span class="at">dec =</span> <span class="st">&quot;,&quot;</span>)</span></code></pre></div>
+<div id="les-clés" class="section level2" number="6.1">
+<h2 number="6.1"><span class="header-section-number">6.1</span> Les clés</h2>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>zone<span class="sc">$</span>Layer</span></code></pre></div>
 <pre><code>##  [1] &quot;_Bureau 24&quot; &quot;_Bureau 15&quot; &quot;_Bureau 14&quot; &quot;_Bureau 12&quot; &quot;_Bureau 30&quot;
 ##  [6] &quot;_Bureau 05&quot; &quot;_Bureau 09&quot; &quot;_Bureau 28&quot; &quot;_Bureau 26&quot; &quot;_Bureau 27&quot;
 ## [11] &quot;_Bureau 22&quot; &quot;_Bureau 21&quot; &quot;_Bureau 25&quot; &quot;_Bureau 07&quot; &quot;_Bureau 23&quot;
 ## [16] &quot;_Bureau 01&quot; &quot;_Bureau 19&quot; &quot;_Bureau 03&quot; &quot;_Bureau 02&quot; &quot;_Bureau 18&quot;
 ## [21] &quot;_Bureau 29&quot; &quot;_Bureau 08&quot; &quot;_Bureau 17&quot; &quot;_Bureau 13&quot; &quot;_Bureau 20&quot;
 ## [26] &quot;_Bureau 10&quot; &quot;_Bureau 04&quot; &quot;_Bureau 06&quot; &quot;_Bureau 11&quot; &quot;_Bureau 16&quot;</code></pre>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>Bureau.de.vote</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>Bureau.de.vote</span></code></pre></div>
 <pre><code>##  [1] &quot;BV1&quot;        &quot;BV2&quot;        &quot;BV3&quot;        &quot;BV4&quot;        &quot;BV5&quot;       
 ##  [6] &quot;BV6&quot;        &quot;BV7&quot;        &quot;BV8&quot;        &quot;BV9&quot;        &quot;BV10&quot;      
 ## [11] &quot;BV11&quot;       &quot;BV12&quot;       &quot;BV13&quot;       &quot;BV14&quot;       &quot;BV15&quot;      

@@ -13,7 +13,7 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(cache = FALSE)
 # Passer la valeur suivante à TRUE pour reproduire les extractions.
 knitr::opts_chunk$set(eval = TRUE)
 knitr::opts_chunk$set(warning = FALSE)
@@ -53,6 +53,7 @@ notes <- c(16,12,13)
 ```{r}
 nom [1]
 notes [2]
+df <- data.frame(nom, notes)
 df [1,2]
 ```
 

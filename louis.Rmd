@@ -1,0 +1,44 @@
+---
+title: "Opération géométrique"
+author: "Louis PERRAUD"
+date: "19/02/2022"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+# Passer la valeur suivante à TRUE pour reproduire les extractions.
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+J'ai installé sf.
+```{r}
+library(sf)
+```
+J'ai lu le dataframe sf et ai regardé sa structure.
+```{r}
+zone <- st_read("data/vote.gpkg", "zone")
+str(zone)
+zone
+```
+J'ai regardé la première ligne, celle du bureau 1.
+```{r}
+zone[1,]
+```
+A partir d'ici j'ai essayé de fusionner les bureaux de votes qui sont des multipolygones. Si j'ai compris je devrais obtenir une seule zone de bureau (même si les bureaux ne sont pas contigus ?)
+
+
+```{r}
+mon_union <- st_union(zone)
+mon_union
+```
+Sans être sûr de ce que cela donne graphiquement, je crois que j'ai fini.
+PS : Je ne comprends pas quel format de rendu est attendu...
+

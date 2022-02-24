@@ -1,0 +1,44 @@
+---
+title: "ExoIndexation"
+author: "MAUCLET Anna"
+date: "18/02/2022"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+## Je télécharge tout d'abord les packages sf et mapsf
+
+install.packages("sf")
+install.packages("mapsf")
+
+# 1.1 Import
+
+library(sf)
+## Linking to GEOS 3.9.0, GDAL 3.2.1, PROJ 7.2.1
+
+## Observation de la structure, ici : charactère 
+zone <- st_read("vote.gpkg","zone")
+str(zone)
+
+## Première carte affichée 
+plot(zone$geom, col= terrain.colors (31),
+  border = NA,
+  main = "31 bureaux de vote de Bondy",
+
+## Définir les caractéristiques de la carte 
+
+library(mapsf)
+mf_map(zone, type= "choro", border = NA, var = "aire")
+
+

@@ -465,13 +465,13 @@ div.tocify {
 <pre><code>## [1] &quot;Zachary&quot;</code></pre>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>notes [<span class="dv">2</span>]</span></code></pre></div>
 <pre><code>## [1] 12</code></pre>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df [<span class="dv">1</span>,<span class="dv">2</span>]</span></code></pre></div>
-<pre><code>## notes 
-##  &quot;16&quot;</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(nom, notes)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>df [<span class="dv">1</span>,<span class="dv">2</span>]</span></code></pre></div>
+<pre><code>## [1] 16</code></pre>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>nom</span></code></pre></div>
 <pre><code>## [1] &quot;Zachary&quot; &quot;Pierre&quot;  &quot;Linda&quot;</code></pre>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>notes</span></code></pre></div>
-<pre><code>## [1] &quot;16&quot; &quot;12&quot; &quot;13&quot;</code></pre>
+<pre><code>## [1] 16 12 13</code></pre>
 </div>
 <div id="operation" class="section level3" number="2.1.3">
 <h3 number="2.1.3"><span class="header-section-number">2.1.3</span> Operation</h3>
@@ -686,8 +686,8 @@ div.tocify {
 <span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cours1)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    32 obs. of  14 variables:
 ##  $ Prénom                            : chr  &quot;Louis&quot; &quot;Gaëlle&quot; &quot;Anne&quot; &quot;Mariam&quot; ...
-##  $ nom                               : chr  &quot;PERRAUD&quot; &quot;ROUSSEAU&quot; &quot;Simon&quot; &quot;Ouattara&quot; ...
-##  $ adresse.mail                      : chr  &quot;louisperraud@orange.fr&quot; &quot;gaelle.e.m.rousseau@gmail.com&quot; &quot;annesimon94@sfr.fr&quot; &quot;moreliaivy@gmail.com&quot; ...
+##  $ nom                               : chr  &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; ...
+##  $ adresse.mail                      : chr  &quot;X@mail&quot; &quot;X@mail&quot; &quot;X@mail&quot; &quot;X@mail&quot; ...
 ##  $ X44223                            : chr  &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; ...
 ##  $ passé                             : chr  &quot;archéologie-géographie&quot; &quot;L2 archéo-géographie&quot; &quot;Classe préparatoire Khâgne/Hypokhâgne Lakanal&quot; &quot;L2 Géographie et aménagement&quot; ...
 ##  $ présent                           : chr  &quot;L3 archéologie géographie&quot; &quot;L3 archéologie géographie&quot; &quot;L3 géographie et aménagement&quot; &quot;L3 géographie et aménagement&quot; ...
@@ -716,14 +716,11 @@ div.tocify {
 ##  $ X.9                      : logi  NA NA NA NA NA NA ...
 ##  $ X.10                     : logi  NA NA NA NA NA NA ...</code></pre>
 <div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cours3)</span></code></pre></div>
-<pre><code>## &#39;data.frame&#39;:    30 obs. of  7 variables:
+<pre><code>## &#39;data.frame&#39;:    30 obs. of  4 variables:
 ##  $ Prénom      : chr  &quot;Louis&quot; &quot;Anne&quot; &quot;Mariam&quot; &quot;Selin&quot; ...
 ##  $ cours3..oui.: chr  &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;Oui&quot; ...
-##  $ X           : chr  &quot;https://github.com/Beatdvtbea/Exercice&quot; &quot;https://github.com/annesimon94/momo.git&quot; &quot;https://github.com/MariamOuatt/monrepository&quot; &quot;https://github.com/selinhacer/Cactus&quot; ...
-##  $ X.1         : chr  &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; ...
-##  $ X.2         : logi  NA NA NA NA NA NA ...
-##  $ X.3         : logi  NA NA NA NA NA NA ...
-##  $ X.4         : logi  NA NA NA NA NA NA ...</code></pre>
+##  $ lien.github : chr  &quot;ok&quot; &quot;ok&quot; &quot;ok&quot; &quot;ok&quot; ...
+##  $ X           : chr  &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; ...</code></pre>
 <div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cours4)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    19 obs. of  7 variables:
 ##  $ Prénom                                   : chr  &quot;Louis&quot; &quot;Anne&quot; &quot;Mariam&quot; &quot;Selin&quot; ...
@@ -836,41 +833,41 @@ div.tocify {
 <span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>  coursBase <span class="ot">&lt;-</span> coursMerge</span>
 <span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>coursMerge</span></code></pre></div>
-<pre><code>##           Prénom cours1..oui.           nom cours2..oui. cours3..oui.
-## 1          Alaya          oui       Irissou          oui          oui
-## 2           Anna          oui       MAUCLET          oui          oui
-## 3           Anne          oui         Simon          oui          oui
-## 4        Aurélie          non     Levasseur          non          non
-## 5        Camille          oui        Bouron     autre TD         &lt;NA&gt;
-## 6     Chang-Beom          oui           LEE          oui          oui
-## 7          Chloé          oui     de Soyres          oui          oui
-## 8           Eah           oui         Opitz          non          non
-## 9  Elif-Delphine          oui       ILGINSU          non          non
-## 10         Elisa          oui     Dieudonné     autre TD         &lt;NA&gt;
-## 11          Emma          non       Lesieur          non          non
-## 12        Gaëlle          oui      ROUSSEAU     autre TD         &lt;NA&gt;
-## 13         Galli         &lt;NA&gt;          &lt;NA&gt;          oui          non
-## 14      Gianluca          oui    Giovannini          oui          non
-## 15       Guénolé          oui     Reucheron          oui          non
-## 16         Ianis          oui         Ngoma          oui          oui
-## 17          Iman          oui      Zourdani          oui          non
-## 18      Jennifer          oui          Diep          oui          non
-## 19        Laura           oui       SAUNIER     autre TD         &lt;NA&gt;
-## 20         Linda          oui       Besnard                       non
-## 21         Louis          oui       PERRAUD          oui          oui
-## 22         LUCAS          oui  DO CARMO GIL          oui          non
-## 23        Mariam          oui      Ouattara          oui          oui
-## 24        Marion          oui      BLONDEAU          oui          Oui
-## 25      Matthieu          non          Dein          non          non
-## 26         SALIF          oui       SISSOKO          non          non
-## 27         Sanaa          oui          roux          oui          oui
-## 28         sarah         &lt;NA&gt;          &lt;NA&gt;          oui          oui
-## 29      Savannah          oui       LAURENT          oui          non
-## 30         Selin          oui                        Oui          Oui
-## 31         Théo           non  Deleplancque          non          non
-## 32        Thomas          oui        Médard          oui          non
-## 33        Yanis           non     Belahcene          oui          non
-## 34       Zachary          oui abdi-mechouar          oui          oui</code></pre>
+<pre><code>##           Prénom cours1..oui.  nom cours2..oui. cours3..oui.
+## 1          Alaya          oui    x          oui          oui
+## 2           Anna          oui    x          oui          oui
+## 3           Anne          oui    x          oui          oui
+## 4        Aurélie          non    x          non          non
+## 5        Camille          oui    x     autre TD         &lt;NA&gt;
+## 6     Chang-Beom          oui    x          oui          oui
+## 7          Chloé          oui    x          oui          oui
+## 8           Eah           oui    x          non          non
+## 9  Elif-Delphine          oui    x          non          non
+## 10         Elisa          oui    x     autre TD         &lt;NA&gt;
+## 11          Emma          non    x          non          non
+## 12        Gaëlle          oui    x     autre TD         &lt;NA&gt;
+## 13         Galli         &lt;NA&gt; &lt;NA&gt;          oui          non
+## 14      Gianluca          oui    x          oui          non
+## 15       Guénolé          oui    x          oui          non
+## 16         Ianis          oui    x          oui          oui
+## 17          Iman          oui    x          oui          non
+## 18      Jennifer          oui    x          oui          non
+## 19        Laura           oui    x     autre TD         &lt;NA&gt;
+## 20         Linda          oui    x                       non
+## 21         Louis          oui    x          oui          oui
+## 22         LUCAS          oui    x          oui          non
+## 23        Mariam          oui    x          oui          oui
+## 24        Marion          oui    x          oui          Oui
+## 25      Matthieu          non    x          non          non
+## 26         SALIF          oui    x          non          non
+## 27         Sanaa          oui    x          oui          oui
+## 28         sarah         &lt;NA&gt; &lt;NA&gt;          oui          oui
+## 29      Savannah          oui    x          oui          non
+## 30         Selin          oui    x          Oui          Oui
+## 31         Théo           non    x          non          non
+## 32        Thomas          oui    x          oui          non
+## 33        Yanis           non    x          oui          non
+## 34       Zachary          oui    x          oui          oui</code></pre>
 </div>
 </div>
 <div id="en-utilisant-les-listes-et-les-apply" class="section level3" number="3.2.3">
@@ -902,39 +899,39 @@ div.tocify {
 <span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>liste <span class="ot">&lt;-</span> <span class="fu">lapply</span>(liste_cours, read.csv.UTF)</span></code></pre></div>
 <p>Indexation des listes</p>
 <div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>liste[[<span class="dv">1</span>]]</span></code></pre></div>
-<pre><code>##           Prénom           nom                      adresse.mail X44223
-## 1          Louis       PERRAUD            louisperraud@orange.fr    oui
-## 2         Gaëlle      ROUSSEAU     gaelle.e.m.rousseau@gmail.com    oui
-## 3           Anne         Simon                annesimon94@sfr.fr    oui
-## 4         Mariam      Ouattara              moreliaivy@gmail.com    oui
-## 5        Camille        Bouron            camillebrn12@gmail.com    oui
-## 6          Elisa     Dieudonné       elisa.dieudonne46@gmail.com    oui
-## 7          Selin                              selin.3@outlook.fr    oui
-## 8          Sanaa          roux                sanaaroux@yahoo.fr    oui
-## 9           Eah          Opitz                elzoop@outlook.com    oui
-## 10         Chloé     de Soyres            chloedesoyres@yahoo.fr    oui
-## 11         Ianis         Ngoma             ian.ngoma38@gmail.com    oui
-## 12      Jennifer          Diep             shayden.dj@icloud.com    oui
-## 13         Linda       Besnard          besnardlinda28@gmail.com    oui
-## 14          Anna       MAUCLET            annamauclet@hotmail.fr    oui
-## 15        Marion      BLONDEAU               marionbdu@gmail.com    oui
-## 16      Gianluca    Giovannini gianluca.giovannini.pro@gmail.com    oui
-## 17      Savannah       LAURENT       Savannah_laurent@outlook.fr    oui
-## 18         LUCAS  DO CARMO GIL        lucas.docarmogil@gmail.com    oui
-## 19          Iman      Zourdani            iman.zourdani@yahoo.fr    oui
-## 20         Alaya       Irissou            alayairissou@gmail.com    oui
-## 21       Guénolé     Reucheron       guenole.reucheron@gmail.com    oui
-## 22        Thomas        Médard          thomas.medard@outlook.fr    oui
-## 23        Laura        SAUNIER          saunierlaura99@gmail.com    oui
-## 24         SALIF       SISSOKO          SISSOKOSALIf94@gmail.com    oui
-## 25    Chang-Beom           LEE               lcb900813@gmail.com    oui
-## 26       Zachary abdi-mechouar       zachary.abdi.crew@gmail.com    oui
-## 27       Aurélie     Levasseur     aurelie.levasseur03@gmail.com    non
-## 28        Yanis      Belahcene          yanisbelahcene@gmail.com    non
-## 29         Théo   Deleplancque       theo.deleplancque@gmail.com    non
-## 30          Emma       Lesieur           emma.lesieur@hotmail.fr    non
-## 31      Matthieu          Dein           dein.matthieu@gmail.com    non
-## 32 Elif-Delphine       ILGINSU            elif.ilginsu@gmail.com    oui
+<pre><code>##           Prénom nom adresse.mail X44223
+## 1          Louis   x       X@mail    oui
+## 2         Gaëlle   x       X@mail    oui
+## 3           Anne   x       X@mail    oui
+## 4         Mariam   x       X@mail    oui
+## 5        Camille   x       X@mail    oui
+## 6          Elisa   x       X@mail    oui
+## 7          Selin   x       X@mail    oui
+## 8          Sanaa   x       X@mail    oui
+## 9           Eah    x       X@mail    oui
+## 10         Chloé   x       X@mail    oui
+## 11         Ianis   x       X@mail    oui
+## 12      Jennifer   x       X@mail    oui
+## 13         Linda   x       X@mail    oui
+## 14          Anna   x       X@mail    oui
+## 15        Marion   x       X@mail    oui
+## 16      Gianluca   x       X@mail    oui
+## 17      Savannah   x       X@mail    oui
+## 18         LUCAS   x       X@mail    oui
+## 19          Iman   x       X@mail    oui
+## 20         Alaya   x       X@mail    oui
+## 21       Guénolé   x       X@mail    oui
+## 22        Thomas   x       X@mail    oui
+## 23        Laura    x       X@mail    oui
+## 24         SALIF   x       X@mail    oui
+## 25    Chang-Beom   x       X@mail    oui
+## 26       Zachary   x       X@mail    oui
+## 27       Aurélie   x       X@mail    non
+## 28        Yanis    x       X@mail    non
+## 29         Théo    x       X@mail    non
+## 30          Emma   x       X@mail    non
+## 31      Matthieu   x       X@mail    non
+## 32 Elif-Delphine   x       X@mail    oui
 ##                                            passé                      présent
 ## 1                         archéologie-géographie    L3 archéologie géographie
 ## 2                           L2 archéo-géographie    L3 archéologie géographie

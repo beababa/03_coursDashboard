@@ -1,0 +1,73 @@
+---
+title: "Correction évaluation 10 mars"
+author: "B. Maranget"
+date: "08/03/2021"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+# Passer la valeur suivante à TRUE pour reproduire les extractions.
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+# Objet
+
+Intersection spatiale et exploration statistique du carroyage INSEE 200 m
+
+
+
+# Limites des bureaux de vote
+
+```{r}
+library(sf)
+data <- st_read("data/vote.gpkg", "zone")
+plot(data$geom)
+limite <- st_convex_hull(st_union(data$geom))
+limite <- st_as_sf(limite)
+plot(limite)
+```
+
+
+# Chargement des données INSEE
+
+```{r}
+insee <- st_read("data/Filosofi2015_carreaux_200m_metropole.gpkg")
+head(insee)
+idf <- st_read("data/regions-20180101-shp/regions-20180101.shp")
+idf <- st_transform(idf, 2154)
+idf <- idf [idf$code_insee == 11,]
+idfInsee <- st_intersection(insee, idf)
+st_write(idfInsee,"data/insee.gpkg","idf", delete_layer = T)
+```
+
+
+# intersection spatiale bondy
+
+```{r}
+bondyInsee <- st_intersection (idfInsee, limite)
+names(bondyInsee)
+st_write(bondyInsee, "data/insee.gpkg", "bondy")
+
+```
+
+
+
+# enregistrement .csv
+
+```{r}
+idfcsv <- idfInsee [,c(1:42), drop = T]
+class(idfcsv)
+bondycsv <- bondyInsee [, c(1:42), drop = T]
+write.csv(idfcsv, "data/idfInsee.csv", fileEncoding = "UTF-8")
+write.csv(bondycsv, "data/bondyInsee.csv", fileEncoding = "UTF-8")
+```
+

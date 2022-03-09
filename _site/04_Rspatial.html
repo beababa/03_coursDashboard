@@ -596,11 +596,73 @@ div.tocify {
 ## [21] &quot;BV21&quot;       &quot;BV22&quot;       &quot;BV23&quot;       &quot;BV24&quot;       &quot;BV25&quot;      
 ## [26] &quot;BV26&quot;       &quot;BV27&quot;       &quot;BV28&quot;       &quot;BV29&quot;       &quot;BV30&quot;      
 ## [31] &quot;BV31&quot;       &quot;BV32&quot;       &quot;TOTAL&quot;      &quot;Total en %&quot;</code></pre>
-<p>Comment recoder pour faire correspondre les clés ?</p>
-<p>Faire l’algo</p>
-<p>Donner les fonctions R</p>
-<p>Faire le script</p>
+<div id="comment-recoder-pour-faire-correspondre-les-clés" class="section level3" number="6.1.1">
+<h3 number="6.1.1"><span class="header-section-number">6.1.1</span> Comment recoder pour faire correspondre les clés ?</h3>
+<p>La clé des zones est de type : _Bureau <em>Num</em> Celle des chiffres est de type : BV<em>Num</em></p>
+<p>Il faut donc recoder les valeurs.</p>
+<p>Pour faire correspondre les deux clés, il suffit de retirer les lettres et garder uniquement les chiffres.</p>
 </div>
+<div id="faire-lalgo" class="section level3" number="6.1.2">
+<h3 number="6.1.2"><span class="header-section-number">6.1.2</span> Faire l’algo</h3>
+<ul>
+<li><p>pour clé zone, extraire les deux derniers caractères</p></li>
+<li><p>pour clé chiffres, extraire à partir du 3e caractère</p></li>
+<li><p>vérifier si zone et chiffres correspondent</p></li>
+<li><p>supprimer les lignes en trop</p></li>
+<li><p>converir les clés en chiffres pour éviter le pb 01</p></li>
+<li><p>jointure attributaire zone et chiffres</p></li>
+<li><p>sauvegarder le résultat de la jointure</p></li>
+</ul>
+</div>
+<div id="donner-les-fonctions-r" class="section level3" number="6.1.3">
+<h3 number="6.1.3"><span class="header-section-number">6.1.3</span> Donner les fonctions R</h3>
+<ul>
+<li><p>substring</p></li>
+<li><p>as.integer</p></li>
+<li><p>merge pour le jonction attributaire</p></li>
+</ul>
+</div>
+<div id="faire-le-script" class="section level3" number="6.1.4">
+<h3 number="6.1.4"><span class="header-section-number">6.1.4</span> Faire le script</h3>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data [data<span class="sc">$</span>cle[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">32</span>)],]</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>zone<span class="sc">$</span>cle <span class="ot">&lt;-</span> <span class="fu">substring</span> (zone<span class="sc">$</span>Layer,<span class="dv">9</span>,<span class="dv">11</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>cle <span class="ot">&lt;-</span> <span class="fu">substring</span>(data<span class="sc">$</span>Bureau.de.vote, <span class="dv">3</span>,<span class="dv">5</span> )</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>cle <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(data<span class="sc">$</span>cle)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>zone<span class="sc">$</span>cle <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(zone<span class="sc">$</span>cle)</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(zone<span class="sc">$</span>cle) <span class="sc">==</span> <span class="fu">length</span>(data<span class="sc">$</span>cle)</span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>jointure <span class="ot">&lt;-</span> <span class="fu">merge</span>(zone, data, <span class="at">by =</span> <span class="st">&quot;cle&quot;</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(jointure, <span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;jointure&quot;</span>, <span class="at">delete_layer =</span> T)</span></code></pre></div>
+<pre><code>## Deleting layer `jointure&#39; using driver `GPKG&#39;
+## Writing layer `jointure&#39; to data source `data/vote.gpkg&#39; using driver `GPKG&#39;
+## Writing 0 features with 18 fields and geometry type Unknown (any).</code></pre>
+</div>
+</div>
+</div>
+<div id="carte-des-résultats" class="section level1" number="7">
+<h1 number="7"><span class="header-section-number">7</span> Carte des résultats</h1>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(jointure)</span></code></pre></div>
+<pre><code>##  [1] &quot;cle&quot;                                                                                       
+##  [2] &quot;Layer&quot;                                                                                     
+##  [3] &quot;bureauNo_1&quot;                                                                                
+##  [4] &quot;aire&quot;                                                                                      
+##  [5] &quot;numBureau&quot;                                                                                 
+##  [6] &quot;txVotants&quot;                                                                                 
+##  [7] &quot;Bureau.de.vote&quot;                                                                            
+##  [8] &quot;Nb.d.électeurs.inscrits&quot;                                                                   
+##  [9] &quot;Nb.de.votants&quot;                                                                             
+## [10] &quot;Taux.de.participation....&quot;                                                                 
+## [11] &quot;Nb.votes.nuls&quot;                                                                             
+## [12] &quot;Nb.votes.blancs&quot;                                                                           
+## [13] &quot;Suffrages.exprimés&quot;                                                                        
+## [14] &quot;Résultats.liste.1...Liste.de.la.gauche.unie.pour.Bondy....Sylvine.THOMASSIN.&quot;              
+## [15] &quot;Résultats.liste.2....Pour.Bondy.allons.plus.loin....Stephen.HERVE&quot;                         
+## [16] &quot;Résultats.liste.3....Bondy.pour.une.gauche.sociale.insoumise.et.populaire....Jamal.AMMOURI&quot;
+## [17] &quot;Résultats.liste.4....Bondy.autrement...Vincent.DUGUET&quot;                                     
+## [18] &quot;Résultats.liste.5....Bondy.c.est.vous...Sylvie.BADOUX&quot;                                     
+## [19] &quot;geometry&quot;</code></pre>
+<p>Exprimer tous les indicateurs (du taux de votant à la liste 5 par une boucle)</p>
+<p>(Faire l’algorithme, donner les fonctions, et faire le script)</p>
 </div>
 
 <br><br><br><br><br><br><br><br><br><br><br><br>

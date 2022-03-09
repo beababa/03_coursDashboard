@@ -123,10 +123,60 @@ zone$Layer
 data$Bureau.de.vote
 ```
 
-Comment recoder pour faire correspondre les clés ?
+### Comment recoder pour faire correspondre les clés ?
 
-Faire l'algo
+La clé des zones est de type : _Bureau *Num*
+Celle des chiffres est de type : BV*Num*
 
-Donner les fonctions R
+Il faut donc recoder les valeurs.
 
-Faire le script
+Pour faire correspondre les deux clés, il suffit de retirer les lettres et garder uniquement les chiffres.
+
+### Faire l'algo
+
+
+- pour clé zone, extraire les deux derniers caractères
+
+- pour clé chiffres, extraire à partir du 3e caractère
+
+- vérifier si zone et chiffres correspondent
+
+- supprimer les lignes en trop
+
+- converir les clés en chiffres pour éviter le pb 01
+
+- jointure attributaire zone et chiffres
+
+- sauvegarder le résultat de la jointure
+
+### Donner les fonctions R
+
+- substring
+
+- as.integer
+
+- merge pour le jonction attributaire
+
+### Faire le script
+
+```{r}
+data <- data [data$cle[c(1:32)],]
+zone$cle <- substring (zone$Layer,9,11)
+data$cle <- substring(data$Bureau.de.vote, 3,5 )
+data$cle <- as.integer(data$cle)
+zone$cle <- as.integer(zone$cle)
+length(zone$cle) == length(data$cle)
+jointure <- merge(zone, data, by = "cle")
+st_write(jointure, "data/vote.gpkg", "jointure", delete_layer = T)
+```
+
+
+# Carte des résultats
+
+```{r}
+names(jointure)
+```
+
+Exprimer tous les indicateurs (du taux de votant à la liste 5 par une boucle)
+
+(Faire l'algorithme, donner les fonctions, et faire le script)

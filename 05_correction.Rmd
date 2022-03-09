@@ -39,7 +39,12 @@ plot(limite)
 
 # Chargement des données INSEE
 
-```{r}
+A partir du fichier disponible sur le site de l'INSEE qui couvre toute la France.
+Ce chunk n'est pas rejoué car le fichier est tros gros pour le git.
+
+On filtre donc sur l'Ile de France
+
+```{r, eval = FALSE}
 insee <- st_read("data/Filosofi2015_carreaux_200m_metropole.gpkg")
 head(insee)
 idf <- st_read("data/regions-20180101-shp/regions-20180101.shp")
@@ -52,22 +57,59 @@ st_write(idfInsee,"data/insee.gpkg","idf", delete_layer = T)
 
 # intersection spatiale bondy
 
-```{r}
+Même problème
+
+```{r, eval = FALSE}
+idfInsee <- st_read("data/insee.gpkg", "idf")
 bondyInsee <- st_intersection (idfInsee, limite)
 names(bondyInsee)
 st_write(bondyInsee, "data/insee.gpkg", "bondy")
-
 ```
 
 
 
 # enregistrement .csv
 
-```{r}
+```{r, eval=FALSE}
 idfcsv <- idfInsee [,c(1:42), drop = T]
 class(idfcsv)
 bondycsv <- bondyInsee [, c(1:42), drop = T]
 write.csv(idfcsv, "data/idfInsee.csv", fileEncoding = "UTF-8")
 write.csv(bondycsv, "data/bondyInsee.csv", fileEncoding = "UTF-8")
+```
+
+# Explorations statistiques
+
+
+```{r}
+data <- read.csv("data/bondyInsee.csv", fileEncoding = "UTF-8")
+names(data)
+barplot(data$Men_pauv, main = "carroyage INSEE Bondy, inégalités", xlab = "carreaux carroyage" ,
+        ylab = "Nb de ménages pauvres", col = "red", border = NA)
+```
+
+Il est évident qu'il vaut mieux cartographier...
+
+
+# Bonus cartographique
+
+```{r}
+library(mapsf)
+data <- st_read("data/vote.gpkg", "inseeBondy")
+mf_map(data, type = "choro", pal = "Burg",
+       border = NA, var = "Men_pauv", leg_title = "Nb de ménages pauvres")
+mf_layout(title =  "Pauvreté à Bondy", credits = "INSEE Carroyage 200 m") 
+```
+
+
+En fait l'exploration statistique passe par un histogramme qui permet de définir les seuils
+que l'on va cartographier.
+
+```{r}
+hist(data$Men_pauv)
+# Définition de 3 paliers
+paliers <- c(0,50,200,300)
+mf_map(data, type ="choro", var = "Men_pauv", breaks = paliers, pal = "Burg", border = "antiquewhite1", leg_title = "Nb de ménages pauvres")
+mf_layout(title =  "Concentration de la pauvreté à Bondy", credits = "INSEE Carroyage 200 m")
 ```
 

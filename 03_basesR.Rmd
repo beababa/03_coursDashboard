@@ -218,11 +218,16 @@ Déposer le .Rmd dans le moodle avant la fin du cours. N'oubliez pas les comment
 contenu <- list.files("data/")
 # On remonte les indices des noms contenant "cours"
 ind <- grep("cours", contenu)
-# verif : il doit y en avoir 4 puisqu'il y a eu 4 cours
+# verif : il doit y en avoir 5 puisqu'il y a eu 5 cours
 # on sort cours1.csv dont la structure est différente
 i <- 2
+#initialisation tmp et coursBase au cas où boucle tourne pl fois
+tmp <- NULL
+coursBase <- cours1 [, c("Prénom", "X44223")]
+names (coursBase)[2] <- "cours1..oui."
 for (i in 2:length(ind)){
-  tmp <- read.csv(paste0("data/", contenu [i]), fileEncoding = "UTF-8")
+  tmp <- read.csv(paste0("data/", contenu [ind [i]]), fileEncoding = "UTF-8")
+  tmp
   coursMerge <- merge(coursBase,tmp [,c(1:2)], all = T, by = c("Prénom", "Prénom"))
   coursBase <- coursMerge
 }
@@ -273,7 +278,6 @@ liste[[1]]
 liste[[1]][1]
 liste[[1]][c(1,4)]
 liste [[1]] <- liste [[1]][c(1,4)]
-
 ```
 
 
@@ -315,6 +319,7 @@ listeRecodée
 ```{r}
 compter <- function (vec) {table(vec == "oui")}
 présence <- sapply(listeRecodée, compter)
+numCours <- seq (1:length (listeRecodée))
 barplot(présence [2,], main = "Nombres d'étudiants",
-        names.arg = c ("cours1", "cours2", "cours3", "cours4"))
+        names.arg = numCours, xlab = "cours")
 ```

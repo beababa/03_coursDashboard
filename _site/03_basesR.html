@@ -824,50 +824,90 @@ div.tocify {
 <span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>contenu <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">&quot;data/&quot;</span>)</span>
 <span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="co"># On remonte les indices des noms contenant &quot;cours&quot;</span></span>
 <span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>ind <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">&quot;cours&quot;</span>, contenu)</span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="co"># verif : il doit y en avoir 4 puisqu&#39;il y a eu 4 cours</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="co"># verif : il doit y en avoir 5 puisqu&#39;il y a eu 5 cours</span></span>
 <span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="co"># on sort cours1.csv dont la structure est différente</span></span>
 <span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>i <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(ind)){</span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  tmp <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">paste0</span>(<span class="st">&quot;data/&quot;</span>, contenu [i]), <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
-<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  coursMerge <span class="ot">&lt;-</span> <span class="fu">merge</span>(coursBase,tmp [,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)], <span class="at">all =</span> T, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;Prénom&quot;</span>, <span class="st">&quot;Prénom&quot;</span>))</span>
-<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>  coursBase <span class="ot">&lt;-</span> coursMerge</span>
-<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>coursMerge</span></code></pre></div>
-<pre><code>##           Prénom cours1..oui.  nom cours2..oui. cours3..oui.
-## 1          Alaya          oui    x          oui          oui
-## 2           Anna          oui    x          oui          oui
-## 3           Anne          oui    x          oui          oui
-## 4        Aurélie          non    x          non          non
-## 5        Camille          oui    x     autre TD         &lt;NA&gt;
-## 6     Chang-Beom          oui    x          oui          oui
-## 7          Chloé          oui    x          oui          oui
-## 8           Eah           oui    x          non          non
-## 9  Elif-Delphine          oui    x          non          non
-## 10         Elisa          oui    x     autre TD         &lt;NA&gt;
-## 11          Emma          non    x          non          non
-## 12        Gaëlle          oui    x     autre TD         &lt;NA&gt;
-## 13         Galli         &lt;NA&gt; &lt;NA&gt;          oui          non
-## 14      Gianluca          oui    x          oui          non
-## 15       Guénolé          oui    x          oui          non
-## 16         Ianis          oui    x          oui          oui
-## 17          Iman          oui    x          oui          non
-## 18      Jennifer          oui    x          oui          non
-## 19        Laura           oui    x     autre TD         &lt;NA&gt;
-## 20         Linda          oui    x                       non
-## 21         Louis          oui    x          oui          oui
-## 22         LUCAS          oui    x          oui          non
-## 23        Mariam          oui    x          oui          oui
-## 24        Marion          oui    x          oui          Oui
-## 25      Matthieu          non    x          non          non
-## 26         SALIF          oui    x          non          non
-## 27         Sanaa          oui    x          oui          oui
-## 28         sarah         &lt;NA&gt; &lt;NA&gt;          oui          oui
-## 29      Savannah          oui    x          oui          non
-## 30         Selin          oui    x          Oui          Oui
-## 31         Théo           non    x          non          non
-## 32        Thomas          oui    x          oui          non
-## 33        Yanis           non    x          oui          non
-## 34       Zachary          oui    x          oui          oui</code></pre>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="co">#initialisation tmp et coursBase au cas où boucle tourne pl fois</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>tmp <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>coursBase <span class="ot">&lt;-</span> cours1 [, <span class="fu">c</span>(<span class="st">&quot;Prénom&quot;</span>, <span class="st">&quot;X44223&quot;</span>)]</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span> (coursBase)[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="st">&quot;cours1..oui.&quot;</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(ind)){</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>  tmp <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">paste0</span>(<span class="st">&quot;data/&quot;</span>, contenu [ind [i]]), <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>  tmp</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>  coursMerge <span class="ot">&lt;-</span> <span class="fu">merge</span>(coursBase,tmp [,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)], <span class="at">all =</span> T, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;Prénom&quot;</span>, <span class="st">&quot;Prénom&quot;</span>))</span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>  coursBase <span class="ot">&lt;-</span> coursMerge</span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a>coursMerge</span></code></pre></div>
+<pre><code>##           Prénom cours1..oui. cours2..oui. cours3..oui. cours4..oui.
+## 1          Alaya          oui          oui          oui          oui
+## 2           Anna          oui          oui          oui          oui
+## 3           Anne          oui          oui          oui          oui
+## 4        Aurélie          non          non          non         &lt;NA&gt;
+## 5        Camille          oui     autre TD         &lt;NA&gt;         &lt;NA&gt;
+## 6     Chang-Beom          oui          oui          oui          oui
+## 7          Chloé          oui          oui          oui          oui
+## 8           Eah           oui          non          non         &lt;NA&gt;
+## 9  Elif-Delphine          oui          non          non         &lt;NA&gt;
+## 10         Elisa          oui     autre TD         &lt;NA&gt;         &lt;NA&gt;
+## 11          Emma          non          non          non         &lt;NA&gt;
+## 12        Gaëlle          oui     autre TD         &lt;NA&gt;         &lt;NA&gt;
+## 13         Galli         &lt;NA&gt;          oui          non          oui
+## 14      Gianluca          oui          oui          non          oui
+## 15       Guénolé          oui          oui          non          non
+## 16         Ianis          oui          oui          oui          oui
+## 17          Iman          oui          oui          non         &lt;NA&gt;
+## 18      Jennifer          oui          oui          non          oui
+## 19        Laura           oui     autre TD         &lt;NA&gt;         &lt;NA&gt;
+## 20         Linda          oui                       non         &lt;NA&gt;
+## 21         Louis          oui          oui          oui          oui
+## 22         LUCAS          oui          oui          non         &lt;NA&gt;
+## 23        Mariam          oui          oui          oui          oui
+## 24        Marion          oui          oui          Oui          Oui
+## 25      Matthieu          non          non          non         &lt;NA&gt;
+## 26         SALIF          oui          non          non         &lt;NA&gt;
+## 27         Sanaa          oui          oui          oui          oui
+## 28         sarah         &lt;NA&gt;          oui          oui          oui
+## 29      Savannah          oui          oui          non          non
+## 30         Selin          oui          Oui          Oui          oui
+## 31         Théo           non          non          non         &lt;NA&gt;
+## 32        Thomas          oui          oui          non          non
+## 33        Yanis           non          oui          non         &lt;NA&gt;
+## 34       Zachary          oui          oui          oui          oui
+##    cours5..oui.
+## 1           non
+## 2           Oui
+## 3           oui
+## 4          &lt;NA&gt;
+## 5          &lt;NA&gt;
+## 6           oui
+## 7           oui
+## 8          &lt;NA&gt;
+## 9          &lt;NA&gt;
+## 10         &lt;NA&gt;
+## 11         &lt;NA&gt;
+## 12         &lt;NA&gt;
+## 13          oui
+## 14          non
+## 15          non
+## 16          oui
+## 17          oui
+## 18          non
+## 19         &lt;NA&gt;
+## 20         &lt;NA&gt;
+## 21          oui
+## 22         &lt;NA&gt;
+## 23          oui
+## 24          Oui
+## 25         &lt;NA&gt;
+## 26         &lt;NA&gt;
+## 27          oui
+## 28          non
+## 29          non
+## 30          oui
+## 31         &lt;NA&gt;
+## 32          non
+## 33         &lt;NA&gt;
+## 34          oui</code></pre>
 </div>
 </div>
 <div id="en-utilisant-les-listes-et-les-apply" class="section level3" number="3.2.3">
@@ -1269,7 +1309,30 @@ div.tocify {
 ## 16 Chang-Beom          oui
 ## 17    Zachary          oui
 ## 18      Galli          oui
-## 19      sarah          oui</code></pre>
+## 19      sarah          oui
+## 
+## [[5]]
+##        Prénom cours5..oui.
+## 1       Louis          oui
+## 2        Anne          oui
+## 3      Mariam          oui
+## 4       Selin          oui
+## 5       Sanaa          oui
+## 6       Chloé          oui
+## 7       Ianis          oui
+## 8    Jennifer          non
+## 9        Anna          Oui
+## 10     Marion          Oui
+## 11   Gianluca          non
+## 12   Savannah          non
+## 13      Alaya          non
+## 14    Guénolé          non
+## 15     Thomas          non
+## 16 Chang-Beom          oui
+## 17    Zachary          oui
+## 18      Galli          oui
+## 19      sarah          non
+## 20       Iman          oui</code></pre>
 </div>
 </div>
 <div id="recodage" class="section level2" number="3.4">
@@ -1333,15 +1396,20 @@ div.tocify {
 ## 
 ## [[4]]
 ##  [1] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot;
-## [13] &quot;oui&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot;</code></pre>
+## [13] &quot;oui&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot;
+## 
+## [[5]]
+##  [1] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;non&quot;
+## [13] &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot;</code></pre>
 </div>
 </div>
 <div id="explorations-statistiques-sur-les-présences" class="section level1" number="4">
 <h1 number="4"><span class="header-section-number">4</span> Explorations statistiques sur les présences</h1>
 <div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>compter <span class="ot">&lt;-</span> <span class="cf">function</span> (vec) {<span class="fu">table</span>(vec <span class="sc">==</span> <span class="st">&quot;oui&quot;</span>)}</span>
 <span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>présence <span class="ot">&lt;-</span> <span class="fu">sapply</span>(listeRecodée, compter)</span>
-<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(présence [<span class="dv">2</span>,], <span class="at">main =</span> <span class="st">&quot;Nombres d&#39;étudiants&quot;</span>,</span>
-<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">names.arg =</span> <span class="fu">c</span> (<span class="st">&quot;cours1&quot;</span>, <span class="st">&quot;cours2&quot;</span>, <span class="st">&quot;cours3&quot;</span>, <span class="st">&quot;cours4&quot;</span>))</span></code></pre></div>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>numCours <span class="ot">&lt;-</span> <span class="fu">seq</span> (<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span> (listeRecodée))</span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(présence [<span class="dv">2</span>,], <span class="at">main =</span> <span class="st">&quot;Nombres d&#39;étudiants&quot;</span>,</span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">names.arg =</span> numCours, <span class="at">xlab =</span> <span class="st">&quot;cours&quot;</span>)</span></code></pre></div>
 <p><img src="03_basesR_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 </div>
 

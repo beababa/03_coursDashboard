@@ -477,7 +477,7 @@ div.tocify {
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(idfInsee,<span class="st">&quot;data/insee.gpkg&quot;</span>,<span class="st">&quot;idf&quot;</span>, <span class="at">delete_layer =</span> T)</span></code></pre></div>
 </div>
 <div id="intersection-spatiale-bondy" class="section level1" number="4">
-<h1 number="4"><span class="header-section-number">4</span> intersection spatiale bondy</h1>
+<h1 number="4"><span class="header-section-number">4</span> Intersection spatiale bondy</h1>
 <p>Même problème</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>idfInsee <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/insee.gpkg&quot;</span>, <span class="st">&quot;idf&quot;</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>bondyInsee <span class="ot">&lt;-</span> <span class="fu">st_intersection</span> (idfInsee, limite)</span>
@@ -485,9 +485,9 @@ div.tocify {
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(bondyInsee, <span class="st">&quot;data/insee.gpkg&quot;</span>, <span class="st">&quot;bondy&quot;</span>)</span></code></pre></div>
 </div>
 <div id="enregistrement-.csv" class="section level1" number="5">
-<h1 number="5"><span class="header-section-number">5</span> enregistrement .csv</h1>
+<h1 number="5"><span class="header-section-number">5</span> Enregistrement .csv</h1>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>idfcsv <span class="ot">&lt;-</span> idfInsee [,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">42</span>), drop <span class="ot">=</span> T]</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(idfcsv)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># drop permet de laisser tomber la géométrie</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>bondycsv <span class="ot">&lt;-</span> bondyInsee [, <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">42</span>), drop <span class="ot">=</span> T]</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(idfcsv, <span class="st">&quot;data/idfInsee.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(bondycsv, <span class="st">&quot;data/bondyInsee.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span></code></pre></div>
@@ -527,11 +527,11 @@ div.tocify {
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span>  <span class="st">&quot;Pauvreté à Bondy&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>) </span></code></pre></div>
 <p><img src="05_correction_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>En fait l’exploration statistique passe par un histogramme qui permet de définir les seuils que l’on va cartographier.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(data<span class="sc">$</span>Men_pauv)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(data<span class="sc">$</span>Men_pauv, <span class="at">xlab =</span> <span class="st">&quot;valeurs des carreaux&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;nb de carreaux&quot;</span>)</span></code></pre></div>
 <p><img src="05_correction_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Définition de 3 paliers</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>paliers <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">50</span>,<span class="dv">200</span>,<span class="dv">300</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(data, <span class="at">type =</span><span class="st">&quot;choro&quot;</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="at">breaks =</span> paliers, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>, <span class="at">border =</span> <span class="st">&quot;antiquewhite1&quot;</span>, <span class="at">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(data, <span class="at">type =</span><span class="st">&quot;choro&quot;</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="at">breaks =</span> paliers, paliers, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>, <span class="at">border =</span> <span class="st">&quot;antiquewhite1&quot;</span>, <span class="at">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span>  <span class="st">&quot;Concentration de la pauvreté à Bondy&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>)</span></code></pre></div>
 <p><img src="05_correction_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
 </div>

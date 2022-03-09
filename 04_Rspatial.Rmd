@@ -177,6 +177,6 @@ st_write(jointure, "data/vote.gpkg", "jointure", delete_layer = T)
 names(jointure)
 ```
 
-Exprimer tous les indicateurs (du taux de votant à la liste 5 par une boucle)
+Cartographier tous les indicateurs (du taux de votant à la liste 5 par une boucle)
 
 (Faire l'algorithme, donner les fonctions, et faire le script)

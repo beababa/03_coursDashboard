@@ -55,7 +55,7 @@ st_write(idfInsee,"data/insee.gpkg","idf", delete_layer = T)
 ```
 
 
-# intersection spatiale bondy
+# Intersection spatiale bondy
 
 Même problème
 
@@ -68,11 +68,11 @@ st_write(bondyInsee, "data/insee.gpkg", "bondy")
 
 
 
-# enregistrement .csv
+# Enregistrement .csv
 
 ```{r, eval=FALSE}
 idfcsv <- idfInsee [,c(1:42), drop = T]
-class(idfcsv)
+# drop permet de laisser tomber la géométrie
 bondycsv <- bondyInsee [, c(1:42), drop = T]
 write.csv(idfcsv, "data/idfInsee.csv", fileEncoding = "UTF-8")
 write.csv(bondycsv, "data/bondyInsee.csv", fileEncoding = "UTF-8")
@@ -102,14 +102,13 @@ mf_layout(title =  "Pauvreté à Bondy", credits = "INSEE Carroyage 200 m")
 ```
 
 
-En fait l'exploration statistique passe par un histogramme qui permet de définir les seuils
-que l'on va cartographier.
+En fait l'exploration statistique passe par un histogramme qui permet de définir les seuils que l'on va cartographier.
 
 ```{r}
-hist(data$Men_pauv)
+hist(data$Men_pauv, xlab = "valeurs des carreaux", ylab = "nb de carreaux")
 # Définition de 3 paliers
 paliers <- c(0,50,200,300)
-mf_map(data, type ="choro", var = "Men_pauv", breaks = paliers, pal = "Burg", border = "antiquewhite1", leg_title = "Nb de ménages pauvres")
+mf_map(data, type ="choro", var = "Men_pauv", breaks = paliers, paliers, pal = "Burg", border = "antiquewhite1", leg_title = "Nb de ménages pauvres")
 mf_layout(title =  "Concentration de la pauvreté à Bondy", credits = "INSEE Carroyage 200 m")
 ```
 

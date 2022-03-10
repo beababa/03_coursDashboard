@@ -1,0 +1,46 @@
+---
+title: "Valorisation : Flexboard"
+author: "B. Maranget"
+date: "20/01/2021"
+output: flexdashboard::flex_dashboard
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+# Passer la valeur suivante à TRUE pour reproduire les extractions.
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+Row
+----------------
+
+
+### Chart 1
+
+```{r}
+library(leaflet)
+    leaflet() %>% 
+        fitBounds(-20,65,20,40) %>% 
+        addTiles() 
+```
+
+
+Row
+-------------------
+
+### Chart 2
+
+```{r}
+
+```
+
+### Chart 3
+
+```{r}
+
+```

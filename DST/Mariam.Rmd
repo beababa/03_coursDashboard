@@ -1,0 +1,77 @@
+---
+title: "LE CARROYAGE DE L'INSEE A BONDY"
+author: "Mariam OUATTARA"
+date: '2022-03-10'
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+#DECOUPAGE DES CARREAUX AUX LIMITES DE BONDY
+```{r}
+contenu <- list.files("data/idfinsee.csv")
+car<- list.files("data/bondyinsee.csv")
+#
+library(sf)
+zone <- st_read("data/vote.gpkg", "zone", quiet = TRUE,stringsAsFactors = F)
+ resultat <- read.csv("data/bondyInsee.csv", encoding = "UTF-8")
+#les lignes suivantes importe les donnée de bondy prensent dans le dossier data
+bondy<- st_read("data/bondyinsee.csv", quiet=TRUE)
+# cette ligne permet d'exporter l'objet bondy dans un dossier au format geopackage
+st_write(obj = bondy, dsn = "data/insee.gpkg", layer = "bondy", delete_layer = TRUE)
+
+```
+```{r}
+library(sf)
+ data <- st_read("data/vote.gpkg", "zone")
+ plot(data$geom)
+ bondy<- st_convex_hull(st_union(data$geom))
+ bondy<- st_as_sf(bondy)
+ plot(bondy)
+```
+```{r}
+# Chargement des données INSEE
+
+ ```{r}
+ insee <- st_read("data/Filosofi2015_carreaux_200m_metropole.gpkg")
+ head(insee)
+ idf <- st_read("data/regions-20180101-shp/regions-20180101.shp")
+ idf <- st_transform(idf, 2154)
+ idf <- idf [idf$code_insee == 11,]
+ idfInsee <- st_intersection(insee, idf)
+ st_write(idfInsee,"data/insee.gpkg","idf", delete_layer = T)
+ ```
+
+
+ # intersection spatiale bondy
+
+ ```{r}
+ bondyInsee <- st_intersection (idfInsee, limite)
+ names(bondyInsee)
+ st_write(bondyInsee, "data/insee.gpkg", "bondy")
+
+ ```
+
+
+
+ # enregistrement .csv
+
+ ```{r}
+ idfcsv <- idfInsee [,c(1:42), drop = T]
+ class(idfcsv)
+ bondycsv <- bondyInsee [, c(1:42), drop = T]
+ write.csv(idfcsv, "data/idfInsee.csv", fileEncoding = "UTF-8")
+ write.csv(bondycsv, "data/bondyInsee.csv", fileEncoding = "UTF-8")
+ ```
+```
+
+```
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+

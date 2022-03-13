@@ -1,0 +1,114 @@
+---
+title: "Evaluation"
+author : "MAUCLET Anna" 
+date : "18/02/2022"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+# Ouverture des fichiers
+Tout d'abord, j'ouvre mon fichier nommé "bondyInsee.csv" que j'ai mis dans un fichier R dans mon ordinateur.
+J'utilise la commande read.csv et j'execute en faisant ctrl + entrée. je fais la même chose pour mon fichier nommé "idInsee.csv"
+
+```{r}
+read.csv("bondyInsee.csv",fileEncoding = "UTF-8")
+read.csv("idfInsee.csv",fileEncoding = "UTF-8")
+```
+# Installation des packages
+Puis, j'installe les packages sf et mapsf
+```{r}
+install.packages("sf")
+install.packages("mapsf")
+install.packages("data.table")
+install.packages("stringr")
+library(data.table) 
+library(stringr)
+```
+# Importation
+## Affichage et caractéristique de la carte
+J'importe ma librairie sf et j'observe la structure avec la commande str
+J'affiche une carte
+Puis je définis les caractéristiques de ma carte
+```{r}
+library(sf)
+zone <- st_read("vote.gpkg","zone")
+str(zone)
+
+zone$numBureau
+zone [zone$numBureau == 1,]
+zone [1,2]
+
+plot(zone$geom)
+fusion <- st_union(zone)
+str(zone)
+plot(zone$geom)
+
+
+library(mapsf)
+mf_map(zone, type= "choro", border = NA, var = "aire")
+
+zone <- zone [zone$numBureau %in% seq(1,30),]
+summary(zone)
+
+mf_map(zone, type = "choro", pal = "Burg",
+       border = NA, var = "txVotants")
+barplot("txVotants")
+
+```
+
+# Intersection spatiale 
+Le carroyage est une technique de quadrillage consistant à découper le territoire en carreaux pour y diffuser 
+de l’information statistique à un niveau faiblement agrégé. Le maillage du territoire qui en résulte est plus ou 
+moins fin selon la taille de carreau choisie. Le carroyage nécessite de disposer initialement de données pour
+lesquelles on connaît précisément la position géographique de chaque observation
+
+La commande pour faire une intersection spatiale est : st_intersection
+```{r}
+st_intersection(zone$geom)
+intersections_lp <- st_intersection(lines, polygons)
+calculAgregatsZones 
+```
+Je trouve des commandes mais je n'arrive pas à savoir ce qu'il faut mettre comme fichiers à l'intérieur...
+```{r}
+listeIndicDef <- c("Ind","Men","Men_pauv","Men_1ind","Men_5ind","Men_prop","Men_fmp","Ind_snv",
+                   "Men_surf","Men_coll","Men_mais","Log_av45","Log_45_70","Log_70_90","Log_ap90",
+                   "Log_inc","Log_soc","Ind_0_3","Ind_4_5","Ind_6_10","Ind_11_17","Ind_18_24",
+                   "Ind_25_39","Ind_40_54","Ind_55_64","Ind_65_79","Ind_80p","Ind_inc")
+calculAgregatsZones <- function (listeIndicDef)
+carreaux <- data.table::fread
+  epsg <- as.integer(str_sub(str_extract(carreaux[1,]$idfInsee, "CRS\\d+"), 4)),
+  
+  tailleCarreaux <- unlist(lapply(X = "idfInsee"", FUN = function(ligne){
+    return(as.integer(str_sub(str_extract(ligne, "RES\\d+"), 4)))
+  }))
+  ordonneesCarreaux <- unlist(lapply(X = "idfInsee"", FUN = function(ligne){
+    return(as.integer(str_sub(str_extract(ligne, "N\\d+"), 2)))
+  }))
+  abscissesCarreaux <- unlist(lapply(X = "idfI", FUN = function(ligne){
+    return(as.integer(str_sub(str_extract(ligne, "E\\d+"), 2)))
+  }))
+  
+  
+  
+```
+## un barplot
+J'essaie de réaliser un barplot
+```{r}
+st_read("insee.gpkg")
+str(data)
+Individu <- data(ind)
+tab <- table(variable.names("listeIndicDef"))
+barplot(tab,col=heat.colors(5),border = NA, xlab = "variables", 0-5, legend = T)
+```
+

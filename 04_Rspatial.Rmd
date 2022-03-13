@@ -160,13 +160,13 @@ Pour faire correspondre les deux clés, il suffit de retirer les lettres et gard
 ### Faire le script
 
 ```{r}
-data <- data [data$cle[c(1:32)],]
+dataSel <- data [c(1:32),]
 zone$cle <- substring (zone$Layer,9,11)
-data$cle <- substring(data$Bureau.de.vote, 3,5 )
-data$cle <- as.integer(data$cle)
+dataSel$cle <- substring(dataSel$Bureau.de.vote, 3,5 )
+dataSel$cle <- as.integer(dataSel$cle)
 zone$cle <- as.integer(zone$cle)
 length(zone$cle) == length(data$cle)
-jointure <- merge(zone, data, by = "cle")
+jointure <- merge(zone, dataSel, by = "cle")
 st_write(jointure, "data/vote.gpkg", "jointure", delete_layer = T)
 ```
 

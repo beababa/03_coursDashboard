@@ -1,0 +1,86 @@
+---
+title: "Evaluation du 10 mars 2022"
+author: "M. Blondeau"
+date: "10/03/2022"
+output:
+  html_document: 
+  number_sections: yes
+toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+```{r}
+library(sf)  
+```  
+
+On charge la librairie sf. 
+
+```{r}
+zone <- st_read("vote.gpkg", "zone")
+str(zone)  
+```  
+
+Je lis le fichier vote.gpkg et je regarde sa structure. 
+
+```{r}
+plot(zone$geom, col = terrain.colors (31),
+  border = NA,
+  main = "Bureaux de votes de Bondy")  
+```  
+
+On fait ici apparaître les bureaux de vote de Bondy, en nommant la carte qui apparaît "Bureaux de vote de Bondy" avec 'main' qui permet de donner un titre à ce que nous produisons, et 'border = NA' qui permet de supprimer les lignes noires qui délimitait les différentes parties de la carte. 
+
+```{r}
+plot(zone$geom, col = terrain.colors (31),
+  main = "Bureaux de votes de Bondy")  
+```  
+
+Ici, la même carte mais avec la commande 'border = NA' supprimée, ce qui rajoute les lignes noires qui délimitent les différents bureaux de votes de la ville. 
+
+```{r}
+union_bureau <- st_union(zone)
+union_bureau
+plot(union_bureau, col = terrain.colors (31),
+  border = NA,
+  main = "Bureaux de votes de Bondy fusionnés")  
+```  
+
+J'ai ici fusionné les bureaux de vote qui étaient des multipolygones en un seul, et ai à nouveau supprimé les lignes noires de délimitations. 
+
+```{r}
+setwd("C:/Users/Marion/Downloads/Exam_SIG")
+read.csv("bondyInsee.csv", fileEncoding = "UTF-8")
+data <- read.csv("bondyInsee.csv", fileEncoding = "UTF-8")  
+```  
+
+Je m'assure d'abord que je suis toujours dans le même fichier avec setwd (je n'en étais plus sûre à cause d'une erreur affichée dans la console), puis j'ajoute le fichier bondyInsee.csv, en l'encodant pour que les accents soient bien traduits. 
+```{r}
+str(data)  
+```  
+
+On regarde la structure du document.
+
+```{r}
+Age1 <- data$Ind_55_64
+Age2 <- data$Ind_65_79
+Age1_2 <- merge(Age1, Age2, all = T)
+Age1_2  
+```  
+
+On essaye ici de fusionner les groupes de personnes entre 55 et 64 et entre 65 et 79 qui sont allées voter. Une première fonction nommée Age1 regroupe les habitants qui sont allés voter âgés entre 55 et 64 ans, et Age2 regroupe les habitants qui sont allés voter âgés entre 65 et 79 ans. On utilise la commande 'merge' pour fusionner les deux, et on nomme cela Age1_2. 
+
+
+```{r}
+tab <- table(Age1_2)
+barplot(tab, col = heat.colors(10), border = NA)  
+```  
+
+J'essaye de faire un tableau avec ce Age1_2 que j'ai obtenu précédemment. 

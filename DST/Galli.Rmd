@@ -1,0 +1,18 @@
+---
+title: "Bondy"
+author: "Galli ZANI"
+date: "10/03/2022"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+library(sf)
+zone <- st_read ("idfInsee.csv)```
+zone <- st_read ("insee.gpkg")
+zone <- st_read ("bondyInsee.csv"")
+
+srt (idfInsee.csv)

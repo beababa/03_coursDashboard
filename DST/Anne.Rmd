@@ -1,0 +1,76 @@
+---
+title: "rmdexam"
+author: "A. Simon"
+date: "17/02/2022"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+# Passer la valeur suivante à TRUE pour reproduire les extractions.
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+Il faut croiser les indicateurs socio-économiques et les résultats des votes. Pour cela, il va falloir utiliser les données socio-économique fournies par l'INSEE en Ile de France et les résultats des votes de Bondy. 
+
+# Exploration statistique
+
+## Intégrer les données dans le Markdown
+ Il faut que le markedown comprenne les données. On les place donc dans le répertoire puis on les incorpore au scripte en le traduisant :
+ 
+```{r}
+databondy <- read.csv("bondyInsee.csv",fileEncoding = "UTF-8")
+dataidf <- read.csv("idfInsee.csv",fileEncoding = "UTF-8")
+
+```
+ 
+On constate qu'il y a 43 variables dans les deux jeux de données. 
+
+On peut évaluer le nombre de ménages pauvres :
+
+```{r}
+tab <- table (databondy$Men_pauv)
+etik <- names(tab)
+barplot(tab, col =heat.colors(50), legend.text = T, border = NA, names.arg = names(tab), las = 2, main = "Nombre de ménages pauvres par carreaux de 200m à Bondy")
+```
+
+On peut le comparer avec les résultats de l'Insee
+
+```{r}
+tab <- table (dataidf$Men_pauv)
+etik <- names(tab)
+barplot(tab, col =heat.colors(50), legend.text = T, border = NA, names.arg = names(tab), las = 2, main = "Nombre de ménages pauvres par carreaux de 200m en IDF")
+```
+
+# Délimiter Bondy
+## Créer la carte
+
+On commence par faire la carte des bureaux de vote :
+
+```{r}
+
+library(sf)
+vote <- st_read("vote.gpkg")
+plot(vote$geom,col = terrain.colors (31),
+     border = NA,
+     main = "vote bondy")
+fusion <- st_union(vote)
+str(vote)
+
+```
+
+## Couper les carreaux de la carte
+On désigne ensuite les zones tampons  de 10m et on les supprime:
+
+```{r}
+tampon <- st_buffer(vote, 10)
+plot(tampon$geom)
+```
+

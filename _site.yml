@@ -8,7 +8,11 @@ navbar:
     - text: "Bases R"
       href: 03_basesR.html 
     - text: "R spatial"
-      href: 04_Rspatial.html 
+      href: 04_Rspatial.html
+    - text: "Correction"
+      href: 05_correction.html 
+    - text: "OSM"
+      href: 05_OSM.html   
   right:
     - icon: fa-github
       href: https://github.com/beababa/beababa.github.io

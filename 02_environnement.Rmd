@@ -146,8 +146,10 @@ https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a
 
 ### Test
 
-* ssh -T git@github.com*
+*ssh -T git@github.com*
 
+
+![](img/GIThi.png)
 
 ## Mise à jour du projet : 4 commandes à connaître
 

@@ -23,63 +23,130 @@ knitr::opts_chunk$set(warning = FALSE)
 
 Intersection spatiale et exploration statistique du carroyage INSEE 200 m
 
+# Préparation des données pour l'examen
 
 
-# Limites des bureaux de vote
+## Le fichier spatial
 
-```{r}
-library(sf)
-data <- st_read("data/vote.gpkg", "zone")
-plot(data$geom)
-limite <- st_convex_hull(st_union(data$geom))
-limite <- st_as_sf(limite)
-plot(limite)
-```
+Les données INSEE sont très lourdes (223 M°)
+Dans le cadre de l'examen sont mises à disposition les données concernant uniquement
+l'Ile de France.
+
+sources :
+
+- https:/www.insee.fr/fr/statistiques/4176290?sommaire=4176305
+
+- https://www.data.gouv.fr/fr/organizations/openstreetmap/
 
 
-# Chargement des données INSEE
+On filtre donc sur l'Ile de France afin d'avoir un fichier un peu moins gros.
 
-A partir du fichier disponible sur le site de l'INSEE qui couvre toute la France.
-Ce chunk n'est pas rejoué car le fichier est tros gros pour le git.
-
-On filtre donc sur l'Ile de France
 
 ```{r, eval = FALSE}
 insee <- st_read("data/Filosofi2015_carreaux_200m_metropole.gpkg")
-head(insee)
 idf <- st_read("data/regions-20180101-shp/regions-20180101.shp")
+# Transformation de la projection de idf (les données osm sont toujours en 4326, projection mondiale)
 idf <- st_transform(idf, 2154)
+# On filtre sur le code insee de l'île de france (11), les autres régions ne nous intéressent pas.
 idf <- idf [idf$code_insee == 11,]
+# Intersection spatiale
 idfInsee <- st_intersection(insee, idf)
 st_write(idfInsee,"data/insee.gpkg","idf", delete_layer = T)
 ```
 
 
-# Intersection spatiale bondy
+## Le fichier .csv
 
-Même problème
-
-```{r, eval = FALSE}
-idfInsee <- st_read("data/insee.gpkg", "idf")
-bondyInsee <- st_intersection (idfInsee, limite)
-names(bondyInsee)
-st_write(bondyInsee, "data/insee.gpkg", "bondy")
-```
+Pour créer un fichier .csv, à partir d'un fichier de formes, il faut faire "tomber" la colonne géométrique (commande **drop**)
 
 
-
-# Enregistrement .csv
 
 ```{r, eval=FALSE}
 idfcsv <- idfInsee [,c(1:42), drop = T]
-# drop permet de laisser tomber la géométrie
-bondycsv <- bondyInsee [, c(1:42), drop = T]
 write.csv(idfcsv, "data/idfInsee.csv", fileEncoding = "UTF-8")
-write.csv(bondycsv, "data/bondyInsee.csv", fileEncoding = "UTF-8")
 ```
+
+
+
+## Récupérations des copies
+
+
+Les étudiants ont déposé leur script sur leur git. La récupération est possible de
+manière automatisé.
+
+### Algorithme
+
+importer le tableau des dépots git et du prénom étudiant
+Tant que la liste des sites n'est pas finie
+  lire
+  chercher le fichier
+  l'enregistrer dans le répertoire DST sous la forme prénom étudiant et extension .Rmd
+Fin boucle
+
+
+### Script
+
+```{r}
+ref <- read.csv("data/cours6.csv", fileEncoding = "UTF-8")
+ref <- ref [ref$lien.évaluation != "", c(1,4,5)]
+length(ref$lien.évaluation)
+# 14 étudiants ont rendu un script...
+ok <- grep(".Rmd", ref$lien.évaluation)
+# ... dont 7 seulement un Rmd
+ref$lien.évaluation [-ok]
+# ...les 7 autres ont parfois rendu uniqumement le répertoire où est le script.
+# d'où correction
+ref$lien.ok
+# Le 14e étudiant n'a pas de dépôt public, demande d'envoi par mail.
+```
+
+
+```{r}
+for (i in 1:length(ref$lien.ok)-1){
+  download.file(ref$lien.ok [i], paste0("DST/",ref$Prénom [i], ".Rmd"))
+}
+
+```
+
+
+
+
+# Intersection spatiale
+
+## Limites des bureaux de vote
+
+Afin de faire l'intersection spatiale, on crée une enveloppe autour des bureaux
+de vote.
+
+```{r}
+library(sf)
+data <- st_read("data/vote.gpkg", "zone")
+plot(data$geom, main = "Bureaux de vote")
+limite <- st_convex_hull(st_union(data$geom))
+class(limite)
+# l'objet limite n'est pas un dataframe, juste un polygone
+limite <- st_as_sf(limite)
+plot(limite, add = TRUE, col= NA, border = "red")
+```
+
+
+
+## Intersection spatiale 
+
+
+```{r}
+idfInsee <- st_read("data/insee.gpkg", "idf")
+bondyInsee <- st_intersection (idfInsee, limite)
+st_write(bondyInsee, "data/insee.gpkg", "bondy", delete_layer = T)
+```
+
+
+
 
 # Explorations statistiques
 
+
+On choisir la variable *Men_pauv* qui représente le nombre de ménages pauvres.
 
 ```{r}
 data <- read.csv("data/bondyInsee.csv", fileEncoding = "UTF-8")
@@ -87,6 +154,9 @@ names(data)
 barplot(data$Men_pauv, main = "carroyage INSEE Bondy, inégalités", xlab = "carreaux carroyage" ,
         ylab = "Nb de ménages pauvres", col = "red", border = NA)
 ```
+
+Le graphique montrer qu'il existe de grandes inégalités à Bondy. Quelques carreaux
+ont plus de 200 ménages pauvres, mais l'énorme majorité est en dessous de 50.
 
 Il est évident qu'il vaut mieux cartographier...
 

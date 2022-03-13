@@ -1,0 +1,88 @@
+---
+title: "Selin"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+rmarkdown flexdashboard tidyverse shiny DT knitr sp sf mapsf terra leaflet osmdata RColorBrewer
+library(sf)
+zone <- st_read("vote.gpkg", "zone")
+str(zone)
+zone$numBureau
+zone [zone$numBureau == 1,]
+zone [1,2]
+plot(zone$geom)
+fusion <- st_union(zone)
+str(zone)
+plot(zone$geom)
+enveloppe <- st_convex_hull(fusion)
+plot(enveloppe)
+tampon <- st_buffer(zone, 50)
+plot(tampon$geom)
+fusion <- st_union(tampon)
+plot(fusion)
+simplifier <- st_simplify(fusion,90, preserveTopology = F)
+plot(simplifier)
+plot(zone$geom, col = terrain.colors (31),
+     border = NA,
+     main = "31 bureaux de vote de Bondy")
+library(mapsf)
+mf_map(zone, type = "choro", border = NA,var = "aire")
+zone <- zone [zone$numBureau %in% seq(1,30),]
+summary(zone)
+mf_map(zone, type = "choro", pal = "Burg",
+       border = NA, var = "txVotants")
+data <- read.csv("bondyInsee.csv", fileEncoding = "UTF-8", dec = ",")
+zone$Layer
+data$Bureau.de.vote
+data <- data [data$cle[c(1:32)],]
+zone$cle <- substring (zone$Layer,9,11)
+data$cle <- substring(data$Bureau.de.vote, 3,5 )
+data$cle <- as.integer(data$cle)
+zone$cle <- as.integer(zone$cle)
+length(zone$cle) == length(data$cle)
+jointure <- merge(zone, data, by = "cle")
+st_write(jointure, "data/vote.gpkg", "jointure", delete_layer = T)
+names(jointure)
+
+data <- read.csv("bondyInsee.csv", fileEncoding = "UTF-8", dec = ",")
+head(data)
+summary(data)
+data$Bureau.de.vote
+data <-  data [-c(33,34),]
+candidat  <- names(data)[8:12]
+candidat
+liste <- strsplit(candidat,"\\.\\.\\.")
+liste [[5]][3]
+candidat <- sapply(liste, '[', 3)
+names (data) [8:12] <- candidat
+names(data)
+png(height = 800, width = 600, filename = "img/resultat.png")
+par(mfrow = c(4,3))
+for (i in 2:12){
+  barplot(data [,i], main = names(data) [i])
+}
+dev.off()
+

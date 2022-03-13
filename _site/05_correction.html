@@ -416,6 +416,9 @@ div.tocify {
 <li>
   <a href="04_Rspatial.html">R spatial</a>
 </li>
+<li>
+  <a href="05_correction.html">Correction</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -444,11 +447,41 @@ div.tocify {
 <h1 number="1"><span class="header-section-number">1</span> Objet</h1>
 <p>Intersection spatiale et exploration statistique du carroyage INSEE 200 m</p>
 </div>
-<div id="limites-des-bureaux-de-vote" class="section level1" number="2">
-<h1 number="2"><span class="header-section-number">2</span> Limites des bureaux de vote</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code></pre></div>
-<pre><code>## Linking to GEOS 3.9.0, GDAL 3.2.1, PROJ 7.2.1</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;zone&quot;</span>)</span></code></pre></div>
+<div id="préparation-des-données-pour-lexamen" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Préparation des données pour l’examen</h1>
+<div id="le-fichier-spatial" class="section level2" number="2.1">
+<h2 number="2.1"><span class="header-section-number">2.1</span> Le fichier spatial</h2>
+<p>Les données INSEE sont très lourdes (223 M°) Dans le cadre de l’examen sont mises à disposition les données concernant uniquement l’Ile de France.</p>
+<p>sources :</p>
+<ul>
+<li><p><a href="https:/www.insee.fr/fr/statistiques/4176290?sommaire=4176305" class="uri">https:/www.insee.fr/fr/statistiques/4176290?sommaire=4176305</a></p></li>
+<li><p><a href="https://www.data.gouv.fr/fr/organizations/openstreetmap/" class="uri">https://www.data.gouv.fr/fr/organizations/openstreetmap/</a></p></li>
+</ul>
+<p>On filtre donc sur l’Ile de France afin d’avoir un fichier un peu moins gros.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>insee <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/Filosofi2015_carreaux_200m_metropole.gpkg&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>idf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/regions-20180101-shp/regions-20180101.shp&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Transformation de la projection de idf (les données osm sont toujours en 4326, projection mondiale)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>idf <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(idf, <span class="dv">2154</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># On filtre sur le code insee de l&#39;île de france (11), les autres régions ne nous intéressent pas.</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>idf <span class="ot">&lt;-</span> idf [idf<span class="sc">$</span>code_insee <span class="sc">==</span> <span class="dv">11</span>,]</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Intersection spatiale</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>idfInsee <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(insee, idf)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(idfInsee,<span class="st">&quot;data/insee.gpkg&quot;</span>,<span class="st">&quot;idf&quot;</span>, <span class="at">delete_layer =</span> T)</span></code></pre></div>
+</div>
+<div id="le-fichier-.csv" class="section level2" number="2.2">
+<h2 number="2.2"><span class="header-section-number">2.2</span> Le fichier .csv</h2>
+<p>Pour créer un fichier .csv, à partir d’un fichier de formes, il faut faire “tomber” la colonne géométrique (commande <strong>drop</strong>)</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>idfcsv <span class="ot">&lt;-</span> idfInsee [,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">42</span>), drop <span class="ot">=</span> T]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(idfcsv, <span class="st">&quot;data/idfInsee.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="intersection-spatiale" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Intersection spatiale</h1>
+<div id="limites-des-bureaux-de-vote" class="section level2" number="3.1">
+<h2 number="3.1"><span class="header-section-number">3.1</span> Limites des bureaux de vote</h2>
+<p>Afin de faire l’intersection spatiale, on crée une enveloppe autour des bureaux de vote.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;zone&quot;</span>)</span></code></pre></div>
 <pre><code>## Reading layer `zone&#39; from data source 
 ##   `C:\Users\tachasa\Documents\sauveGIT\03_coursDashboard\data\vote.gpkg&#39; 
 ##   using driver `GPKG&#39;
@@ -457,45 +490,38 @@ div.tocify {
 ## Dimension:     XY
 ## Bounding box:  xmin: 661088.1 ymin: 6865338 xmax: 663354.7 ymax: 6869043
 ## Projected CRS: RGF93 / Lambert-93</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(data<span class="sc">$</span>geom)</span></code></pre></div>
-<p><img src="05_correction_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>limite <span class="ot">&lt;-</span> <span class="fu">st_convex_hull</span>(<span class="fu">st_union</span>(data<span class="sc">$</span>geom))</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>limite <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(limite)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(limite)</span></code></pre></div>
-<p><img src="05_correction_files/figure-html/unnamed-chunk-1-2.png" width="672" /></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(data<span class="sc">$</span>geom, <span class="at">main =</span> <span class="st">&quot;Bureaux de vote&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>limite <span class="ot">&lt;-</span> <span class="fu">st_convex_hull</span>(<span class="fu">st_union</span>(data<span class="sc">$</span>geom))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(limite)</span></code></pre></div>
+<pre><code>## [1] &quot;sfc_POLYGON&quot; &quot;sfc&quot;</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># l&#39;objet limite n&#39;est pas un dataframe, juste un polygone</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>limite <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(limite)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(limite, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col=</span> <span class="cn">NA</span>, <span class="at">border =</span> <span class="st">&quot;red&quot;</span>)</span></code></pre></div>
+<p><img src="05_correction_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 </div>
-<div id="chargement-des-données-insee" class="section level1" number="3">
-<h1 number="3"><span class="header-section-number">3</span> Chargement des données INSEE</h1>
-<p>A partir du fichier disponible sur le site de l’INSEE qui couvre toute la France. Ce chunk n’est pas rejoué car le fichier est tros gros pour le git.</p>
-<p>On filtre donc sur l’Ile de France</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>insee <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/Filosofi2015_carreaux_200m_metropole.gpkg&quot;</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(insee)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>idf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/regions-20180101-shp/regions-20180101.shp&quot;</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>idf <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(idf, <span class="dv">2154</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>idf <span class="ot">&lt;-</span> idf [idf<span class="sc">$</span>code_insee <span class="sc">==</span> <span class="dv">11</span>,]</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>idfInsee <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(insee, idf)</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(idfInsee,<span class="st">&quot;data/insee.gpkg&quot;</span>,<span class="st">&quot;idf&quot;</span>, <span class="at">delete_layer =</span> T)</span></code></pre></div>
+<div id="intersection-spatiale-1" class="section level2" number="3.2">
+<h2 number="3.2"><span class="header-section-number">3.2</span> Intersection spatiale</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>idfInsee <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/insee.gpkg&quot;</span>, <span class="st">&quot;idf&quot;</span>)</span></code></pre></div>
+<pre><code>## Reading layer `idf&#39; from data source 
+##   `C:\Users\tachasa\Documents\sauveGIT\03_coursDashboard\data\insee.gpkg&#39; 
+##   using driver `GPKG&#39;
+## Simple feature collection with 73214 features and 42 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 586673.7 ymin: 6780073 xmax: 738408.8 ymax: 6905080
+## Projected CRS: RGF93 / Lambert-93</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>bondyInsee <span class="ot">&lt;-</span> <span class="fu">st_intersection</span> (idfInsee, limite)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(bondyInsee, <span class="st">&quot;data/insee.gpkg&quot;</span>, <span class="st">&quot;bondy&quot;</span>, <span class="at">delete_layer =</span> T)</span></code></pre></div>
+<pre><code>## Deleting layer `bondy&#39; using driver `GPKG&#39;
+## Writing layer `bondy&#39; to data source `data/insee.gpkg&#39; using driver `GPKG&#39;
+## Writing 188 features with 42 fields and geometry type Polygon.</code></pre>
 </div>
-<div id="intersection-spatiale-bondy" class="section level1" number="4">
-<h1 number="4"><span class="header-section-number">4</span> Intersection spatiale bondy</h1>
-<p>Même problème</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>idfInsee <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/insee.gpkg&quot;</span>, <span class="st">&quot;idf&quot;</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>bondyInsee <span class="ot">&lt;-</span> <span class="fu">st_intersection</span> (idfInsee, limite)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(bondyInsee)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(bondyInsee, <span class="st">&quot;data/insee.gpkg&quot;</span>, <span class="st">&quot;bondy&quot;</span>)</span></code></pre></div>
 </div>
-<div id="enregistrement-.csv" class="section level1" number="5">
-<h1 number="5"><span class="header-section-number">5</span> Enregistrement .csv</h1>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>idfcsv <span class="ot">&lt;-</span> idfInsee [,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">42</span>), drop <span class="ot">=</span> T]</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># drop permet de laisser tomber la géométrie</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>bondycsv <span class="ot">&lt;-</span> bondyInsee [, <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">42</span>), drop <span class="ot">=</span> T]</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(idfcsv, <span class="st">&quot;data/idfInsee.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(bondycsv, <span class="st">&quot;data/bondyInsee.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span></code></pre></div>
-</div>
-<div id="explorations-statistiques" class="section level1" number="6">
-<h1 number="6"><span class="header-section-number">6</span> Explorations statistiques</h1>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/bondyInsee.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(data)</span></code></pre></div>
+<div id="explorations-statistiques" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Explorations statistiques</h1>
+<p>On choisir la variable <em>Men_pauv</em> qui représente le nombre de ménages pauvres.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/bondyInsee.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(data)</span></code></pre></div>
 <pre><code>##  [1] &quot;X&quot;          &quot;IdINSPIRE&quot;  &quot;Id_carr1km&quot; &quot;I_est_cr&quot;   &quot;Id_carr_n&quot; 
 ##  [6] &quot;Groupe&quot;     &quot;Depcom&quot;     &quot;I_pauv&quot;     &quot;Id_car2010&quot; &quot;Ind&quot;       
 ## [11] &quot;Men&quot;        &quot;Men_pauv&quot;   &quot;Men_1ind&quot;   &quot;Men_5ind&quot;   &quot;Men_prop&quot;  
@@ -505,15 +531,16 @@ div.tocify {
 ## [31] &quot;Ind_18_24&quot;  &quot;Ind_25_39&quot;  &quot;Ind_40_54&quot;  &quot;Ind_55_64&quot;  &quot;Ind_65_79&quot; 
 ## [36] &quot;Ind_80p&quot;    &quot;Ind_inc&quot;    &quot;I_est_1km&quot;  &quot;code_insee&quot; &quot;nom&quot;       
 ## [41] &quot;nuts2&quot;      &quot;wikipedia&quot;  &quot;surf_km2&quot;</code></pre>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(data<span class="sc">$</span>Men_pauv, <span class="at">main =</span> <span class="st">&quot;carroyage INSEE Bondy, inégalités&quot;</span>, <span class="at">xlab =</span> <span class="st">&quot;carreaux carroyage&quot;</span> ,</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>, <span class="at">border =</span> <span class="cn">NA</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(data<span class="sc">$</span>Men_pauv, <span class="at">main =</span> <span class="st">&quot;carroyage INSEE Bondy, inégalités&quot;</span>, <span class="at">xlab =</span> <span class="st">&quot;carreaux carroyage&quot;</span> ,</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>, <span class="at">border =</span> <span class="cn">NA</span>)</span></code></pre></div>
 <p><img src="05_correction_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Le graphique montrer qu’il existe de grandes inégalités à Bondy. Quelques carreaux ont plus de 200 ménages pauvres, mais l’énorme majorité est en dessous de 50.</p>
 <p>Il est évident qu’il vaut mieux cartographier…</p>
 </div>
-<div id="bonus-cartographique" class="section level1" number="7">
-<h1 number="7"><span class="header-section-number">7</span> Bonus cartographique</h1>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapsf)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;inseeBondy&quot;</span>)</span></code></pre></div>
+<div id="bonus-cartographique" class="section level1" number="5">
+<h1 number="5"><span class="header-section-number">5</span> Bonus cartographique</h1>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapsf)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;inseeBondy&quot;</span>)</span></code></pre></div>
 <pre><code>## Reading layer `inseeBondy&#39; from data source 
 ##   `C:\Users\tachasa\Documents\sauveGIT\03_coursDashboard\data\vote.gpkg&#39; 
 ##   using driver `GPKG&#39;
@@ -522,17 +549,17 @@ div.tocify {
 ## Dimension:     XY
 ## Bounding box:  xmin: 661088.1 ymin: 6865338 xmax: 663354.7 ymax: 6869043
 ## Projected CRS: RGF93 / Lambert-93</code></pre>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(data, <span class="at">type =</span> <span class="st">&quot;choro&quot;</span>, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>,</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="at">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span>  <span class="st">&quot;Pauvreté à Bondy&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>) </span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(data, <span class="at">type =</span> <span class="st">&quot;choro&quot;</span>, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>,</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="at">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span>  <span class="st">&quot;Pauvreté à Bondy&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>) </span></code></pre></div>
 <p><img src="05_correction_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>En fait l’exploration statistique passe par un histogramme qui permet de définir les seuils que l’on va cartographier.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(data<span class="sc">$</span>Men_pauv, <span class="at">xlab =</span> <span class="st">&quot;valeurs des carreaux&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;nb de carreaux&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(data<span class="sc">$</span>Men_pauv, <span class="at">xlab =</span> <span class="st">&quot;valeurs des carreaux&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;nb de carreaux&quot;</span>)</span></code></pre></div>
 <p><img src="05_correction_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Définition de 3 paliers</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>paliers <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">50</span>,<span class="dv">200</span>,<span class="dv">300</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(data, <span class="at">type =</span><span class="st">&quot;choro&quot;</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="at">breaks =</span> paliers, paliers, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>, <span class="at">border =</span> <span class="st">&quot;antiquewhite1&quot;</span>, <span class="at">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span>  <span class="st">&quot;Concentration de la pauvreté à Bondy&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Définition de 3 paliers</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>paliers <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">50</span>,<span class="dv">200</span>,<span class="dv">300</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(data, <span class="at">type =</span><span class="st">&quot;choro&quot;</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="at">breaks =</span> paliers, paliers, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>, <span class="at">border =</span> <span class="st">&quot;antiquewhite1&quot;</span>, <span class="at">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span>  <span class="st">&quot;Concentration de la pauvreté à Bondy&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>)</span></code></pre></div>
 <p><img src="05_correction_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
 </div>
 

@@ -13,7 +13,7 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(cache = FALSE)
 # Passer la valeur suivante à TRUE pour reproduire les extractions.
 knitr::opts_chunk$set(eval = TRUE)
 knitr::opts_chunk$set(warning = FALSE)
@@ -31,7 +31,7 @@ Dans ce cours, au lieu d'utiliser les outils ArcGIS, on part sur R / git et OSM 
 # Déroulé
 
 ```{r}
-data <- read.csv("data/deroule.csv", header =F, fileEncoding = "UTF-8")
+data <- read.csv("data/deroule.csv", header = T, fileEncoding = "UTF-8")
 knitr::kable(data)
 ```
 
@@ -173,6 +173,13 @@ barplot(tab, col = terrain.colors(7), las = 2, horiz = T, main = "Quel futur ima
 
 
 
+## Notes du DST
+
+
+```{r}
+data <- read.csv("data/noteDST.csv", fileEncoding = "UTF-8")
+hist(data$note.DST, main = "Notes DST", xlab = "valeur de la note", ylab = "nb de notes")
+```
 
 
 

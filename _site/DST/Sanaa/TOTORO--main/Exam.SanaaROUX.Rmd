@@ -1,0 +1,83 @@
+---
+title: "exammars"
+author: "SanaaROUX"
+date: "10/03/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+J'ai mis sous forme de graphique les données
+```{r}
+library(sf)
+library (readr)
+data<- read.csv("Documents/bondyInsee.csv",fileEncoding = "UTF-8")
+bondyInsee <- read_csv("Documents/bondyInsee.csv")
+
+View(bondyInsee)
+
+str(bondyInsee
+
+
+```
+
+```{r}
+tab<-table(bondyInsee$Men_coll)
+barplot(tab,col = heat.colors(5),border = NA)
+
+```
+```{r}
+tab<-table(bondyInsee$Men_surf)
+
+barplot(tab,col = heat.colors(4),border = NA,names.arg = names(tab),las=2)
+```
+J'ai mis en graphique d'autres données avec des couleurs 
+```{r}
+barplot(tab, col =heat.colors(4), border = NA, legend.text = T, main = "Présent des étudiants")
+```
+```{r}
+tab<-table(bondyInsee$Men_mais)
+etik<-names(tab)
+names(tab)
+
+```
+```{r}
+barplot(tab, names.arg = names(tab),las=2)
+```
+
+Je commence à faire les cartes 
+```{r}
+library(sf)
+bondyInsee<-st_read("Documents/bondyInsee.csv)
+
+str(bondyInsee)
+```
+```{r}
+bondyInsee$Men_coll
+
+```
+```{r}
+bondyInsee[bondyInsee$Men_coll]
+
+```
+
+```{r}
+str(zone)
+```
+
+Fusion des bureaux de vote 
+
+```{r}
+plot(zone$geom)
+fusion <- st_union(zone)
+str(zone)
+```
+
+```{r}
+plot(zone$geom)
+```
+```{r}
+
+```
+

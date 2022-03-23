@@ -12,7 +12,9 @@ navbar:
     - text: "Correction"
       href: 05_correction.html 
     - text: "OSM"
-      href: 05_OSM.html   
+      href: 06_OSM.html   
+    - text: "Valorisation"
+      href: 07_valorisation.html   
   right:
     - icon: fa-github
       href: https://github.com/beababa/beababa.github.io

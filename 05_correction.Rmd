@@ -76,12 +76,13 @@ manière automatisé.
 
 ### Algorithme
 
-importer le tableau des dépots git et du prénom étudiant
-Tant que la liste des sites n'est pas finie
-  lire
-  chercher le fichier
-  l'enregistrer dans le répertoire DST sous la forme prénom étudiant et extension .Rmd
-Fin boucle
+- importer le tableau des dépots git et du prénom étudiant
+- Tant que la liste des sites n'est pas finie
+    - lire
+    - chercher le fichier
+    - l'enregistrer dans le répertoire DST sous la forme prénom étudiant et extension .Rmd
+    
+- Fin boucle
 
 
 ### Script
@@ -102,13 +103,16 @@ ref$lien.ok
 
 
 ```{r}
-for (i in 1:length(ref$lien.ok)-1){
-  download.file(ref$lien.ok [i], paste0("DST/",ref$Prénom [i], ".Rmd"))
+fin <- length(ref$lien.ok)-1
+  chemin <- "DST/"
+for (i in 1:fin){
+  download.file(ref$lien.ok [i], paste0(chemin,ref$Prénom [i], ".Rmd"))
 }
-
 ```
 
 
+En fait, les fichiers récupérés ne correspondent pas au .Rmd.
+La récupération manuelle s'impose....
 
 
 # Intersection spatiale

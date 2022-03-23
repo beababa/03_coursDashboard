@@ -419,7 +419,10 @@ div.tocify {
   <a href="05_correction.html">Correction</a>
 </li>
 <li>
-  <a href="05_OSM.html">OSM</a>
+  <a href="06_OSM.html">OSM</a>
+</li>
+<li>
+  <a href="07_valorisation.html">Valorisation</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -453,104 +456,104 @@ div.tocify {
 </div>
 <div id="déroulé" class="section level1" number="2">
 <h1 number="2"><span class="header-section-number">2</span> Déroulé</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/deroule.csv&quot;</span>, <span class="at">header =</span>F, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/deroule.csv&quot;</span>, <span class="at">header =</span> T, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(data)</span></code></pre></div>
-<table>
+<table style="width:100%;">
+<colgroup>
+<col width="7%" />
+<col width="9%" />
+<col width="21%" />
+<col width="39%" />
+<col width="21%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th align="left">V1</th>
-<th align="left">V2</th>
-<th align="left">V3</th>
-<th align="left">V4</th>
-<th align="left">V5</th>
+<th align="left">num</th>
+<th align="left">date</th>
+<th align="left">thème</th>
+<th align="left">détail.prévu</th>
+<th align="left">évaluation</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">num</td>
-<td align="left">date</td>
-<td align="left">thème</td>
-<td align="left">détail</td>
-<td align="left">évaluation</td>
-</tr>
-<tr class="even">
 <td align="left">Cours 1</td>
 <td align="left">27/01/22</td>
 <td align="left">environnement de travail</td>
 <td align="left">git</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Cours 2</td>
 <td align="left">03/02/22</td>
 <td align="left"></td>
 <td align="left">Markdown + structure projet</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Cours 3</td>
 <td align="left">10/02/22</td>
 <td align="left">bases</td>
 <td align="left">objets dans R : vecteurs et dataframe</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Cours 4</td>
 <td align="left">17/02/22</td>
 <td align="left"></td>
 <td align="left">Algo, boucles et fonctions</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Cours 5</td>
 <td align="left">24/02/22</td>
 <td align="left"></td>
 <td align="left">intégrer des données spatiales : format gpkg</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Cours 6</td>
 <td align="left">10/03/22</td>
 <td align="left"></td>
 <td align="left">Géotraitements</td>
 <td align="left">Eval 1 : DST</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Cours 7</td>
 <td align="left">17/03/22</td>
 <td align="left">collecter des données</td>
 <td align="left">saisie sous OSM</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Cours 8</td>
 <td align="left">24/03/22</td>
 <td align="left">valorisation</td>
-<td align="left">cartographie : symbologie</td>
-<td align="left"></td>
+<td align="left">cartographie : sémiologie</td>
+<td align="left">Rendu DST / sujet projet</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Cours 9</td>
 <td align="left">31/03/22</td>
 <td align="left"></td>
 <td align="left">cartographie : mise en page</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Cours 10</td>
 <td align="left">07/04/22</td>
 <td align="left"></td>
 <td align="left">leaflet : le webmapping</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Cours 11</td>
 <td align="left">14/04/22</td>
 <td align="left"></td>
 <td align="left">le dashboard</td>
 <td align="left">Eval 2 : projet markdown</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Cours 12</td>
 <td align="left">12/05/2022</td>
 <td align="left"></td>
@@ -595,19 +598,19 @@ div.tocify {
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cours1)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    32 obs. of  14 variables:
 ##  $ Prénom                            : chr  &quot;Louis&quot; &quot;Gaëlle&quot; &quot;Anne&quot; &quot;Mariam&quot; ...
-##  $ nom                               : chr  &quot;PERRAUD&quot; &quot;ROUSSEAU&quot; &quot;Simon&quot; &quot;Ouattara&quot; ...
-##  $ adresse.mail                      : chr  &quot;louisperraud@orange.fr&quot; &quot;gaelle.e.m.rousseau@gmail.com&quot; &quot;annesimon94@sfr.fr&quot; &quot;moreliaivy@gmail.com&quot; ...
+##  $ nom                               : chr  &quot;x&quot; &quot;x&quot; &quot;x&quot; &quot;x&quot; ...
+##  $ adresse.mail                      : chr  &quot;X@mail&quot; &quot;X@mail&quot; &quot;X@mail&quot; &quot;X@mail&quot; ...
 ##  $ X44223                            : chr  &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; ...
 ##  $ passé                             : chr  &quot;archéologie-géographie&quot; &quot;L2 archéo-géographie&quot; &quot;Classe préparatoire Khâgne/Hypokhâgne Lakanal&quot; &quot;L2 Géographie et aménagement&quot; ...
 ##  $ présent                           : chr  &quot;L3 archéologie géographie&quot; &quot;L3 archéologie géographie&quot; &quot;L3 géographie et aménagement&quot; &quot;L3 géographie et aménagement&quot; ...
 ##  $ futur                             : chr  &quot;égyptologie&quot; &quot;SIG appliqué à l&#39;archéologie&quot; &quot;Urbaniste&quot; &quot;logisticienne&quot; ...
 ##  $ appétence.codage..1.fort.4.mauvais: int  2 1 2 3 1 1 3 3 4 3 ...
 ##  $ Niveau.de.codage.de.0.à.5         : int  0 0 0 1 NA NA 2 NA 1 0 ...
+##  $ désinscription                    : chr  &quot;&quot; &quot;oui&quot; &quot;&quot; &quot;&quot; ...
 ##  $ X                                 : logi  NA NA NA NA NA NA ...
 ##  $ X.1                               : logi  NA NA NA NA NA NA ...
 ##  $ X.2                               : logi  NA NA NA NA NA NA ...
-##  $ X.3                               : logi  NA NA NA NA NA NA ...
-##  $ X.4                               : logi  NA NA NA NA NA NA ...</code></pre>
+##  $ X.3                               : logi  NA NA NA NA NA NA ...</code></pre>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tab  <span class="ot">&lt;-</span> <span class="fu">table</span> (cours1<span class="sc">$</span>appétence.codage..<span class="fl">1.</span>fort.<span class="fl">4.</span>mauvais)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tab, <span class="at">col =</span> <span class="fu">heat.colors</span>(<span class="dv">5</span>), <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">xlab =</span> <span class="st">&quot;appétence, (1 oui - 4 non)&quot;</span>)</span></code></pre></div>
 <p><img src="01_intro_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
@@ -701,6 +704,12 @@ div.tocify {
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">15</span>,<span class="dv">2</span>,<span class="dv">2</span>))</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tab, <span class="at">col =</span> <span class="fu">terrain.colors</span>(<span class="dv">7</span>), <span class="at">las =</span> <span class="dv">2</span>, <span class="at">horiz =</span> T, <span class="at">main =</span> <span class="st">&quot;Quel futur imaginent les étudiants ?&quot;</span>)</span></code></pre></div>
 <p><img src="01_intro_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+</div>
+<div id="notes-du-dst" class="section level2" number="6.5">
+<h2 number="6.5"><span class="header-section-number">6.5</span> Notes du DST</h2>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/noteDST.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(data<span class="sc">$</span>note.DST, <span class="at">main =</span> <span class="st">&quot;Notes DST&quot;</span>, <span class="at">xlab =</span> <span class="st">&quot;valeur de la note&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;nb de notes&quot;</span>)</span></code></pre></div>
+<p><img src="01_intro_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 </div>
 </div>
 

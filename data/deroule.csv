@@ -1,13 +1,13 @@
-num,date,thème,détail prévu,évaluation,détail réel,exercice complémentaires
-Cours 1,27/01/22,environnement de travail,git,,structure projet / 1er script R,"vecteur, dataframe, moyenne"
-Cours 2,03/02/22,,Markdown + structure projet,,objets dans R / intégration .csv et graphique,profil git
-Cours 3,10/02/22,bases,objets dans R : vecteurs et dataframe,,NA et algo,intégrer .gpkg et carte / jointure
-Cours 4,17/02/22,,"Algo, boucles et fonctions",,géotraitements,
-Cours 5,24/02/22,,intégrer des données spatiales : format gpkg,,markdown,
-Cours 6,10/03/22,,Géotraitements ,Eval 1 : DST,DST,
-Cours 7,17/03/22,collecter des données,saisie sous OSM,,,
-Cours 8,24/03/22,valorisation,cartographie : symbologie,,,
-Cours 9,31/03/22,,cartographie : mise en page,,,
-Cours 10,07/04/22,,leaflet : le webmapping,,,
-Cours 11,14/04/22,,le dashboard,Eval 2 : projet markdown,,
-Cours 12,12/05/2022,,révision : remarques sur les projets,,,
+num,date,thème,détail prévu,évaluation
+Cours 1,27/01/22,environnement de travail,git,
+Cours 2,03/02/22,,Markdown + structure projet,
+Cours 3,10/02/22,bases,objets dans R : vecteurs et dataframe,
+Cours 4,17/02/22,,"Algo, boucles et fonctions",
+Cours 5,24/02/22,,intégrer des données spatiales : format gpkg,
+Cours 6,10/03/22,,Géotraitements ,Eval 1 : DST
+Cours 7,17/03/22,collecter des données,saisie sous OSM,
+Cours 8,24/03/22,valorisation,cartographie : sémiologie,Rendu DST / sujet projet
+Cours 9,31/03/22,,cartographie : mise en page,
+Cours 10,07/04/22,,leaflet : le webmapping,
+Cours 11,14/04/22,,le dashboard,Eval 2 : projet markdown
+Cours 12,12/05/2022,,révision : remarques sur les projets,

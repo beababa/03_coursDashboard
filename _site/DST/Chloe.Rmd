@@ -1,0 +1,73 @@
+---
+title: "Untitled"
+author: "momo"
+date: "3/10/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Déroulé
+
+```{r}
+documents<-read.csv("documents/bondyInsee.csv",header = F,fileEncoding = "UTF-8")
+knitr::kable(documents)
+```
+
+#Données
+
+```{r}
+library(sf)
+```
+
+```{r}
+bondyInsee<-read.csv("documents/bondyInsee.csv",fileEncoding = "UTF-8")
+str(bondyInsee)
+```
+
+#Graphique
+
+```{r}
+tab<-table(bondyInsee$Men_5ind)
+barplot(tab,col = heat.colors(5),border = NA)
+```
+
+```{r}
+tab<-table(bondyInsee$Men_1ind)
+barplot(tab,col = heat.colors(8),border = NA)
+```
+
+```{r}
+library(sf)
+```
+
+```{r}
+zone<-st_read("documents/insee.gpkg")
+```
+#quel contenu pour le fichier?
+
+```{r}
+str(zone)
+```
+```{r}
+zone$Men_5ind
+```
+```{r}
+zone[zone$Men_5ind==1,]
+```
+```{r}
+zone[1,2]
+```
+```{r}
+plot(zone$geom)
+#première solution
+fusion<-st_union(zone)
+str(zone)
+```
+```{r}
+plot(zone$geom)
+```
+
+

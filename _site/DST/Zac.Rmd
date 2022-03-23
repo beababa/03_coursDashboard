@@ -1,0 +1,74 @@
+---
+title: "controle"
+de ABDI zachary
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+library(sf)
+zone <- st_read("insee.gpkg", "zone")
+#cette commande à pour but de faire lire le fichier de votant, les variables/zones sont donc prise en compte visible grace a l'environnement.
+str(zone)
+#cette commande nous montre la structure du document, en d'autre termes les entetes ainsi que les contenue
+zone$numBureau
+#cette commande nous montre les numBureau(donc les burequ de votes) qui sont dans les zones. Le $ permet donc de demander une liaison .
+zone [zone$numBureau == 1,]
+#cette commande est plus specifique car elle permet d'avoir les données seulement du premier bureau 
+zone [1,2]
+#le "1,2" nous informe que les données affiché sur la console corresponde à la zone 1 et 2 
+plot(zone$geom)
+#le plot nous premet d'avoir une representation graphique des données. Les données conserner dans ce cas sont les zone.
+fusion <- st_union(zone)
+str(zone)
+#cette commande nous permet de voir la structure de la zone 
+#(je viens de vous demander si ma methode etait la bonne et vous m'avez monter que les données spatiale sont insee.gpkg .J'ai donc fait les meme demarches avec ce fichier.)
+plot(zone$geom)
+plot(zone$geom, col = terrain.colors (31),
+     border = NA,
+     main = "31 bureaux de vote de Bondy")
+#les trois commande précédentes m'ont permis de de crée sur un plot des intersections spaciale entre les differents bureau de vote sur le plot et par extention graphiquement (voici ma reponse pour les intersection spaciale)
+data <- read.csv("bondyInsee.csv", fileEncoding = "UTF-8", dec = ",")
+head(data)
+#pour faire une exploitation statistique, j'ai utiliser ces lignes permettant d'utiliser "bondyInsee.csv car ce sont les données non spatiale de bondy donc qu'on peut mettre en graphique.
+#head nous sert a voir les premieres lignes des données et par extention la plus par du temps les entetes .
+summary(data)
+#cette commande nous fait des rendu mathematiques sur les données
+data$Bureau.de.vote
+#cette commande nous permet de voir les données des bureau de vote dans les data 
+data <-  data [-c(33,34),]
+candidat  <- names(data)[8:12]
+candidat
+liste <- strsplit(candidat,"\\.\\.\\.")
+liste [[5]][3]
+candidat <- sapply(liste, '[', 3)
+names (data) [8:12] <- candidat
+names(data)
+png(height = 800, width = 600, filename = "img/resultat.png")
+par(mfrow = c(4,3))
+for (i in 2:12){
+  barplot(data [,i], main = names(data) [i])
+}
+dev.off()
+#les commandes suivantes sont sencé servire a crée un tableau statistique finaliser grace a la commande barplot mais je ne comprend malheureusement pas pourquoi alors que mes données sont non spaciale une carte est afficher .

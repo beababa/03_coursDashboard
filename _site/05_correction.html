@@ -419,6 +419,12 @@ div.tocify {
 <li>
   <a href="05_correction.html">Correction</a>
 </li>
+<li>
+  <a href="06_OSM.html">OSM</a>
+</li>
+<li>
+  <a href="07_valorisation.html">Valorisation</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -474,14 +480,73 @@ div.tocify {
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>idfcsv <span class="ot">&lt;-</span> idfInsee [,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">42</span>), drop <span class="ot">=</span> T]</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(idfcsv, <span class="st">&quot;data/idfInsee.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span></code></pre></div>
 </div>
+<div id="récupérations-des-copies" class="section level2" number="2.3">
+<h2 number="2.3"><span class="header-section-number">2.3</span> Récupérations des copies</h2>
+<p>Les étudiants ont déposé leur script sur leur git. La récupération est possible de manière automatisé.</p>
+<div id="algorithme" class="section level3" number="2.3.1">
+<h3 number="2.3.1"><span class="header-section-number">2.3.1</span> Algorithme</h3>
+<ul>
+<li>importer le tableau des dépots git et du prénom étudiant</li>
+<li>Tant que la liste des sites n’est pas finie
+<ul>
+<li>lire</li>
+<li>chercher le fichier</li>
+<li>l’enregistrer dans le répertoire DST sous la forme prénom étudiant et extension .Rmd</li>
+</ul></li>
+<li>Fin boucle</li>
+</ul>
+</div>
+<div id="script" class="section level3" number="2.3.2">
+<h3 number="2.3.2"><span class="header-section-number">2.3.2</span> Script</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ref <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/cours6.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ref <span class="ot">&lt;-</span> ref [ref<span class="sc">$</span>lien.évaluation <span class="sc">!=</span> <span class="st">&quot;&quot;</span>, <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">4</span>,<span class="dv">5</span>)]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(ref<span class="sc">$</span>lien.évaluation)</span></code></pre></div>
+<pre><code>## [1] 14</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 14 étudiants ont rendu un script...</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ok <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">&quot;.Rmd&quot;</span>, ref<span class="sc">$</span>lien.évaluation)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ... dont 7 seulement un Rmd</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ref<span class="sc">$</span>lien.évaluation [<span class="sc">-</span>ok]</span></code></pre></div>
+<pre><code>## [1] &quot;https://github.com/Beatdvtbea/DST.git&quot;                                                     
+## [2] &quot;https://github.com/Sanaa-totoro/TOTORO-&quot;                                                   
+## [3] &quot;https://github.com/chloedesoyres/toto&quot;                                                     
+## [4] &quot;https://github.com/Ian833/L6ECSIG/blob/68edcb2f27fabf685099c30d0fdf3995768cd5de/Exam.Rproj&quot;
+## [5] &quot;https://github.com/glcgvnn123/EXAMEN/blob/main/DST%2010%20MARS.R&quot;                          
+## [6] &quot;https://github.com/Galliza/galli&quot;                                                          
+## [7] &quot;https://github.com/ImanZourdani/L6ECSIG/blob/main/Iman.Rproj&quot;</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ...les 7 autres ont parfois rendu uniqumement le répertoire où est le script.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># d&#39;où correction</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>ref<span class="sc">$</span>lien.ok</span></code></pre></div>
+<pre><code>##  [1] &quot;https://github.com/Beatdvtbea/DST/blob/main/DST.Rmd&quot;                                                         
+##  [2] &quot;https://github.com/annesimon94/pourlebon/blob/main/examrmd.Rmd&quot;                                              
+##  [3] &quot;https://github.com/MariamOuatt/monrepository/blob/main/DST%20OUATTARA/Carroyage-Bondy.Rmd&quot;                   
+##  [4] &quot;https://github.com/selinhacer/L6ECSIG/blob/40e43c2efdc7fdc7e9959e5b93ef965c69096785/Selin.Rmd&quot;               
+##  [5] &quot;https://github.com/Sanaa-totoro/TOTORO-/blob/main/Exam.SanaaROUX.Rmd&quot;                                        
+##  [6] &quot;https://github.com/chloedesoyres/toto/blob/main/bondy.Rmd&quot;                                                   
+##  [7] &quot;https://github.com/Ian833/L6ECSIG/blob/68edcb2f27fabf685099c30d0fdf3995768cd5de/exam.html&quot;                   
+##  [8] &quot;https://github.com/AnnaMauclet/SIG1/blob/main/Evaluation.Rmd&quot;                                                
+##  [9] &quot;https://github.com/Marion67620/SIG_v2/blob/gh-pages/Evaluation_10-03_BLONDEAU.Rmd&quot;                           
+## [10] &quot;https://github.com/glcgvnn123/EXAMEN/blob/main/DST%2010%20MARS.R&quot;                                            
+## [11] &quot;https://github.com/leechangbeom/L6ECSIG/blob/64ed85217daeeb04688065fa6ace676c73634948/examen(Chang-beom).Rmd&quot;
+## [12] &quot;https://github.com/Zacharyabdi/SIG/blob/1a582a6c616822ff4592577dc35f81d688562b78/ABDIzacharycontrole.Rmd&quot;    
+## [13] &quot;https://github.com/Galliza/galli/blob/main/Galli1.Rmd&quot;                                                       
+## [14] &quot;&quot;</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le 14e étudiant n&#39;a pas de dépôt public, demande d&#39;envoi par mail.</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fin <span class="ot">&lt;-</span> <span class="fu">length</span>(ref<span class="sc">$</span>lien.ok)<span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  chemin <span class="ot">&lt;-</span> <span class="st">&quot;DST/&quot;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>fin){</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">download.file</span>(ref<span class="sc">$</span>lien.ok [i], <span class="fu">paste0</span>(chemin,ref<span class="sc">$</span>Prénom [i], <span class="st">&quot;.Rmd&quot;</span>))</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>En fait, les fichiers récupérés ne correspondent pas au .Rmd. La récupération manuelle s’impose….</p>
+</div>
+</div>
 </div>
 <div id="intersection-spatiale" class="section level1" number="3">
 <h1 number="3"><span class="header-section-number">3</span> Intersection spatiale</h1>
 <div id="limites-des-bureaux-de-vote" class="section level2" number="3.1">
 <h2 number="3.1"><span class="header-section-number">3.1</span> Limites des bureaux de vote</h2>
 <p>Afin de faire l’intersection spatiale, on crée une enveloppe autour des bureaux de vote.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;zone&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;zone&quot;</span>)</span></code></pre></div>
 <pre><code>## Reading layer `zone&#39; from data source 
 ##   `C:\Users\tachasa\Documents\sauveGIT\03_coursDashboard\data\vote.gpkg&#39; 
 ##   using driver `GPKG&#39;
@@ -490,18 +555,18 @@ div.tocify {
 ## Dimension:     XY
 ## Bounding box:  xmin: 661088.1 ymin: 6865338 xmax: 663354.7 ymax: 6869043
 ## Projected CRS: RGF93 / Lambert-93</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(data<span class="sc">$</span>geom, <span class="at">main =</span> <span class="st">&quot;Bureaux de vote&quot;</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>limite <span class="ot">&lt;-</span> <span class="fu">st_convex_hull</span>(<span class="fu">st_union</span>(data<span class="sc">$</span>geom))</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(limite)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(data<span class="sc">$</span>geom, <span class="at">main =</span> <span class="st">&quot;Bureaux de vote&quot;</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>limite <span class="ot">&lt;-</span> <span class="fu">st_convex_hull</span>(<span class="fu">st_union</span>(data<span class="sc">$</span>geom))</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(limite)</span></code></pre></div>
 <pre><code>## [1] &quot;sfc_POLYGON&quot; &quot;sfc&quot;</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># l&#39;objet limite n&#39;est pas un dataframe, juste un polygone</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>limite <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(limite)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(limite, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col=</span> <span class="cn">NA</span>, <span class="at">border =</span> <span class="st">&quot;red&quot;</span>)</span></code></pre></div>
-<p><img src="05_correction_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># l&#39;objet limite n&#39;est pas un dataframe, juste un polygone</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>limite <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(limite)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(limite, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col=</span> <span class="cn">NA</span>, <span class="at">border =</span> <span class="st">&quot;red&quot;</span>)</span></code></pre></div>
+<p><img src="05_correction_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
 <div id="intersection-spatiale-1" class="section level2" number="3.2">
 <h2 number="3.2"><span class="header-section-number">3.2</span> Intersection spatiale</h2>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>idfInsee <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/insee.gpkg&quot;</span>, <span class="st">&quot;idf&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>idfInsee <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/insee.gpkg&quot;</span>, <span class="st">&quot;idf&quot;</span>)</span></code></pre></div>
 <pre><code>## Reading layer `idf&#39; from data source 
 ##   `C:\Users\tachasa\Documents\sauveGIT\03_coursDashboard\data\insee.gpkg&#39; 
 ##   using driver `GPKG&#39;
@@ -510,8 +575,8 @@ div.tocify {
 ## Dimension:     XY
 ## Bounding box:  xmin: 586673.7 ymin: 6780073 xmax: 738408.8 ymax: 6905080
 ## Projected CRS: RGF93 / Lambert-93</code></pre>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>bondyInsee <span class="ot">&lt;-</span> <span class="fu">st_intersection</span> (idfInsee, limite)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(bondyInsee, <span class="st">&quot;data/insee.gpkg&quot;</span>, <span class="st">&quot;bondy&quot;</span>, <span class="at">delete_layer =</span> T)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>bondyInsee <span class="ot">&lt;-</span> <span class="fu">st_intersection</span> (idfInsee, limite)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(bondyInsee, <span class="st">&quot;data/insee.gpkg&quot;</span>, <span class="st">&quot;bondy&quot;</span>, <span class="at">delete_layer =</span> T)</span></code></pre></div>
 <pre><code>## Deleting layer `bondy&#39; using driver `GPKG&#39;
 ## Writing layer `bondy&#39; to data source `data/insee.gpkg&#39; using driver `GPKG&#39;
 ## Writing 188 features with 42 fields and geometry type Polygon.</code></pre>
@@ -520,8 +585,8 @@ div.tocify {
 <div id="explorations-statistiques" class="section level1" number="4">
 <h1 number="4"><span class="header-section-number">4</span> Explorations statistiques</h1>
 <p>On choisir la variable <em>Men_pauv</em> qui représente le nombre de ménages pauvres.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/bondyInsee.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(data)</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/bondyInsee.csv&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(data)</span></code></pre></div>
 <pre><code>##  [1] &quot;X&quot;          &quot;IdINSPIRE&quot;  &quot;Id_carr1km&quot; &quot;I_est_cr&quot;   &quot;Id_carr_n&quot; 
 ##  [6] &quot;Groupe&quot;     &quot;Depcom&quot;     &quot;I_pauv&quot;     &quot;Id_car2010&quot; &quot;Ind&quot;       
 ## [11] &quot;Men&quot;        &quot;Men_pauv&quot;   &quot;Men_1ind&quot;   &quot;Men_5ind&quot;   &quot;Men_prop&quot;  
@@ -531,16 +596,16 @@ div.tocify {
 ## [31] &quot;Ind_18_24&quot;  &quot;Ind_25_39&quot;  &quot;Ind_40_54&quot;  &quot;Ind_55_64&quot;  &quot;Ind_65_79&quot; 
 ## [36] &quot;Ind_80p&quot;    &quot;Ind_inc&quot;    &quot;I_est_1km&quot;  &quot;code_insee&quot; &quot;nom&quot;       
 ## [41] &quot;nuts2&quot;      &quot;wikipedia&quot;  &quot;surf_km2&quot;</code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(data<span class="sc">$</span>Men_pauv, <span class="at">main =</span> <span class="st">&quot;carroyage INSEE Bondy, inégalités&quot;</span>, <span class="at">xlab =</span> <span class="st">&quot;carreaux carroyage&quot;</span> ,</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>, <span class="at">border =</span> <span class="cn">NA</span>)</span></code></pre></div>
-<p><img src="05_correction_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(data<span class="sc">$</span>Men_pauv, <span class="at">main =</span> <span class="st">&quot;carroyage INSEE Bondy, inégalités&quot;</span>, <span class="at">xlab =</span> <span class="st">&quot;carreaux carroyage&quot;</span> ,</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>, <span class="at">border =</span> <span class="cn">NA</span>)</span></code></pre></div>
+<p><img src="05_correction_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>Le graphique montrer qu’il existe de grandes inégalités à Bondy. Quelques carreaux ont plus de 200 ménages pauvres, mais l’énorme majorité est en dessous de 50.</p>
 <p>Il est évident qu’il vaut mieux cartographier…</p>
 </div>
 <div id="bonus-cartographique" class="section level1" number="5">
 <h1 number="5"><span class="header-section-number">5</span> Bonus cartographique</h1>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapsf)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;inseeBondy&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapsf)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;inseeBondy&quot;</span>)</span></code></pre></div>
 <pre><code>## Reading layer `inseeBondy&#39; from data source 
 ##   `C:\Users\tachasa\Documents\sauveGIT\03_coursDashboard\data\vote.gpkg&#39; 
 ##   using driver `GPKG&#39;
@@ -549,18 +614,18 @@ div.tocify {
 ## Dimension:     XY
 ## Bounding box:  xmin: 661088.1 ymin: 6865338 xmax: 663354.7 ymax: 6869043
 ## Projected CRS: RGF93 / Lambert-93</code></pre>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(data, <span class="at">type =</span> <span class="st">&quot;choro&quot;</span>, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>,</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="at">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span>  <span class="st">&quot;Pauvreté à Bondy&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>) </span></code></pre></div>
-<p><img src="05_correction_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(data, <span class="at">type =</span> <span class="st">&quot;choro&quot;</span>, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>,</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="at">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span>  <span class="st">&quot;Pauvreté à Bondy&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>) </span></code></pre></div>
+<p><img src="05_correction_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <p>En fait l’exploration statistique passe par un histogramme qui permet de définir les seuils que l’on va cartographier.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(data<span class="sc">$</span>Men_pauv, <span class="at">xlab =</span> <span class="st">&quot;valeurs des carreaux&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;nb de carreaux&quot;</span>)</span></code></pre></div>
-<p><img src="05_correction_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Définition de 3 paliers</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>paliers <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">50</span>,<span class="dv">200</span>,<span class="dv">300</span>)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(data, <span class="at">type =</span><span class="st">&quot;choro&quot;</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="at">breaks =</span> paliers, paliers, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>, <span class="at">border =</span> <span class="st">&quot;antiquewhite1&quot;</span>, <span class="at">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span>  <span class="st">&quot;Concentration de la pauvreté à Bondy&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>)</span></code></pre></div>
-<p><img src="05_correction_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(data<span class="sc">$</span>Men_pauv, <span class="at">xlab =</span> <span class="st">&quot;valeurs des carreaux&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;nb de carreaux&quot;</span>)</span></code></pre></div>
+<p><img src="05_correction_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Définition de 3 paliers</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>paliers <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">50</span>,<span class="dv">200</span>,<span class="dv">300</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(data, <span class="at">type =</span><span class="st">&quot;choro&quot;</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="at">breaks =</span> paliers, paliers, <span class="at">pal =</span> <span class="st">&quot;Burg&quot;</span>, <span class="at">border =</span> <span class="st">&quot;antiquewhite1&quot;</span>, <span class="at">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span>  <span class="st">&quot;Concentration de la pauvreté à Bondy&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>)</span></code></pre></div>
+<p><img src="05_correction_files/figure-html/unnamed-chunk-9-2.png" width="672" /></p>
 </div>
 
 <br><br><br><br><br><br><br><br><br><br><br><br>

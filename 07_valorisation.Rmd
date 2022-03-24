@@ -28,9 +28,11 @@ Un ensemble standardisés de règle dont ...
 https://neocarto.hypotheses.org/5717
 
 
-# Carroyage : ne pas oublier la densité !
+## La cheatsheet du package mapsf
 
-## Reprise des données sur le nombre de ménages
+![](img/mapsf_cheatsheet.png)
+
+# Reprise des données sur le nombre de ménages
 
 ```{r}
 library(sf)
@@ -38,6 +40,21 @@ data <- st_read("data/vote.gpkg", "inseeBondy")
 str(data)
 ```
 
+Le choix de la variable est celui du nombre de ménages pauvres.
 
 # Discrétisation : étudier sa distribution
+
+
+
+```{r}
+summary(data$Men_pauv)
+hist(data$Men_pauv, breaks = c(0,5,10,20,40,200,300))
+```
+
+Cette distribution permet de distinguer dans le groupe des très pauvres les différentes catégories.
+
+# Cartographie
+
+Reprendre le bonus cartographique du devoir et essayer de faire la carte.
+
 

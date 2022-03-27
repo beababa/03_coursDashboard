@@ -174,9 +174,65 @@ st_write(jointure, "data/vote.gpkg", "jointure", delete_layer = T)
 # Carte des résultats
 
 ```{r}
+library(sf)
+library(mapsf)
+jointure <- st_read("data/vote.gpkg", "jointure", quiet = T)
 names(jointure)
 ```
 
-Cartographier tous les indicateurs (du taux de votant à la liste 5 par une boucle)
+Il s'agit de cartographier le résultat des colonnes 6 à 18 sauf la colonne 7
 
-(Faire l'algorithme, donner les fonctions, et faire le script)
+## Algo
+
+- tant que 6 < col < nb col - 1
+  - si col différent de 7
+    - faire 1 carte choroplèthe 
+    - faire un titre 
+- fin tant que
+
+## Fonctions
+
+- mf_map( type = choro )
+- mf_title
+
+## Carto
+
+
+On extrait les noms des candidats
+
+```{r}
+names(jointure)[14:18] <- c("THOMASSIN", "HERVE", "AMMOURI", "DUGUET", "BADOUX")
+```
+
+
+
+```{r}
+nomCol <- names(jointure)
+col <- 6
+for (col in 6:18) {
+  if (col != 7) {   
+    png(paste0("img/resultat", col, ".png"))
+    mf_map (jointure, type = "choro", 
+            border = NA, var = nomCol [col])
+    mf_title(nomCol [col])
+    dev.off()
+    } else {col == 8}
+}
+```
+
+
+Les images sont enregistrées une à une.
+
+
+![](img/resultat6.png)
+![](img/resultat8.png)
+![](img/resultat9.png)
+![](img/resultat10.png)
+![](img/resultat11.png)
+![](img/resultat12.png)
+![](img/resultat13.png)
+![](img/resultat14.png)
+![](img/resultat15.png)
+![](img/resultat16.png)
+![](img/resultat17.png)
+![](img/resultat18.png)

@@ -12,8 +12,9 @@
 <meta name="author" content="B. Maranget" />
 
 
-<title>Valorisation : sémiologie</title>
+<title>Valorisation : sémiologie et mise en page</title>
 
+<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/united.min.css" rel="stylesheet" />
@@ -46,7 +47,6 @@
     </style>
 
 
-
 <style type="text/css">
   code {
     white-space: pre;
@@ -56,26 +56,28 @@
   }
 </style>
 <style type="text/css" data-origin="pandoc">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(title);
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -84,9 +86,9 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  { background-color: #f8f8f8; }
+  {  background-color: #f8f8f8; }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ef2929; } /* Alert */
 code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
@@ -167,9 +169,6 @@ button.code-folding-btn:focus {
 }
 summary {
   display: list-item;
-}
-details > summary > p:only-child {
-  display: inline;
 }
 pre code {
   padding: 0;
@@ -395,7 +394,7 @@ div.tocify {
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -442,30 +441,34 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Valorisation : sémiologie</h1>
+<h1 class="title toc-ignore">Valorisation : sémiologie et mise en page</h1>
 <h4 class="author">B. Maranget</h4>
 <h4 class="date">13/03/2021</h4>
 
 </div>
 
 
-<div id="une-définition-rapide-de-la-sémiologie" class="section level1">
-<h1><span class="header-section-number">1</span> Une définition rapide de la sémiologie</h1>
+<div id="sémiologie" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Sémiologie</h1>
+<div id="une-définition-rapide" class="section level2" number="1.1">
+<h2 number="1.1"><span class="header-section-number">1.1</span> Une définition rapide</h2>
 <p>Un ensemble standardisés de règle dont …</p>
-<div id="première-règle-de-sémiologie" class="section level2">
-<h2><span class="header-section-number">1.1</span> Première règle de sémiologie</h2>
+<div id="première-règle-de-sémiologie" class="section level3" number="1.1.1">
+<h3 number="1.1.1"><span class="header-section-number">1.1.1</span> Première règle de sémiologie</h3>
 <p><a href="https://neocarto.hypotheses.org/5717" class="uri">https://neocarto.hypotheses.org/5717</a></p>
 </div>
-<div id="la-cheatsheet-du-package-mapsf" class="section level2">
-<h2><span class="header-section-number">1.2</span> La cheatsheet du package mapsf</h2>
+<div id="la-cheatsheet-du-package-mapsf" class="section level3" number="1.1.2">
+<h3 number="1.1.2"><span class="header-section-number">1.1.2</span> La cheatsheet du package mapsf</h3>
 <p><img src="img/mapsf_cheatsheet.png" /></p>
+<p>Cette cheatsheet pe Illustrationrmet de cataloguer toutes les cartes possibles.</p>
 </div>
 </div>
-<div id="reprise-des-données-sur-le-nombre-de-ménages" class="section level1">
-<h1><span class="header-section-number">2</span> Reprise des données sur le nombre de ménages</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(sf)</a></code></pre></div>
-<pre><code>## Linking to GEOS 3.9.0, GDAL 3.2.1, PROJ 7.2.1</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">data &lt;-<span class="st"> </span><span class="kw">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;inseeBondy&quot;</span>)</a></code></pre></div>
+<div id="illustration" class="section level2" number="1.2">
+<h2 number="1.2"><span class="header-section-number">1.2</span> Illustration</h2>
+<div id="reprise-des-données-sur-le-nombre-de-ménages" class="section level3" number="1.2.1">
+<h3 number="1.2.1"><span class="header-section-number">1.2.1</span> Reprise des données sur le nombre de ménages</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;inseeBondy&quot;</span>)</span></code></pre></div>
 <pre><code>## Reading layer `inseeBondy&#39; from data source 
 ##   `C:\Users\tachasa\Documents\sauveGIT\03_coursDashboard\data\vote.gpkg&#39; 
 ##   using driver `GPKG&#39;
@@ -474,70 +477,128 @@ div.tocify {
 ## Dimension:     XY
 ## Bounding box:  xmin: 661088.1 ymin: 6865338 xmax: 663354.7 ymax: 6869043
 ## Projected CRS: RGF93 / Lambert-93</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">str</span>(data)</a></code></pre></div>
-<pre><code>## Classes &#39;sf&#39; and &#39;data.frame&#39;:   188 obs. of  43 variables:
-##  $ IdINSPIRE : chr  &quot;CRS3035RES200mN2892800E3771800&quot; &quot;CRS3035RES200mN2892800E3770600&quot; &quot;CRS3035RES200mN2892800E3771400&quot; &quot;CRS3035RES200mN2892000E3770600&quot; ...
-##  $ Id_carr1km: chr  &quot;CRS3035RES1000mN2892000E3771000&quot; &quot;CRS3035RES1000mN2892000E3770000&quot; &quot;CRS3035RES1000mN2892000E3771000&quot; &quot;CRS3035RES1000mN2892000E3770000&quot; ...
-##  $ I_est_cr  : int  0 0 0 0 0 0 0 0 0 0 ...
-##  $ Id_carr_n : chr  &quot;CRS3035RES200mN2892800E3771800&quot; &quot;CRS3035RES1000mN2892000E3770000&quot; &quot;CRS3035RES200mN2892800E3771400&quot; &quot;CRS3035RES1000mN2892000E3770000&quot; ...
-##  $ Groupe    : int  866428 866396 866443 866383 866447 866440 866400 866398 866402 866435 ...
-##  $ Depcom    : chr  &quot;93057&quot; &quot;93010&quot; &quot;93010&quot; &quot;93010&quot; ...
-##  $ I_pauv    : int  0 0 0 0 0 0 0 0 0 0 ...
-##  $ Id_car2010: chr  &quot;CRS3035RES200mN2892800E3771800&quot; &quot;CRS3035RES200mN2892800E3770600&quot; &quot;CRS3035RES200mN2892800E3771400&quot; &quot;CRS3035RES200mN2892000E3770600&quot; ...
-##  $ Ind       : num  125 426 454 82 460 ...
-##  $ Men       : num  49 178 142 29 167 135 232 188 294 72 ...
-##  $ Men_pauv  : num  5 27 22 1 32 33 43 23 61 11 ...
-##  $ Men_1ind  : num  14 59 23 4 43 36 92 62 99 11 ...
-##  $ Men_5ind  : num  4 19 25 2 22 32 16 13 33 14 ...
-##  $ Men_prop  : num  39 141 118 27 113 69 153 113 154 55 ...
-##  $ Men_fmp   : num  2 17 15 3 14 13 21 13 34 10 ...
-##  $ Ind_snv   : num  3057120 9996131 9921034 2298222 9454700 ...
-##  $ Men_surf  : num  3584 11994 11172 2903 10615 ...
-##  $ Men_coll  : num  13 107 9 0 76 58 162 133 246 17 ...
-##  $ Men_mais  : num  36 71 133 29 91 77 70 55 48 55 ...
-##  $ Log_av45  : num  33 70 48 2 112 55 103 32 82 46 ...
-##  $ Log_45_70 : num  7 7 13 0 31 53 15 136 24 17 ...
-##  $ Log_70_90 : num  5 6 13 27 14 7 53 18 11 6 ...
-##  $ Log_ap90  : num  4 95 68 0 10 20 61 2 177 3 ...
-##  $ Log_inc   : num  0 0 0 0 0 0 0 0 0 0 ...
-##  $ Log_soc   : num  0 0 8 0 8 58 1 0 41 0 ...
-##  $ Ind_0_3   : num  7 20 32.5 5 49 27 30 41 42.5 18 ...
-##  $ Ind_4_5   : num  4 9.5 13 2 12 14 13 14 28 9 ...
-##  $ Ind_6_10  : num  7 22.5 33 8 33 26 31 32 51 22.5 ...
-##  $ Ind_11_17 : num  8 36.5 51.5 5 35 47 35 24 48.5 23 ...
-##  $ Ind_18_24 : num  9 27 32 1 22 33 23.5 21 45 16 ...
-##  $ Ind_25_39 : num  30 84 86 17 116 74 135 138 199 45 ...
-##  $ Ind_40_54 : num  23 101 95 12 71 98 93 76 139 47 ...
-##  $ Ind_55_64 : num  15 66 58 16 57 56 62 47 89 20 ...
-##  $ Ind_65_79 : num  11 34 31 11 45 41 58 29 62 14 ...
-##  $ Ind_80p   : num  9 14 11 3 20 15 34 26 28 8 ...
-##  $ Ind_inc   : num  2 11 11 2 0 20 5 5 8 11 ...
-##  $ I_est_1km : int  0 0 0 0 0 0 0 0 0 0 ...
-##  $ code_insee: chr  &quot;11&quot; &quot;11&quot; &quot;11&quot; &quot;11&quot; ...
-##  $ nom       : chr  &quot;Île-de-France&quot; &quot;Île-de-France&quot; &quot;Île-de-France&quot; &quot;Île-de-France&quot; ...
-##  $ nuts2     : chr  &quot;FR10&quot; &quot;FR10&quot; &quot;FR10&quot; &quot;FR10&quot; ...
-##  $ wikipedia : chr  &quot;fr:Île-de-France&quot; &quot;fr:Île-de-France&quot; &quot;fr:Île-de-France&quot; &quot;fr:Île-de-France&quot; ...
-##  $ surf_km2  : num  12069 12069 12069 12069 12069 ...
-##  $ geom      :sfc_POLYGON of length 188; first list element: List of 1
-##   ..$ : num [1:5, 1:2] 663324 663343 663144 663125 663324 ...
-##   ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;XY&quot; &quot;POLYGON&quot; &quot;sfg&quot;
-##  - attr(*, &quot;sf_column&quot;)= chr &quot;geom&quot;
-##  - attr(*, &quot;agr&quot;)= Factor w/ 3 levels &quot;constant&quot;,&quot;aggregate&quot;,..: NA NA NA NA NA NA NA NA NA NA ...
-##   ..- attr(*, &quot;names&quot;)= chr [1:42] &quot;IdINSPIRE&quot; &quot;Id_carr1km&quot; &quot;I_est_cr&quot; &quot;Id_carr_n&quot; ...</code></pre>
-<p>Le choix de la variable est celui du nombre de ménages pauvres.</p>
+<p>24 variables disponibles, on prend celui du nombre de ménages pauvres.</p>
 </div>
-<div id="discrétisation-étudier-sa-distribution" class="section level1">
-<h1><span class="header-section-number">3</span> Discrétisation : étudier sa distribution</h1>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">summary</span>(data<span class="op">$</span>Men_pauv)</a></code></pre></div>
+<div id="discrétisation-étudier-sa-distribution" class="section level3" number="1.2.2">
+<h3 number="1.2.2"><span class="header-section-number">1.2.2</span> Discrétisation : étudier sa distribution</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data<span class="sc">$</span>Men_pauv)</span></code></pre></div>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##    0.00   11.00   22.00   32.82   42.00  294.00</code></pre>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">hist</span>(data<span class="op">$</span>Men_pauv, <span class="dt">breaks =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">40</span>,<span class="dv">200</span>,<span class="dv">300</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le maximum est très éloigné du 3e quartile !</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(data<span class="sc">$</span>Men_pauv, <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">40</span>,<span class="dv">200</span>,<span class="dv">300</span>))</span></code></pre></div>
 <p><img src="07_valorisation_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>Cette distribution permet de distinguer dans le groupe des très pauvres les différentes catégories.</p>
 </div>
-<div id="cartographie" class="section level1">
-<h1><span class="header-section-number">4</span> Cartographie</h1>
-<p>Reprendre le bonus cartographique du devoir et essayer de faire la carte.</p>
+<div id="cartographie" class="section level3" number="1.2.3">
+<h3 number="1.2.3"><span class="header-section-number">1.2.3</span> Cartographie</h3>
+<p>Comment rendre cette distribution très inégale ?</p>
+<p>L’usage d’une palette différente peut-être une solution.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapsf)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>paliers <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">40</span>,<span class="dv">100</span>,<span class="dv">200</span>,<span class="dv">300</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>palette <span class="ot">&lt;-</span> <span class="fu">mf_get_pal</span>(<span class="at">n =</span> <span class="fu">c</span>(<span class="dv">5</span>,<span class="dv">2</span>), <span class="at">pal =</span> <span class="fu">c</span>(<span class="st">&quot;Mint&quot;</span>, <span class="st">&quot;Burg&quot;</span>))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(data, <span class="at">type =</span><span class="st">&quot;choro&quot;</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="at">breaks =</span> paliers, paliers, <span class="at">pal =</span> palette, <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span>  <span class="st">&quot;Concentration de la pauvreté à Bondy&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>)</span></code></pre></div>
+<p><img src="07_valorisation_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Essai de lissage spatiale</p>
+<p><a href="https://rcarto.github.io/carto_avec_r/chapitre3.html" class="uri">https://rcarto.github.io/carto_avec_r/chapitre3.html</a></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(linemap)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>limite <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;zone&quot;</span>)</span></code></pre></div>
+<pre><code>## Reading layer `zone&#39; from data source 
+##   `C:\Users\tachasa\Documents\sauveGIT\03_coursDashboard\data\vote.gpkg&#39; 
+##   using driver `GPKG&#39;
+## Simple feature collection with 32 features and 5 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 661088.1 ymin: 6865338 xmax: 663354.7 ymax: 6869043
+## Projected CRS: RGF93 / Lambert-93</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>opar <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">bg =</span> <span class="st">&quot;ivory2&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>bb <span class="ot">&lt;-</span> <span class="fu">st_bbox</span>(data)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>serie <span class="ot">&lt;-</span> data [, <span class="fu">c</span>(<span class="st">&quot;Men_pauv&quot;</span>), drop <span class="ot">=</span> F]</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>grille <span class="ot">&lt;-</span> <span class="fu">getgrid</span>(<span class="at">x =</span> serie, <span class="at">cellsize =</span> <span class="dv">200</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(limite), <span class="at">col=</span><span class="st">&quot;ivory1&quot;</span>, <span class="at">border =</span> <span class="st">&quot;ivory2&quot;</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">linemap</span>(</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> grille, </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># hauteur des lignes</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">5</span>, </span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># longueur des lignes</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">threshold =</span> <span class="fl">0.1</span>,</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="st">&quot;ivory1&quot;</span>, </span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> <span class="st">&quot;ivory4&quot;</span>, </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="fl">0.6</span>, </span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">add =</span> T</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="at">x =</span> bb[<span class="dv">1</span>], <span class="at">y =</span> bb[<span class="dv">4</span>],<span class="at">adj =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>     <span class="at">labels =</span> <span class="st">&quot;Répartition des ménages pauvres à Bondy&quot;</span>, </span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">&quot;ivory4&quot;</span>, <span class="at">font =</span> <span class="dv">2</span>,  <span class="at">cex =</span> <span class="dv">1</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co"># add sources</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>mapsources <span class="ot">&lt;-</span><span class="st">&quot;Cours SIG</span><span class="sc">\n</span><span class="st">linemap</span><span class="sc">\n</span><span class="st">Données carroyées à 200 m, INSEE 2019&quot;</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="at">x =</span> bb[<span class="dv">3</span>], <span class="at">y =</span> bb[<span class="dv">2</span>],<span class="at">labels =</span> mapsources,  </span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">&quot;ivory4&quot;</span>, <span class="at">font =</span> <span class="dv">3</span>, <span class="at">adj =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>), <span class="at">cex =</span> <span class="fl">0.6</span> )</span></code></pre></div>
+<p><img src="07_valorisation_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Lissage spatiale</p>
+<p><a href="https://riatelab.github.io/potential/articles/potential.html" class="uri">https://riatelab.github.io/potential/articles/potential.html</a></p>
+</div>
+</div>
+</div>
+<div id="mise-en-page" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Mise en page</h1>
+<p>Là également, la cheatsheet permet d’avoir une vision globale.</p>
+<p>Une des fonctions les plus intéressantes est de pouvoir insérer l’histogramme dans la carte.</p>
+<p>Pour illustrer, cette mise en page, on utilise les 2 listes ayant rassemblé le plus de votant.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;jointure&quot;</span>)</span></code></pre></div>
+<pre><code>## Reading layer `jointure&#39; from data source 
+##   `C:\Users\tachasa\Documents\sauveGIT\03_coursDashboard\data\vote.gpkg&#39; 
+##   using driver `GPKG&#39;
+## Simple feature collection with 32 features and 18 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 661088.1 ymin: 6865338 xmax: 663354.7 ymax: 6869043
+## Projected CRS: RGF93 / Lambert-93</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(data [,<span class="dv">14</span><span class="sc">:</span><span class="dv">18</span>, <span class="at">drop =</span> T], <span class="dv">2</span>,sum)</span></code></pre></div>
+<pre><code>##               Résultats.liste.1...Liste.de.la.gauche.unie.pour.Bondy....Sylvine.THOMASSIN. 
+##                                                                                       3380 
+##                          Résultats.liste.2....Pour.Bondy.allons.plus.loin....Stephen.HERVE 
+##                                                                                       4591 
+## Résultats.liste.3....Bondy.pour.une.gauche.sociale.insoumise.et.populaire....Jamal.AMMOURI 
+##                                                                                        370 
+##                                      Résultats.liste.4....Bondy.autrement...Vincent.DUGUET 
+##                                                                                        500 
+##                                      Résultats.liste.5....Bondy.c.est.vous...Sylvie.BADOUX 
+##                                                                                        361</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data[,<span class="dv">14</span><span class="sc">:</span><span class="dv">15</span>, <span class="at">drop =</span> T])</span></code></pre></div>
+<pre><code>##  Résultats.liste.1...Liste.de.la.gauche.unie.pour.Bondy....Sylvine.THOMASSIN.
+##  Min.   : 47.00                                                              
+##  1st Qu.: 84.75                                                              
+##  Median :105.50                                                              
+##  Mean   :105.62                                                              
+##  3rd Qu.:121.25                                                              
+##  Max.   :181.00                                                              
+##  Résultats.liste.2....Pour.Bondy.allons.plus.loin....Stephen.HERVE
+##  Min.   : 86.0                                                    
+##  1st Qu.:117.2                                                    
+##  Median :143.5                                                    
+##  Mean   :143.5                                                    
+##  3rd Qu.:166.5                                                    
+##  Max.   :221.0</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data [,<span class="dv">14</span><span class="sc">:</span><span class="dv">15</span>]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span> (data) [<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;THOMASSIN&quot;</span>, <span class="st">&quot;HERVE&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>palette <span class="ot">&lt;-</span> <span class="fu">terrain.colors</span>(<span class="dv">8</span>, <span class="at">rev =</span> T)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>seuils <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">75</span>, <span class="dv">100</span>, <span class="dv">125</span>, <span class="dv">150</span>, <span class="dv">175</span>, <span class="dv">200</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">png</span>(<span class="st">&quot;img/resultTHOMASSIN.png&quot;</span>, <span class="at">width =</span> <span class="dv">4000</span>, <span class="at">height =</span> <span class="dv">4000</span>, <span class="at">res =</span> <span class="dv">400</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_choro</span>(data,  <span class="at">var =</span> <span class="st">&quot;THOMASSIN&quot;</span>, <span class="at">breaks =</span> seuils, <span class="at">pal =</span> palette,<span class="at">border =</span> <span class="cn">NA</span>, <span class="at">leg_pos =</span> <span class="st">&quot;n&quot;</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_label</span>(data, <span class="st">&quot;THOMASSIN&quot;</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_inset_on</span>(data, <span class="at">pos =</span> <span class="st">&quot;topright&quot;</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(data<span class="sc">$</span>THOMASSIN, <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">breaks =</span> seuils, <span class="at">right =</span> F, <span class="at">col=</span>palette, <span class="at">main =</span> <span class="st">&quot;&quot;</span>, <span class="at">xlab =</span> <span class="st">&quot;&quot;</span>, <span class="at">ylab=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_inset_off</span>()</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code></pre></div>
+<pre><code>## png 
+##   2</code></pre>
+<p><img src="img/resultTHOMASSIN.png" /></p>
 </div>
 
 <br><br><br><br><br><br><br><br><br><br><br><br>

@@ -650,7 +650,10 @@ div.tocify {
 </div>
 <div id="carte-des-résultats" class="section level1" number="7">
 <h1 number="7"><span class="header-section-number">7</span> Carte des résultats</h1>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(jointure)</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapsf)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>jointure <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;jointure&quot;</span>, <span class="at">quiet =</span> T)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(jointure)</span></code></pre></div>
 <pre><code>##  [1] &quot;cle&quot;                                                                                       
 ##  [2] &quot;Layer&quot;                                                                                     
 ##  [3] &quot;bureauNo_1&quot;                                                                                
@@ -669,9 +672,47 @@ div.tocify {
 ## [16] &quot;Résultats.liste.3....Bondy.pour.une.gauche.sociale.insoumise.et.populaire....Jamal.AMMOURI&quot;
 ## [17] &quot;Résultats.liste.4....Bondy.autrement...Vincent.DUGUET&quot;                                     
 ## [18] &quot;Résultats.liste.5....Bondy.c.est.vous...Sylvie.BADOUX&quot;                                     
-## [19] &quot;geometry&quot;</code></pre>
-<p>Cartographier tous les indicateurs (du taux de votant à la liste 5 par une boucle)</p>
-<p>(Faire l’algorithme, donner les fonctions, et faire le script)</p>
+## [19] &quot;geom&quot;</code></pre>
+<p>Il s’agit de cartographier le résultat des colonnes 6 à 18 sauf la colonne 7</p>
+<div id="algo" class="section level2" number="7.1">
+<h2 number="7.1"><span class="header-section-number">7.1</span> Algo</h2>
+<ul>
+<li>tant que 6 &lt; col &lt; nb col - 1
+<ul>
+<li>si col différent de 7
+<ul>
+<li>faire 1 carte choroplèthe</li>
+<li>faire un titre</li>
+</ul></li>
+</ul></li>
+<li>fin tant que</li>
+</ul>
+</div>
+<div id="fonctions" class="section level2" number="7.2">
+<h2 number="7.2"><span class="header-section-number">7.2</span> Fonctions</h2>
+<ul>
+<li>mf_map( type = choro )</li>
+<li>mf_title</li>
+</ul>
+</div>
+<div id="carto" class="section level2" number="7.3">
+<h2 number="7.3"><span class="header-section-number">7.3</span> Carto</h2>
+<p>On extrait les noms des candidats</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(jointure)[<span class="dv">14</span><span class="sc">:</span><span class="dv">18</span>] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;THOMASSIN&quot;</span>, <span class="st">&quot;HERVE&quot;</span>, <span class="st">&quot;AMMOURI&quot;</span>, <span class="st">&quot;DUGUET&quot;</span>, <span class="st">&quot;BADOUX&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>nomCol <span class="ot">&lt;-</span> <span class="fu">names</span>(jointure)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>col <span class="ot">&lt;-</span> <span class="dv">6</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (col <span class="cf">in</span> <span class="dv">6</span><span class="sc">:</span><span class="dv">18</span>) {</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (col <span class="sc">!=</span> <span class="dv">7</span>) {   </span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">png</span>(<span class="fu">paste0</span>(<span class="st">&quot;img/resultat&quot;</span>, col, <span class="st">&quot;.png&quot;</span>))</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mf_map</span> (jointure, <span class="at">type =</span> <span class="st">&quot;choro&quot;</span>, </span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">var =</span> nomCol [col])</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mf_title</span>(nomCol [col])</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dev.off</span>()</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {col <span class="sc">==</span> <span class="dv">8</span>}</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Les images sont enregistrées une à une.</p>
+<p><img src="img/resultat6.png" /> <img src="img/resultat8.png" /> <img src="img/resultat9.png" /> <img src="img/resultat10.png" /> <img src="img/resultat11.png" /> <img src="img/resultat12.png" /> <img src="img/resultat13.png" /> <img src="img/resultat14.png" /> <img src="img/resultat15.png" /> <img src="img/resultat16.png" /> <img src="img/resultat17.png" /> <img src="img/resultat18.png" /></p>
+</div>
 </div>
 
 <br><br><br><br><br><br><br><br><br><br><br><br>

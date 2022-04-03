@@ -1,0 +1,151 @@
+---
+title: "Webmapping"
+author: "B. Maranget"
+date: "02/04/2022"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+# Passer la valeur suivante à TRUE pour reproduire les extractions.
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+
+# Leaflet
+
+https://leafletjs.com/SlavaUkraini/
+
+et pour R : https://rstudio.github.io/leaflet/
+
+## Le monde en Mercator
+
+```{r}
+library(leaflet)
+leaflet() %>% addTiles()
+```
+
+Utilisation des pipes, équivalent de *then*
+
+
+```{r}
+m <- leaflet()
+m <- addTiles(m)
+m
+```
+
+CTRL + MAJ + M
+
+Centrer sur Bondy
+
+```{r}
+leaflet() %>% setView(lng = 48.902199, lat = 2.482800 , zoom = 12) %>% addTiles()
+```
+
+
+
+## Insertion des polygones des bureaux
+
+```{r}
+library(sf)
+data <- st_read("data/vote.gpkg", "jointure")
+data <- st_transform(data, 4326)
+summary(data)
+
+data$Nb.votes.nuls 
+```
+
+
+
+```{r}
+pal <- colorNumeric(
+  palette = "YlOrRd",
+  domain = data$Nb.votes.nuls 
+)
+leaflet(data) %>%
+  addPolygons(color = "#444444", weight = 1, smoothFactor = 0.5,
+    opacity = 1.0, fillOpacity = 0.5,
+    fillColor = ~colorQuantile("YlOrRd", Nb.votes.nuls)(Nb.votes.nuls),
+    highlightOptions = highlightOptions(color = "white", weight = 2,
+      bringToFront = TRUE)) %>% addLegend("bottomright", pal = pal, values = ~Nb.votes.nuls,
+    title = "Nb",
+    opacity = 1
+  ) %>% addTiles()
+```
+
+
+
+## Popup
+
+### Un seul
+
+
+```{r}
+content <- paste(sep = "<br/>",
+  "<b>Bondy</a></b>",
+  "40",
+  "56"
+)
+```
+
+
+```{r}
+leaflet() %>% addTiles() %>% 
+  addPopups(2.48, 48.90, content, options = popupOptions(closeButton = F))
+```
+
+### Plusieurs
+
+```{r}
+# uniquement le nom
+leaflet(data) %>%
+  addPolygons(
+    label = data$bureauNo_1)
+# nom  et nb d'électeurs inscrits
+leaflet(data) %>%
+  addPolygons(
+    label = paste0(data$bureauNo_1, ": ", data$Nb.d.électeurs.inscrits))
+```
+
+
+
+## Couches
+
+```{r}
+st_layers("data/insee.gpkg")
+insee <- st_read("data/insee.gpkg","bondy")
+insee <- st_transform (insee, 4326)
+```
+
+
+
+```{r}
+map <- leaflet() %>%
+  # Base groups
+  addTiles(group = "OSM (default)") %>%
+  addProviderTiles(providers$Stamen.Toner, group = "Toner") %>%
+  addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>%
+  # Overlay groups
+  addPolygons(data = bureaux, fillColor = ~colorQuantile("YlOrRd", Nb.votes.nuls)(Nb.votes.nuls), stroke = F, group = "votes") %>%
+  addPolygons(data = insee,
+    fill = F, weight = 2, color = "#FFFFCC", group = "insee") %>%
+  # Layers control
+  addLayersControl(
+    baseGroups = c("OSM (default)", "Toner", "Toner Lite"),
+    overlayGroups = c("votes", "insee"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+
+
+
+
+# Storymap

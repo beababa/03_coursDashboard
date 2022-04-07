@@ -16,7 +16,9 @@ navbar:
     - text: "Valorisation"
       href: 07_valorisation.html   
     - text: "Web mapping"
-      href: 08_webmapping.html  
+      href: 08_webmapping.html
+    - text: "Correction2"
+      href: 09_correction.html  
   right:
     - icon: fa-github
       href: https://github.com/beababa/beababa.github.io

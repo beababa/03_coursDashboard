@@ -127,7 +127,7 @@ insee <- st_transform (insee, 4326)
 
 
 
-```{r}
+```{r, eval=FALSE}
 map <- leaflet() %>%
   # Base groups
   addTiles(group = "OSM (default)") %>%
@@ -148,4 +148,3 @@ map <- leaflet() %>%
 
 
 
-# Storymap

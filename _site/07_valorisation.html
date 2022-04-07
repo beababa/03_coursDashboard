@@ -14,7 +14,6 @@
 
 <title>Valorisation : sémiologie et mise en page</title>
 
-<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/united.min.css" rel="stylesheet" />
@@ -47,6 +46,7 @@
     </style>
 
 
+
 <style type="text/css">
   code {
     white-space: pre;
@@ -56,28 +56,26 @@
   }
 </style>
 <style type="text/css" data-origin="pandoc">
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
 }
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
+    border: none; pointer-events: all; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -86,9 +84,9 @@ pre.numberSource code > span > a:first-child::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  background-color: #f8f8f8; }
+  { background-color: #f8f8f8; }
 @media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+a.sourceLine::before { text-decoration: underline; }
 }
 code span.al { color: #ef2929; } /* Alert */
 code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
@@ -169,6 +167,9 @@ button.code-folding-btn:focus {
 }
 summary {
   display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
 }
 pre code {
   padding: 0;
@@ -394,7 +395,7 @@ div.tocify {
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -424,6 +425,12 @@ div.tocify {
 <li>
   <a href="07_valorisation.html">Valorisation</a>
 </li>
+<li>
+  <a href="08_webmapping.html">Web mapping</a>
+</li>
+<li>
+  <a href="09_correction.html">Correction2</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -448,27 +455,27 @@ div.tocify {
 </div>
 
 
-<div id="sémiologie" class="section level1" number="1">
-<h1 number="1"><span class="header-section-number">1</span> Sémiologie</h1>
-<div id="une-définition-rapide" class="section level2" number="1.1">
-<h2 number="1.1"><span class="header-section-number">1.1</span> Une définition rapide</h2>
+<div id="sémiologie" class="section level1">
+<h1><span class="header-section-number">1</span> Sémiologie</h1>
+<div id="une-définition-rapide" class="section level2">
+<h2><span class="header-section-number">1.1</span> Une définition rapide</h2>
 <p>Un ensemble standardisés de règle dont …</p>
-<div id="première-règle-de-sémiologie" class="section level3" number="1.1.1">
-<h3 number="1.1.1"><span class="header-section-number">1.1.1</span> Première règle de sémiologie</h3>
+<div id="première-règle-de-sémiologie" class="section level3">
+<h3><span class="header-section-number">1.1.1</span> Première règle de sémiologie</h3>
 <p><a href="https://neocarto.hypotheses.org/5717" class="uri">https://neocarto.hypotheses.org/5717</a></p>
 </div>
-<div id="la-cheatsheet-du-package-mapsf" class="section level3" number="1.1.2">
-<h3 number="1.1.2"><span class="header-section-number">1.1.2</span> La cheatsheet du package mapsf</h3>
+<div id="la-cheatsheet-du-package-mapsf" class="section level3">
+<h3><span class="header-section-number">1.1.2</span> La cheatsheet du package mapsf</h3>
 <p><img src="img/mapsf_cheatsheet.png" /></p>
 <p>Cette cheatsheet pe Illustrationrmet de cataloguer toutes les cartes possibles.</p>
 </div>
 </div>
-<div id="illustration" class="section level2" number="1.2">
-<h2 number="1.2"><span class="header-section-number">1.2</span> Illustration</h2>
-<div id="reprise-des-données-sur-le-nombre-de-ménages" class="section level3" number="1.2.1">
-<h3 number="1.2.1"><span class="header-section-number">1.2.1</span> Reprise des données sur le nombre de ménages</h3>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;inseeBondy&quot;</span>)</span></code></pre></div>
+<div id="illustration" class="section level2">
+<h2><span class="header-section-number">1.2</span> Illustration</h2>
+<div id="reprise-des-données-sur-le-nombre-de-ménages" class="section level3">
+<h3><span class="header-section-number">1.2.1</span> Reprise des données sur le nombre de ménages</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(sf)</a>
+<a class="sourceLine" id="cb1-2" title="2">data &lt;-<span class="st"> </span><span class="kw">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;inseeBondy&quot;</span>)</a></code></pre></div>
 <pre><code>## Reading layer `inseeBondy&#39; from data source 
 ##   `C:\Users\tachasa\Documents\sauveGIT\03_coursDashboard\data\vote.gpkg&#39; 
 ##   using driver `GPKG&#39;
@@ -479,31 +486,31 @@ div.tocify {
 ## Projected CRS: RGF93 / Lambert-93</code></pre>
 <p>24 variables disponibles, on prend celui du nombre de ménages pauvres.</p>
 </div>
-<div id="discrétisation-étudier-sa-distribution" class="section level3" number="1.2.2">
-<h3 number="1.2.2"><span class="header-section-number">1.2.2</span> Discrétisation : étudier sa distribution</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data<span class="sc">$</span>Men_pauv)</span></code></pre></div>
+<div id="discrétisation-étudier-sa-distribution" class="section level3">
+<h3><span class="header-section-number">1.2.2</span> Discrétisation : étudier sa distribution</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">summary</span>(data<span class="op">$</span>Men_pauv)</a></code></pre></div>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##    0.00   11.00   22.00   32.82   42.00  294.00</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le maximum est très éloigné du 3e quartile !</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(data<span class="sc">$</span>Men_pauv, <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">40</span>,<span class="dv">200</span>,<span class="dv">300</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="co"># Le maximum est très éloigné du 3e quartile !</span></a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="kw">hist</span>(data<span class="op">$</span>Men_pauv, <span class="dt">breaks =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">40</span>,<span class="dv">200</span>,<span class="dv">300</span>))</a></code></pre></div>
 <p><img src="07_valorisation_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>Cette distribution permet de distinguer dans le groupe des très pauvres les différentes catégories.</p>
 </div>
-<div id="cartographie" class="section level3" number="1.2.3">
-<h3 number="1.2.3"><span class="header-section-number">1.2.3</span> Cartographie</h3>
+<div id="cartographie" class="section level3">
+<h3><span class="header-section-number">1.2.3</span> Cartographie</h3>
 <p>Comment rendre cette distribution très inégale ?</p>
 <p>L’usage d’une palette différente peut-être une solution.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapsf)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>paliers <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">40</span>,<span class="dv">100</span>,<span class="dv">200</span>,<span class="dv">300</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>palette <span class="ot">&lt;-</span> <span class="fu">mf_get_pal</span>(<span class="at">n =</span> <span class="fu">c</span>(<span class="dv">5</span>,<span class="dv">2</span>), <span class="at">pal =</span> <span class="fu">c</span>(<span class="st">&quot;Mint&quot;</span>, <span class="st">&quot;Burg&quot;</span>))</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(data, <span class="at">type =</span><span class="st">&quot;choro&quot;</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="at">breaks =</span> paliers, paliers, <span class="at">pal =</span> palette, <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span>  <span class="st">&quot;Concentration de la pauvreté à Bondy&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">library</span>(mapsf)</a>
+<a class="sourceLine" id="cb6-2" title="2">paliers &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">40</span>,<span class="dv">100</span>,<span class="dv">200</span>,<span class="dv">300</span>)</a>
+<a class="sourceLine" id="cb6-3" title="3">palette &lt;-<span class="st"> </span><span class="kw">mf_get_pal</span>(<span class="dt">n =</span> <span class="kw">c</span>(<span class="dv">5</span>,<span class="dv">2</span>), <span class="dt">pal =</span> <span class="kw">c</span>(<span class="st">&quot;Mint&quot;</span>, <span class="st">&quot;Burg&quot;</span>))</a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="kw">mf_map</span>(data, <span class="dt">type =</span><span class="st">&quot;choro&quot;</span>, <span class="dt">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, <span class="dt">breaks =</span> paliers, paliers, <span class="dt">pal =</span> palette, <span class="dt">border =</span> <span class="ot">NA</span>, <span class="dt">leg_title =</span> <span class="st">&quot;Nb de ménages pauvres&quot;</span>)</a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="kw">mf_layout</span>(<span class="dt">title =</span>  <span class="st">&quot;Concentration de la pauvreté à Bondy&quot;</span>, <span class="dt">credits =</span> <span class="st">&quot;INSEE Carroyage 200 m&quot;</span>)</a></code></pre></div>
 <p><img src="07_valorisation_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>Essai de lissage spatiale</p>
 <p><a href="https://rcarto.github.io/carto_avec_r/chapitre3.html" class="uri">https://rcarto.github.io/carto_avec_r/chapitre3.html</a></p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(linemap)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>limite <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;zone&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">library</span>(linemap)</a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="kw">library</span>(sf)</a>
+<a class="sourceLine" id="cb7-3" title="3">limite &lt;-<span class="st"> </span><span class="kw">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;zone&quot;</span>)</a></code></pre></div>
 <pre><code>## Reading layer `zone&#39; from data source 
 ##   `C:\Users\tachasa\Documents\sauveGIT\03_coursDashboard\data\vote.gpkg&#39; 
 ##   using driver `GPKG&#39;
@@ -512,44 +519,44 @@ div.tocify {
 ## Dimension:     XY
 ## Bounding box:  xmin: 661088.1 ymin: 6865338 xmax: 663354.7 ymax: 6869043
 ## Projected CRS: RGF93 / Lambert-93</code></pre>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>opar <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">bg =</span> <span class="st">&quot;ivory2&quot;</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>bb <span class="ot">&lt;-</span> <span class="fu">st_bbox</span>(data)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>serie <span class="ot">&lt;-</span> data [, <span class="fu">c</span>(<span class="st">&quot;Men_pauv&quot;</span>), drop <span class="ot">=</span> F]</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>grille <span class="ot">&lt;-</span> <span class="fu">getgrid</span>(<span class="at">x =</span> serie, <span class="at">cellsize =</span> <span class="dv">200</span>, <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(limite), <span class="at">col=</span><span class="st">&quot;ivory1&quot;</span>, <span class="at">border =</span> <span class="st">&quot;ivory2&quot;</span>)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">linemap</span>(</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> grille, </span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, </span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># hauteur des lignes</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">5</span>, </span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># longueur des lignes</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">threshold =</span> <span class="fl">0.1</span>,</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="st">&quot;ivory1&quot;</span>, </span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> <span class="st">&quot;ivory4&quot;</span>, </span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="fl">0.6</span>, </span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">add =</span> T</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="at">x =</span> bb[<span class="dv">1</span>], <span class="at">y =</span> bb[<span class="dv">4</span>],<span class="at">adj =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>     <span class="at">labels =</span> <span class="st">&quot;Répartition des ménages pauvres à Bondy&quot;</span>, </span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">&quot;ivory4&quot;</span>, <span class="at">font =</span> <span class="dv">2</span>,  <span class="at">cex =</span> <span class="dv">1</span>)</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co"># add sources</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>mapsources <span class="ot">&lt;-</span><span class="st">&quot;Cours SIG</span><span class="sc">\n</span><span class="st">linemap</span><span class="sc">\n</span><span class="st">Données carroyées à 200 m, INSEE 2019&quot;</span></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="at">x =</span> bb[<span class="dv">3</span>], <span class="at">y =</span> bb[<span class="dv">2</span>],<span class="at">labels =</span> mapsources,  </span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">&quot;ivory4&quot;</span>, <span class="at">font =</span> <span class="dv">3</span>, <span class="at">adj =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>), <span class="at">cex =</span> <span class="fl">0.6</span> )</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">opar &lt;-<span class="st"> </span><span class="kw">par</span>(<span class="dt">mar=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="dt">bg =</span> <span class="st">&quot;ivory2&quot;</span>)</a>
+<a class="sourceLine" id="cb9-2" title="2">bb &lt;-<span class="st"> </span><span class="kw">st_bbox</span>(data)</a>
+<a class="sourceLine" id="cb9-3" title="3">serie &lt;-<span class="st"> </span>data [, <span class="kw">c</span>(<span class="st">&quot;Men_pauv&quot;</span>), drop =<span class="st"> </span>F]</a>
+<a class="sourceLine" id="cb9-4" title="4">grille &lt;-<span class="st"> </span><span class="kw">getgrid</span>(<span class="dt">x =</span> serie, <span class="dt">cellsize =</span> <span class="dv">200</span>, <span class="dt">var =</span> <span class="st">&quot;Men_pauv&quot;</span>)</a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="kw">plot</span>(<span class="kw">st_geometry</span>(limite), <span class="dt">col=</span><span class="st">&quot;ivory1&quot;</span>, <span class="dt">border =</span> <span class="st">&quot;ivory2&quot;</span>)</a>
+<a class="sourceLine" id="cb9-6" title="6"><span class="kw">linemap</span>(</a>
+<a class="sourceLine" id="cb9-7" title="7">  <span class="dt">x =</span> grille, </a>
+<a class="sourceLine" id="cb9-8" title="8">  <span class="dt">var =</span> <span class="st">&quot;Men_pauv&quot;</span>, </a>
+<a class="sourceLine" id="cb9-9" title="9">  <span class="co"># hauteur des lignes</span></a>
+<a class="sourceLine" id="cb9-10" title="10">  <span class="dt">k =</span> <span class="dv">5</span>, </a>
+<a class="sourceLine" id="cb9-11" title="11">  <span class="co"># longueur des lignes</span></a>
+<a class="sourceLine" id="cb9-12" title="12">  <span class="dt">threshold =</span> <span class="fl">0.1</span>,</a>
+<a class="sourceLine" id="cb9-13" title="13">  <span class="dt">col =</span> <span class="st">&quot;ivory1&quot;</span>, </a>
+<a class="sourceLine" id="cb9-14" title="14">  <span class="dt">border =</span> <span class="st">&quot;ivory4&quot;</span>, </a>
+<a class="sourceLine" id="cb9-15" title="15">  <span class="dt">lwd =</span> <span class="fl">0.6</span>, </a>
+<a class="sourceLine" id="cb9-16" title="16">  <span class="dt">add =</span> T</a>
+<a class="sourceLine" id="cb9-17" title="17">)</a>
+<a class="sourceLine" id="cb9-18" title="18"></a>
+<a class="sourceLine" id="cb9-19" title="19"><span class="kw">text</span>(<span class="dt">x =</span> bb[<span class="dv">1</span>], <span class="dt">y =</span> bb[<span class="dv">4</span>],<span class="dt">adj =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</a>
+<a class="sourceLine" id="cb9-20" title="20">     <span class="dt">labels =</span> <span class="st">&quot;Répartition des ménages pauvres à Bondy&quot;</span>, </a>
+<a class="sourceLine" id="cb9-21" title="21">     <span class="dt">col =</span> <span class="st">&quot;ivory4&quot;</span>, <span class="dt">font =</span> <span class="dv">2</span>,  <span class="dt">cex =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb9-22" title="22"></a>
+<a class="sourceLine" id="cb9-23" title="23"><span class="co"># add sources</span></a>
+<a class="sourceLine" id="cb9-24" title="24">mapsources &lt;-<span class="st">&quot;Cours SIG</span><span class="ch">\n</span><span class="st">linemap</span><span class="ch">\n</span><span class="st">Données carroyées à 200 m, INSEE 2019&quot;</span></a>
+<a class="sourceLine" id="cb9-25" title="25"><span class="kw">text</span>(<span class="dt">x =</span> bb[<span class="dv">3</span>], <span class="dt">y =</span> bb[<span class="dv">2</span>],<span class="dt">labels =</span> mapsources,  </a>
+<a class="sourceLine" id="cb9-26" title="26">     <span class="dt">col =</span> <span class="st">&quot;ivory4&quot;</span>, <span class="dt">font =</span> <span class="dv">3</span>, <span class="dt">adj =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">0</span>), <span class="dt">cex =</span> <span class="fl">0.6</span> )</a></code></pre></div>
 <p><img src="07_valorisation_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>Lissage spatiale</p>
 <p><a href="https://riatelab.github.io/potential/articles/potential.html" class="uri">https://riatelab.github.io/potential/articles/potential.html</a></p>
 </div>
 </div>
 </div>
-<div id="mise-en-page" class="section level1" number="2">
-<h1 number="2"><span class="header-section-number">2</span> Mise en page</h1>
+<div id="mise-en-page" class="section level1">
+<h1><span class="header-section-number">2</span> Mise en page</h1>
 <p>Là également, la cheatsheet permet d’avoir une vision globale.</p>
 <p>Une des fonctions les plus intéressantes est de pouvoir insérer l’histogramme dans la carte.</p>
 <p>Pour illustrer, cette mise en page, on utilise les 2 listes ayant rassemblé le plus de votant.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;jointure&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1">data &lt;-<span class="st"> </span><span class="kw">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;jointure&quot;</span>)</a></code></pre></div>
 <pre><code>## Reading layer `jointure&#39; from data source 
 ##   `C:\Users\tachasa\Documents\sauveGIT\03_coursDashboard\data\vote.gpkg&#39; 
 ##   using driver `GPKG&#39;
@@ -558,7 +565,7 @@ div.tocify {
 ## Dimension:     XY
 ## Bounding box:  xmin: 661088.1 ymin: 6865338 xmax: 663354.7 ymax: 6869043
 ## Projected CRS: RGF93 / Lambert-93</code></pre>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(data [,<span class="dv">14</span><span class="sc">:</span><span class="dv">18</span>, <span class="at">drop =</span> T], <span class="dv">2</span>,sum)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="kw">apply</span>(data [,<span class="dv">14</span><span class="op">:</span><span class="dv">18</span>, <span class="dt">drop =</span> T], <span class="dv">2</span>,sum)</a></code></pre></div>
 <pre><code>##               Résultats.liste.1...Liste.de.la.gauche.unie.pour.Bondy....Sylvine.THOMASSIN. 
 ##                                                                                       3380 
 ##                          Résultats.liste.2....Pour.Bondy.allons.plus.loin....Stephen.HERVE 
@@ -569,7 +576,7 @@ div.tocify {
 ##                                                                                        500 
 ##                                      Résultats.liste.5....Bondy.c.est.vous...Sylvie.BADOUX 
 ##                                                                                        361</code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data[,<span class="dv">14</span><span class="sc">:</span><span class="dv">15</span>, <span class="at">drop =</span> T])</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">summary</span>(data[,<span class="dv">14</span><span class="op">:</span><span class="dv">15</span>, <span class="dt">drop =</span> T])</a></code></pre></div>
 <pre><code>##  Résultats.liste.1...Liste.de.la.gauche.unie.pour.Bondy....Sylvine.THOMASSIN.
 ##  Min.   : 47.00                                                              
 ##  1st Qu.: 84.75                                                              
@@ -584,18 +591,18 @@ div.tocify {
 ##  Mean   :143.5                                                    
 ##  3rd Qu.:166.5                                                    
 ##  Max.   :221.0</code></pre>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data [,<span class="dv">14</span><span class="sc">:</span><span class="dv">15</span>]</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span> (data) [<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;THOMASSIN&quot;</span>, <span class="st">&quot;HERVE&quot;</span>)</span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>palette <span class="ot">&lt;-</span> <span class="fu">terrain.colors</span>(<span class="dv">8</span>, <span class="at">rev =</span> T)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>seuils <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">75</span>, <span class="dv">100</span>, <span class="dv">125</span>, <span class="dv">150</span>, <span class="dv">175</span>, <span class="dv">200</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">png</span>(<span class="st">&quot;img/resultTHOMASSIN.png&quot;</span>, <span class="at">width =</span> <span class="dv">4000</span>, <span class="at">height =</span> <span class="dv">4000</span>, <span class="at">res =</span> <span class="dv">400</span>)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_choro</span>(data,  <span class="at">var =</span> <span class="st">&quot;THOMASSIN&quot;</span>, <span class="at">breaks =</span> seuils, <span class="at">pal =</span> palette,<span class="at">border =</span> <span class="cn">NA</span>, <span class="at">leg_pos =</span> <span class="st">&quot;n&quot;</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_label</span>(data, <span class="st">&quot;THOMASSIN&quot;</span>)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_inset_on</span>(data, <span class="at">pos =</span> <span class="st">&quot;topright&quot;</span>)</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>))</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(data<span class="sc">$</span>THOMASSIN, <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">breaks =</span> seuils, <span class="at">right =</span> F, <span class="at">col=</span>palette, <span class="at">main =</span> <span class="st">&quot;&quot;</span>, <span class="at">xlab =</span> <span class="st">&quot;&quot;</span>, <span class="at">ylab=</span><span class="st">&quot;&quot;</span>)</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_inset_off</span>()</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1">data &lt;-<span class="st"> </span>data [,<span class="dv">14</span><span class="op">:</span><span class="dv">15</span>]</a>
+<a class="sourceLine" id="cb16-2" title="2"><span class="kw">names</span> (data) [<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;THOMASSIN&quot;</span>, <span class="st">&quot;HERVE&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">palette &lt;-<span class="st"> </span><span class="kw">terrain.colors</span>(<span class="dv">8</span>, <span class="dt">rev =</span> T)</a>
+<a class="sourceLine" id="cb17-2" title="2">seuils &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">75</span>, <span class="dv">100</span>, <span class="dv">125</span>, <span class="dv">150</span>, <span class="dv">175</span>, <span class="dv">200</span>)</a>
+<a class="sourceLine" id="cb17-3" title="3"><span class="kw">png</span>(<span class="st">&quot;img/resultTHOMASSIN.png&quot;</span>, <span class="dt">width =</span> <span class="dv">4000</span>, <span class="dt">height =</span> <span class="dv">4000</span>, <span class="dt">res =</span> <span class="dv">400</span>)</a>
+<a class="sourceLine" id="cb17-4" title="4"><span class="kw">mf_choro</span>(data,  <span class="dt">var =</span> <span class="st">&quot;THOMASSIN&quot;</span>, <span class="dt">breaks =</span> seuils, <span class="dt">pal =</span> palette,<span class="dt">border =</span> <span class="ot">NA</span>, <span class="dt">leg_pos =</span> <span class="st">&quot;n&quot;</span>)</a>
+<a class="sourceLine" id="cb17-5" title="5"><span class="kw">mf_label</span>(data, <span class="st">&quot;THOMASSIN&quot;</span>)</a>
+<a class="sourceLine" id="cb17-6" title="6"><span class="kw">mf_inset_on</span>(data, <span class="dt">pos =</span> <span class="st">&quot;topright&quot;</span>)</a>
+<a class="sourceLine" id="cb17-7" title="7"><span class="kw">par</span>(<span class="dt">mar =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb17-8" title="8"><span class="kw">hist</span>(data<span class="op">$</span>THOMASSIN, <span class="dt">border =</span> <span class="ot">NA</span>, <span class="dt">breaks =</span> seuils, <span class="dt">right =</span> F, <span class="dt">col=</span>palette, <span class="dt">main =</span> <span class="st">&quot;&quot;</span>, <span class="dt">xlab =</span> <span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;&quot;</span>)</a>
+<a class="sourceLine" id="cb17-9" title="9"><span class="kw">mf_inset_off</span>()</a>
+<a class="sourceLine" id="cb17-10" title="10"><span class="kw">dev.off</span>()</a></code></pre></div>
 <pre><code>## png 
 ##   2</code></pre>
 <p><img src="img/resultTHOMASSIN.png" /></p>

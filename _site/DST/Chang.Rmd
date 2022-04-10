@@ -1,0 +1,66 @@
+---
+title: "examen"
+author: "Chang-Beom LEE"
+date: "3/10/2022"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+library(sf)
+getwd()
+zone <- st_read("/Users/chang-beom.lee/Desktop/changbeom/vote.gpkg", "zone")
+str(zone)
+zone$numBureau
+zone [zone$numBureau == 1,]
+zone [1,2]
+plot(zone$geom)
+fusion <- st_union(zone)
+str(zone)
+plot(zone$geom)
+enveloppe <- st_convex_hull(fusion)
+plot(enveloppe)
+tampon <- st_buffer(zone, 50)
+plot(tampon$geom)
+fusion <- st_union(tampon)
+plot(fusion)
+simplifier <- st_simplify(fusion,90, preserveTopology = F)
+plot(simplifier)
+plot(zone$geom, col = terrain.colors (31),
+     border = NA,
+     main = "31 bureaux de vote de Bondy")
+library(mapsf)
+mf_map(zone, type = "choro", border = NA,var = "aire")
+zone <- zone [zone$numBureau %in% seq(1,30),]
+summary(zone)
+mf_map(zone, type = "choro", pal = "Burg",
+       border = NA, var = "txVotants")
+data <- read.csv("/Users/chang-beom.lee/Desktop/changbeom/bondyInsee.csv", fileEncoding = "UTF-8", dec = ",")
+zone$Layer
+data$Bureau.de.vote
+data <- data [data$cle[c(1:32)],]
+zone$cle <- substring (zone$Layer,9,11)
+data$cle <- substring(data$Bureau.de.vote, 3,5 )
+data$cle <- as.integer(data$cle)
+zone$cle <- as.integer(zone$cle)
+length(zone$cle) == length(data$cle)
+jointure <- merge(zone, data, by = "cle")
+st_write(jointure, "/Users/chang-beom.lee/Desktop/changbeom/vote.gpkg", "jointure", delete_layer = T)
+names(jointure)
+png(height = 800, width = 600, filename = "img/resultat.png")
+par(mfrow = c(4,3))
+for (i in 2:12){
+  barplot(data [,i], main = names(data) [i])
+}
+dev.off()
+

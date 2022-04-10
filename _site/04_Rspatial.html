@@ -424,6 +424,12 @@ div.tocify {
 <li>
   <a href="07_valorisation.html">Valorisation</a>
 </li>
+<li>
+  <a href="08_webmapping.html">Web mapping</a>
+</li>
+<li>
+  <a href="09_correction.html">Correction2</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -712,6 +718,261 @@ div.tocify {
 <span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>Les images sont enregistrées une à une.</p>
 <p><img src="img/resultat6.png" /> <img src="img/resultat8.png" /> <img src="img/resultat9.png" /> <img src="img/resultat10.png" /> <img src="img/resultat11.png" /> <img src="img/resultat12.png" /> <img src="img/resultat13.png" /> <img src="img/resultat14.png" /> <img src="img/resultat15.png" /> <img src="img/resultat16.png" /> <img src="img/resultat17.png" /> <img src="img/resultat18.png" /></p>
+</div>
+</div>
+<div id="croiser-grille-insee-et-résultats-des-votes" class="section level1" number="8">
+<h1 number="8"><span class="header-section-number">8</span> Croiser grille INSEE et résultats des votes</h1>
+<p>Il s’agit de croiser résultats électoraux et carroyage de l’INSEE afin de confirmer une hypothèse.</p>
+<p>Hypothèse : plus les gens sont modestes, plus ils votent la gauche.</p>
+<p>On va illustrer cette hypothèse avec une carte combinant deux variables visuelles : taille et couleur.</p>
+<p>La taille indiquera le nombre de votants, la couleur la densité des ménages pauvres.</p>
+<div id="préparation-de-la-donnée" class="section level2" number="8.1">
+<h2 number="8.1"><span class="header-section-number">8.1</span> Préparation de la donnée</h2>
+<div id="librairies-et-chargement-des-couches" class="section level3" number="8.1.1">
+<h3 number="8.1.1"><span class="header-section-number">8.1.1</span> Librairies et chargement des couches</h3>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapsf)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>vote <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/vote.gpkg&quot;</span>, <span class="st">&quot;jointure&quot;</span>)</span></code></pre></div>
+<pre><code>## Reading layer `jointure&#39; from data source 
+##   `C:\Users\tachasa\03_coursDashboard\data\vote.gpkg&#39; using driver `GPKG&#39;
+## Simple feature collection with 32 features and 18 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 661088.1 ymin: 6865338 xmax: 663354.7 ymax: 6869043
+## Projected CRS: RGF93 / Lambert-93</code></pre>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>insee <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/insee.gpkg&quot;</span>, <span class="st">&quot;bondy&quot;</span>)</span></code></pre></div>
+<pre><code>## Reading layer `bondy&#39; from data source 
+##   `C:\Users\tachasa\03_coursDashboard\data\insee.gpkg&#39; using driver `GPKG&#39;
+## Simple feature collection with 188 features and 42 fields
+## Geometry type: POLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 661088.1 ymin: 6865338 xmax: 663354.7 ymax: 6869043
+## Projected CRS: RGF93 / Lambert-93</code></pre>
+</div>
+<div id="préparation-des-données" class="section level3" number="8.1.2">
+<h3 number="8.1.2"><span class="header-section-number">8.1.2</span> Préparation des données</h3>
+<p>On filtre les colonnes et on calcule la densité de ménages pauvres.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(vote)[<span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">14</span>)] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;bureau&quot;</span>, <span class="st">&quot;vote&quot;</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>vote <span class="ot">&lt;-</span> vote [, <span class="fu">c</span>(<span class="st">&quot;bureau&quot;</span>, <span class="st">&quot;vote&quot;</span>)]</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Pour obtenir un chiffre relatif, on divise le nombre de ménages pauvres par le nombre de ménages total</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>insee<span class="sc">$</span>densite <span class="ot">&lt;-</span> (insee<span class="sc">$</span>Men_pauv <span class="sc">/</span> insee<span class="sc">$</span>Men)<span class="sc">*</span><span class="dv">100</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>insee <span class="ot">&lt;-</span> insee [, <span class="st">&quot;densite&quot;</span>]</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(insee<span class="sc">$</span>densite, <span class="at">main =</span> <span class="st">&quot;densité des ménages pauvres&quot;</span>)</span></code></pre></div>
+<p><img src="04_Rspatial_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>En général, sur Bondy, il y a 15-20 % de ménages pauvres. Certains quartiers ont plus de 50 % de ménages pauvres mais cela reste exceptionnel.</p>
+</div>
+</div>
+<div id="traitement" class="section level2" number="8.2">
+<h2 number="8.2"><span class="header-section-number">8.2</span> Traitement</h2>
+<div id="intersection" class="section level3" number="8.2.1">
+<h3 number="8.2.1"><span class="header-section-number">8.2.1</span> Intersection</h3>
+<p>Afin de pouvoir croiser grille et polygone, il faut d’abord intersecter les deux de façon à récupérer le nom du bureau de vote pour chaque carreau de la grille.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>inter <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(vote, insee)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(inter)</span></code></pre></div>
+<pre><code>##     bureau               vote          densite                      geom    
+##  Length:357         Min.   : 47.0   Min.   : 0.00   GEOMETRYCOLLECTION:  2  
+##  Class :character   1st Qu.: 88.0   1st Qu.:15.79   MULTIPOLYGON      : 25  
+##  Mode  :character   Median :110.0   Median :21.88   POLYGON           :330  
+##                     Mean   :107.3   Mean   :22.84   epsg:2154         :  0  
+##                     3rd Qu.:120.0   3rd Qu.:27.83   +proj=lcc ...     :  0  
+##                     Max.   :181.0   Max.   :48.88</code></pre>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># la cartographie des multipolygones ne fonctionne pas, on passe tout en polygone</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>inter <span class="ot">&lt;-</span> <span class="fu">st_cast</span>(inter, <span class="st">&quot;POLYGON&quot;</span>)</span></code></pre></div>
+</div>
+<div id="une-première-cartographie" class="section level3" number="8.2.2">
+<h3 number="8.2.2"><span class="header-section-number">8.2.2</span> Une première cartographie</h3>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_export</span>(inter, <span class="at">filename =</span><span class="st">&quot;img/propchoroF.png&quot;</span>, <span class="at">width =</span> <span class="dv">1000</span>, <span class="at">res =</span> <span class="dv">200</span>, <span class="at">expandBB =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">0.6</span>))</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(inter, <span class="at">col =</span> <span class="st">&quot;orange&quot;</span>, <span class="at">border =</span> <span class="st">&quot;antiquewhite1&quot;</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(inter, <span class="at">type =</span><span class="st">&quot;prop_choro&quot;</span>, <span class="at">var =</span> <span class="fu">c</span>(<span class="st">&quot;vote&quot;</span>, <span class="st">&quot;densite&quot;</span>), <span class="at">leg_pos =</span> <span class="fu">c</span>(<span class="st">&quot;topright&quot;</span>, <span class="st">&quot;right&quot;</span>))</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="st">&quot;Euh...&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE / PV Electoral</span><span class="sc">\n</span><span class="st">Bondy, avril 2022&quot;</span>)</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code></pre></div>
+<pre><code>## png 
+##   2</code></pre>
+<p><img src="img/propchoroF.png" /></p>
+<p>Il est absurde de cartographier les résultats par carreau. Mais agréger les carreaux aux bureaux permettra d’avoir une carte lisible.</p>
+</div>
+</div>
+<div id="agrégation" class="section level2" number="8.3">
+<h2 number="8.3"><span class="header-section-number">8.3</span> Agrégation</h2>
+<p>Pour chaque bureau de vote, il faut calculer la somme de la densité des ménages pauvres.</p>
+<p>On intersecte insee et bureaux, puis on calcule la densité ménages par rapport à la taille du carreau, puis on somme tous les carrés dans un bureau.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># La taille du carroyage est normalement 200 *200</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="dv">200</span><span class="sc">*</span><span class="dv">200</span></span></code></pre></div>
+<pre><code>## [1] 40000</code></pre>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># taille du carré</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">st_area</span>(inter)</span></code></pre></div>
+<pre><code>## Units: [m^2]
+##   [1] 2.122679e+01 2.024926e+03 3.135005e+04 4.754607e+03 3.239491e+04
+##   [6] 3.999163e+04 3.999358e+04 1.954717e+04 1.823731e+03 1.439933e+04
+##  [11] 2.202121e+04 1.579569e+04 2.478145e+03 3.518522e+04 3.325654e+02
+##  [16] 9.002025e+03 2.899305e+04 5.180168e+01 7.384069e+03 1.893581e+04
+##  [21] 6.842423e+03 3.860953e+04 5.587639e+02 8.904872e+03 1.000509e+04
+##  [26] 3.736588e+04 1.396785e+01 3.035877e+02 2.765974e+04 9.125849e+03
+##  [31] 1.500683e+04 1.151303e+03 4.751447e+03 2.552953e+04 4.239836e+02
+##  [36] 3.882864e+04 2.534872e+04 2.472424e+04 7.407254e+03 2.660728e+02
+##  [41] 1.111369e+04 3.952189e+04 1.300702e+02 2.137273e+04 1.274985e+02
+##  [46] 1.576980e+04 2.785676e+03 3.601823e+04 2.858931e+04 2.340401e+02
+##  [51] 4.550401e+03 2.397689e+04 6.599400e-01 1.106208e+02 9.644265e+02
+##  [56] 3.467207e+04 2.703120e+04 6.797458e+03 2.381519e+04 9.455134e+03
+##  [61] 1.869925e+04 1.713383e+04 5.245461e+02 2.286393e+04 7.395764e+03
+##  [66] 4.158838e+01 3.872581e+04 1.554704e+01 1.500348e+04 8.998292e+02
+##  [71] 2.520693e+04 1.315115e+04 1.420903e+04 1.095875e+04 2.702555e+04
+##  [76] 4.322359e+03 3.259036e+04 1.143977e+02 2.495693e+04 9.800867e+02
+##  [81] 1.127399e+04 3.901770e+04 5.798764e-04 3.824620e+04 4.173913e+02
+##  [86] 6.112986e+03 1.224695e+04 2.549685e+04 7.606479e+03 9.104193e+03
+##  [91] 1.910756e+04 1.234182e+04 2.063720e+04 2.867048e+03 5.486850e+03
+##  [96] 5.071303e+03 8.928984e+00 2.455940e+04 2.420302e+03 3.287610e+04
+## [101] 1.871965e+04 9.583857e+03 2.441153e+04 6.839925e+03 2.705370e+03
+## [106] 9.992819e+01 4.016047e+02 1.425014e+04 2.115666e+04 6.426741e+02
+## [111] 6.367799e+03 6.282571e+02 7.423716e+03 1.771142e+01 2.832275e+04
+## [116] 7.018451e+02 2.796008e+04 1.195871e+04 1.956011e+04 3.998686e+04
+## [121] 5.300873e+03 3.072568e+04 4.930435e+02 3.999447e+04 3.710372e+04
+## [126] 1.337355e+02 1.734239e+04 3.491926e+02 1.753443e+04 3.987117e+03
+## [131] 9.770859e+03 1.286262e+04 7.815383e+01 8.077320e+03 9.842254e+03
+## [136] 1.267846e+02 2.475269e+04 3.406950e+01 1.457295e+03 3.362867e+04
+## [141] 4.515400e+03 2.154842e+02 3.916117e+04 1.202619e+02 3.477802e+03
+## [146] 2.817554e+04 3.266950e+04 3.977052e+03 9.630170e+02 2.502633e+03
+## [151] 1.276790e+04 4.409719e+03 2.140970e+04 1.159864e+01 8.551624e+03
+## [156] 1.862804e+04 9.129964e+03 2.853307e+04 1.452849e+04 1.693144e+04
+## [161] 4.877828e+03 1.152254e+04 1.413705e+01 2.289350e+04 3.501552e+04
+## [166] 1.920746e+03 6.875360e+03 3.999445e+04 2.788545e+01 2.364396e+04
+## [171] 1.012808e+04 3.310808e+02 2.256868e+04 2.291076e+03 1.557977e+04
+## [176] 1.889227e+04 3.962090e+04 2.891754e+02 2.760950e+04 4.574653e+03
+## [181] 3.715687e+03 2.417961e+04 1.167288e+04 1.728668e+04 6.108078e+03
+## [186] 2.405410e+02 2.439771e+04 1.717339e+04 2.092993e+04 9.954863e+03
+## [191] 4.826615e+03 1.558879e+04 1.605028e+04 4.147102e+03 1.202575e+04
+## [196] 2.505036e+04 1.265084e+02 4.322504e+02 3.697793e+04 1.174970e+03
+## [201] 1.495105e+04 2.129885e+03 1.875382e+04 2.729800e+03 3.979011e+03
+## [206] 3.438351e+04 4.932216e+03 1.256677e+02 1.040713e+03 1.660567e+04
+## [211] 1.857062e+04 2.136015e+03 1.938307e+04 1.436163e+04 4.314723e+02
+## [216] 1.829698e+01 1.618947e+02 1.140605e+04 2.016153e+04 2.939008e+04
+## [221] 6.707659e+02 1.111404e+04 3.068662e+03 3.707365e+04 1.821085e+03
+## [226] 6.967420e+03 1.035003e+03 1.065304e+03 5.499651e+01 1.500734e+04
+## [231] 3.614861e+03 3.692906e+03 2.066246e+03 3.679966e+04 3.883818e+04
+## [236] 1.594486e+04 2.022332e+04 8.154091e+01 2.542806e+04 1.116143e+04
+## [241] 2.792827e+04 1.585551e+02 2.251380e+03 5.381323e+03 3.999400e+04
+## [246] 1.052842e+04 8.126957e+03 1.072893e+04 4.195839e+03 3.696724e+04
+## [251] 1.411930e+03 2.690999e+03 3.317527e+04 9.352913e+01 3.960814e+04
+## [256] 2.441296e+04 1.345474e+04 3.605208e+04 2.020485e+02 3.788353e+04
+## [261] 9.914516e+02 1.491410e+04 2.042135e+04 2.033417e+04 1.758169e+04
+## [266] 9.109237e+03 9.593463e+03 1.548609e+04 1.197039e+03 1.192752e+04
+## [271] 2.058325e+04 2.292073e+03 1.155381e+04 2.434078e+04 5.845734e+03
+## [276] 3.107306e+04 9.985863e+03 8.589654e+03 3.556711e+04 4.327495e+03
+## [281] 1.378138e+02 3.318560e+04 3.254244e+04 3.695524e+03 3.139551e+04
+## [286] 3.267302e+03 1.343977e+03 2.335315e+04 1.003934e+04 1.332395e+03
+## [291] 1.099079e+03 4.999343e+03 3.070428e+04 3.067842e+04 1.529504e+02
+## [296] 6.910052e+02 4.622533e+03 1.250679e+03 1.541646e+03 3.515435e+04
+## [301] 3.999392e+04 4.988889e+02 2.465185e+04 1.144528e+03 1.902408e+02
+## [306] 2.469512e+04 4.452627e+03 1.435546e+04 1.736393e+04 3.655079e+03
+## [311] 5.596957e+03 3.217286e+03 2.658338e+04 3.756353e+04 1.259589e+03
+## [316] 2.867859e+04 7.515169e+03 1.219877e+03 7.397034e+01 2.464706e+04
+## [321] 3.759119e+04 1.668601e+04 1.309525e+04 3.999339e+04 2.893459e+02
+## [326] 2.156837e+04 5.962701e+03 2.244380e+04 1.404473e+04 1.382156e+04
+## [331] 7.285749e+03 1.441133e+04 3.999451e+04 2.946790e+04 3.423588e+03
+## [336] 2.687908e+03 4.130910e+02 6.302249e+03 4.711979e+03 3.178842e+02
+## [341] 1.706027e+04 2.087451e+04 1.625332e+04 1.070720e+04 2.547300e+04
+## [346] 2.043096e+04 1.708607e+04 7.722586e+01 1.926648e+03 3.211436e+04
+## [351] 2.568958e+02 9.675848e+02 2.582799e+04 1.225385e+04 4.016170e+02
+## [356] 4.816923e+01 2.352935e+04</code></pre>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_area</span>(insee)</span></code></pre></div>
+<pre><code>## Units: [m^2]
+##   [1] 39993.79926 39993.73430 39993.77762 39993.31220 39993.57714 39993.76679
+##   [7] 39993.72346 39993.50144 39993.71262   702.54682 12056.79672 39993.51227
+##  [13] 39993.75597 34169.99624 39993.30140 39993.56634 39993.78844  5083.83817
+##  [19] 27268.59590 39993.49062  3832.67427 38959.89885 39993.52309 36881.84685
+##  [25] 39994.17944 39993.55553 17771.09547 39993.54472 39993.70178 39993.74513
+##  [31] 38901.30937   291.78990 39994.31813 32244.66327  8781.11552 30401.68589
+##  [37] 39691.13394 36321.93056 39993.53390 39994.73244 39993.88338 22110.07716
+##  [43] 39994.72153 25769.10739   348.00238 39994.30726 39994.20117  3917.72357
+##  [49] 39994.29639 39994.22288 39993.33380 39993.34459 39994.28552 39993.86171
+##  [55] 39994.16858 39994.15771 39994.71063  9239.01822 32399.13802 39921.47984
+##  [61] 14807.27767 39993.87255 39994.14683 39993.32300 39994.69971 39995.01938
+##  [67] 39994.99749  7196.07610 39994.19031 39995.00844 11541.81416 39994.46522
+##  [73] 39993.89422    17.00711 39994.68880 39993.85087 39993.82918 39994.91274
+##  [79] 39994.21203   153.96641 39994.89087 39994.59332 39993.80748 38206.97559
+##  [85]   643.92565 39993.67194 39994.90181 39993.81833 39822.77126 39994.26376
+##  [91] 39994.25288 39993.90504 39994.45431 39994.62602 39994.67788 39994.13596
+##  [97] 39994.12508 21802.74686 39994.24199 39994.01913 28030.23782 39993.66112
+## [103] 34349.33566 39993.93498 39993.94584 39993.65030 39993.68275 39993.62865
+## [109] 39994.42431 39994.49791 39994.66696 39993.61782 39993.63948 37891.61982
+## [115] 39994.78434 39993.59616 39994.51968 30807.65033 39993.97839 39993.60699
+## [121] 18006.50471   926.53574 39994.41343 19598.28402 39993.96754 39994.27464
+## [127] 39993.95669 39673.89947 39994.40255 39994.00007 39994.60423 39938.84878
+## [133] 39994.33722  2008.97167    88.14423 39993.84003 39994.48701 39994.93460
+## [139] 39994.38079 39994.53057 39994.92367 39994.47612 39993.39598 39994.79526
+## [145] 39994.80619 24106.05434 39993.98923 39994.61512 39993.90240 39994.01091
+## [151] 39993.40679 39994.39167 39993.42841 39994.58242 39993.45002 12823.91597
+## [157] 39994.05173 39994.81711 39993.92412 10559.57446 39993.43922 35871.99045
+## [163] 24672.22322 39994.57151 39994.23111 39993.46082 39994.03000 30540.04041
+## [169] 39993.91326 39993.47161 39993.38516  6935.47399 39994.56060 39994.10601
+## [175] 39994.04087 39994.50880  5261.20574 39994.09516 13923.16935  6440.62191
+## [181] 39994.11685 19145.67901 39994.07345 39993.41760 11567.67542 36977.15215
+## [187] 39994.08431 39994.06259</code></pre>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Il ne faut pas oublier les carreaux frontières...</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="co"># certains carreaux sont coupés par les limites des bureaux. la densité des ménages doit être rapportée à l&#39;aire de la géométrie.</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>insee<span class="sc">$</span>aireTot <span class="ot">&lt;-</span> <span class="fu">st_area</span>(insee)</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>inter <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(vote, insee)</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>inter<span class="sc">$</span>nbRel <span class="ot">&lt;-</span> (inter<span class="sc">$</span>densite <span class="sc">*</span> (<span class="fu">st_area</span>(inter)<span class="sc">/</span> inter<span class="sc">$</span>aireTot) )</span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(inter<span class="sc">$</span>nbRel, <span class="at">main =</span> <span class="st">&quot;densité des ménages pauvres relatif à la taille des carreaux&quot;</span>, <span class="at">xlab =</span> <span class="st">&quot;valeur de la densité&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;nb d&#39;occurence&quot;</span>)</span></code></pre></div>
+<p><img src="04_Rspatial_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>Ici, en utilisant la taille des morceaux de carreaux, on obtient beaucoup de zones avec une densité faible et quelques unes avec une grosse densité.</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Enfin, on agrége les carreaux aux bureaux</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>agg <span class="ot">&lt;-</span> <span class="fu">aggregate</span> (inter<span class="sc">$</span>nbRel , <span class="at">by =</span> <span class="fu">list</span>(inter<span class="sc">$</span>bureau), sum )</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>agg</span></code></pre></div>
+<pre><code>##                                          Group.1             x
+## 1              CENTRE DE LOISIRS - SALLE COLUCHE  76.19402 [1]
+## 2                  CENTRE DE LOISIRS APPOLINAIRE  45.92529 [1]
+## 3  CENTRE DE LOISIRS COLUCHE - SALLE POLYVALENTE  59.68268 [1]
+## 4                 CENTRE DE LOISIRS PIERRE CURIE 119.12057 [1]
+## 5              ECOLE ELEMENTAIRE ANDRE BOULLOCHE 145.33502 [1]
+## 6                  ECOLE ELEMENTAIRE JULES FERRY  84.85380 [1]
+## 7                 ECOLE ELEMENTAIRE LEO LAGRANGE 101.73808 [1]
+## 8             ECOLE ELEMENTAIRE MAINGUY-GUEHENNO  23.81503 [1]
+## 9                 ECOLE ELEMENTAIRE NOUE CAILLET 130.09326 [1]
+## 10            ECOLE ELEMENTAIRE OLYMPE DE GOUGES 118.97452 [1]
+## 11                     ECOLE ELEMENTAIRE PASTEUR  69.98560 [1]
+## 12                    ECOLE ELEMENTAIRE SALENGRO 111.00921 [1]
+## 13              ECOLE MATERNELLE CAMILLE CLAUDEL  63.71893 [1]
+## 14                ECOLE MATERNELLE HENRI SELLIER  81.10840 [1]
+## 15                     ECOLE MATERNELLE JEAN ZAY 212.24093 [1]
+## 16                  ECOLE MATERNELLE JULES FERRY  58.46468 [1]
+## 17                 ECOLE MATERNELLE LEO LAGRANGE 123.60089 [1]
+## 18                      ECOLE MATERNELLE MAINGUY  87.40522 [1]
+## 19                 ECOLE MATERNELLE NOUE CAILLET  59.69507 [1]
+## 20                      ECOLE MATERNELLE PASTEUR 148.15917 [1]
+## 21                 ECOLE MATERNELLE PIERRE CURIE  55.07457 [1]
+## 22               ECOLE MATERNELLE ROGER SALENGRO  70.43217 [1]
+## 23           ECOLE MATERNELLE TERRE SAINT BLAISE 133.92518 [1]
+## 24                          ESPACE MARCEL CHAUZY  47.16339 [1]
+## 25                                GYMNASE AIACHE 139.33991 [1]
+## 26                  GYMNASE AIACHE - SALLE DANSE  64.16970 [1]
+## 27                          GYMNASE LEO LAGRANGE 104.02640 [1]
+## 28              HOTEL DE VILLE - SALLE DES FETES  47.47884 [1]
+## 29                SALLE BLANQUI - ESPACE MANDELA  38.78532 [1]
+## 30                       SALLE MAURICE PETITJEAN 112.74658 [1]</code></pre>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(agg) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;bureau&quot;</span>, <span class="st">&quot;densite&quot;</span>)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="co"># jointure</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(vote)</span></code></pre></div>
+<pre><code>## [1] &quot;bureau&quot; &quot;vote&quot;   &quot;geom&quot;</code></pre>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>jointure <span class="ot">&lt;-</span> <span class="fu">merge</span>(vote, agg, <span class="at">by =</span> <span class="st">&quot;bureau&quot;</span>)</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(jointure)</span></code></pre></div>
+<pre><code>## [1] &quot;bureau&quot;   &quot;vote&quot;     &quot;densite&quot;  &quot;geometry&quot;</code></pre>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>jointure<span class="sc">$</span>densite <span class="ot">&lt;-</span> <span class="fu">round</span>(jointure<span class="sc">$</span>densite,<span class="dv">0</span>)</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>jointure<span class="sc">$</span>densite</span></code></pre></div>
+<pre><code>## Units: [1]
+##  [1]  76  46  60 119 145  85 102  24 130 119  70 111  64  81 212  58 124  87  60
+## [20] 148  55  70 134  47 139  64 104  47  39 113</code></pre>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Problème sur les unités m2, il faut s&quot;en débarasser.</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(units)</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>jointure<span class="sc">$</span>densite <span class="ot">&lt;-</span> <span class="fu">drop_units</span>(jointure<span class="sc">$</span>densite)</span></code></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_export</span>(inter, <span class="at">filename =</span><span class="st">&quot;img/propchoroT.png&quot;</span>, <span class="at">width =</span> <span class="dv">1000</span>, <span class="at">res =</span> <span class="dv">200</span>, <span class="at">expandBB =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">0.9</span>))</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(jointure, <span class="at">col =</span> <span class="st">&quot;antiquewhite1&quot;</span>, <span class="at">border =</span> <span class="st">&quot;grey&quot;</span>)</span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_map</span>(jointure, <span class="at">type =</span><span class="st">&quot;prop_choro&quot;</span>, <span class="at">var =</span> <span class="fu">c</span>(<span class="st">&quot;vote&quot;</span>, <span class="st">&quot;densite&quot;</span>), <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">leg_pos =</span> <span class="fu">c</span>(<span class="st">&quot;topright&quot;</span>, <span class="st">&quot;right&quot;</span>), <span class="at">leg_title =</span> <span class="fu">c</span>(<span class="st">&quot;vote (nb)&quot;</span>, <span class="st">&quot;densité</span><span class="sc">\n</span><span class="st">pauvres (%)&quot;</span>))</span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mf_layout</span>(<span class="at">title =</span> <span class="st">&quot;Les précaires votent à gauche&quot;</span>, <span class="at">credits =</span> <span class="st">&quot;INSEE / PV électoral</span><span class="sc">\n</span><span class="st">Bondy, avril 2022&quot;</span>)</span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code></pre></div>
+<pre><code>## png 
+##   2</code></pre>
+<p><img src="img/propchoroT.png" /></p>
 </div>
 </div>
 

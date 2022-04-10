@@ -236,3 +236,130 @@ Les images sont enregistrées une à une.
 ![](img/resultat16.png)
 ![](img/resultat17.png)
 ![](img/resultat18.png)
+
+# Croiser grille INSEE et résultats des votes
+
+Il s'agit de croiser résultats électoraux et carroyage de l'INSEE afin de confirmer une hypothèse.
+
+Hypothèse : plus les gens sont modestes, plus ils votent la gauche.
+
+On va illustrer cette hypothèse avec une carte combinant deux variables visuelles : taille et couleur.
+
+La taille indiquera le nombre de votants, la couleur la densité des ménages pauvres.
+
+
+## Préparation de la donnée
+
+
+
+### Librairies et chargement des couches
+
+```{r}
+library(sf)
+library(mapsf)
+vote <- st_read("data/vote.gpkg", "jointure")
+insee <- st_read("data/insee.gpkg", "bondy")
+```
+
+
+### Préparation des données
+
+
+On filtre les colonnes et on calcule la densité de ménages pauvres.
+
+
+```{r}
+names(vote)[c(3,14)] <- c("bureau", "vote")
+vote <- vote [, c("bureau", "vote")]
+# Pour obtenir un chiffre relatif, on divise le nombre de ménages pauvres par le nombre de ménages total
+insee$densite <- (insee$Men_pauv / insee$Men)*100
+insee <- insee [, "densite"]
+hist(insee$densite, main = "densité des ménages pauvres")
+```
+
+En général, sur Bondy, il y a 15-20 % de ménages pauvres.
+Certains quartiers ont plus de 50 % de  ménages pauvres mais cela reste exceptionnel.
+
+
+## Traitement
+
+### Intersection
+
+Afin de pouvoir croiser grille et polygone, il faut d'abord intersecter les deux de façon à récupérer le nom du bureau de vote pour chaque carreau de la grille.
+
+
+```{r}
+inter <- st_intersection(vote, insee)
+summary(inter)
+# la cartographie des multipolygones ne fonctionne pas, on passe tout en polygone
+inter <- st_cast(inter, "POLYGON")
+```
+
+
+
+### Une première cartographie
+
+```{r}
+mf_export(inter, filename ="img/propchoroF.png", width = 1000, res = 200, expandBB = c(0,0,0,0.6))
+mf_map(inter, col = "orange", border = "antiquewhite1")
+mf_map(inter, type ="prop_choro", var = c("vote", "densite"), leg_pos = c("topright", "right"))
+mf_layout("Euh...", credits = "INSEE / PV Electoral\nBondy, avril 2022")
+dev.off()
+```
+
+
+![](img/propchoroF.png)
+
+Il est absurde de cartographier les résultats par carreau. Mais agréger les carreaux aux bureaux permettra d'avoir une carte lisible.
+
+
+## Agrégation
+
+
+Pour chaque bureau de vote, il faut calculer la somme de la densité des ménages pauvres.
+
+On intersecte insee et bureaux, puis on calcule la densité ménages par rapport à la taille du carreau, puis on somme tous les carrés dans un bureau.
+
+```{r}
+# La taille du carroyage est normalement 200 *200
+200*200
+# taille du carré
+st_area(inter)
+st_area(insee)
+# Il ne faut pas oublier les carreaux frontières...
+# certains carreaux sont coupés par les limites des bureaux. la densité des ménages doit être rapportée à l'aire de la géométrie.
+insee$aireTot <- st_area(insee)
+inter <- st_intersection(vote, insee)
+inter$nbRel <- (inter$densite * (st_area(inter)/ inter$aireTot) )
+hist(inter$nbRel, main = "densité des ménages pauvres relatif à la taille des carreaux", xlab = "valeur de la densité", ylab = "nb d'occurence")
+```
+
+Ici, en utilisant la taille des morceaux de carreaux, on obtient beaucoup de zones avec une densité faible et quelques unes avec une grosse densité.
+
+
+```{r}
+# Enfin, on agrége les carreaux aux bureaux
+agg <- aggregate (inter$nbRel , by = list(inter$bureau), sum )
+agg
+names(agg) <- c("bureau", "densite")
+# jointure
+names(vote)
+jointure <- merge(vote, agg, by = "bureau")
+names(jointure)
+jointure$densite <- round(jointure$densite,0)
+jointure$densite
+# Problème sur les unités m2, il faut s"en débarasser.
+library(units)
+jointure$densite <- drop_units(jointure$densite)
+```
+
+```{r}
+mf_export(inter, filename ="img/propchoroT.png", width = 1000, res = 200, expandBB = c(0,0,0,0.9))
+mf_map(jointure, col = "antiquewhite1", border = "grey")
+mf_map(jointure, type ="prop_choro", var = c("vote", "densite"), border = NA, leg_pos = c("topright", "right"), leg_title = c("vote (nb)", "densité\npauvres (%)"))
+mf_layout(title = "Les précaires votent à gauche", credits = "INSEE / PV électoral\nBondy, avril 2022")
+dev.off()
+```
+
+
+![](img/propchoroT.png)

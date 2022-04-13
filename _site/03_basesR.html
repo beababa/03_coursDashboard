@@ -424,6 +424,12 @@ div.tocify {
 <li>
   <a href="07_valorisation.html">Valorisation</a>
 </li>
+<li>
+  <a href="08_webmapping.html">Web mapping</a>
+</li>
+<li>
+  <a href="09_correction.html">Correction2</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -847,78 +853,114 @@ div.tocify {
 <span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>  coursBase <span class="ot">&lt;-</span> coursMerge</span>
 <span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a>coursMerge</span></code></pre></div>
-<pre><code>##           Prénom cours1..oui. cours2..oui. cours3..oui. cours4..oui.
-## 1          Alaya          oui          oui          oui          oui
-## 2           Anna          oui          oui          oui          oui
-## 3           Anne          oui          oui          oui          oui
-## 4        Aurélie          non          non          non         &lt;NA&gt;
-## 5        Camille          oui     autre TD         &lt;NA&gt;         &lt;NA&gt;
-## 6     Chang-Beom          oui          oui          oui          oui
-## 7          Chloé          oui          oui          oui          oui
-## 8           Eah           oui          non          non         &lt;NA&gt;
-## 9  Elif-Delphine          oui          non          non         &lt;NA&gt;
-## 10         Elisa          oui     autre TD         &lt;NA&gt;         &lt;NA&gt;
-## 11          Emma          non          non          non         &lt;NA&gt;
-## 12        Gaëlle          oui     autre TD         &lt;NA&gt;         &lt;NA&gt;
-## 13         Galli         &lt;NA&gt;          oui          non          oui
-## 14      Gianluca          oui          oui          non          oui
-## 15       Guénolé          oui          oui          non          non
-## 16         Ianis          oui          oui          oui          oui
-## 17          Iman          oui          oui          non         &lt;NA&gt;
-## 18      Jennifer          oui          oui          non          oui
-## 19        Laura           oui     autre TD         &lt;NA&gt;         &lt;NA&gt;
-## 20         Linda          oui                       non         &lt;NA&gt;
-## 21         Louis          oui          oui          oui          oui
-## 22         Lucas         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 23         LUCAS          oui          oui          non         &lt;NA&gt;
-## 24        Mariam          oui          oui          oui          oui
-## 25        Marion          oui          oui          Oui          Oui
-## 26      Matthieu          non          non          non         &lt;NA&gt;
-## 27         SALIF          oui          non          non         &lt;NA&gt;
-## 28         Sanaa          oui          oui          oui          oui
-## 29         sarah         &lt;NA&gt;          oui          oui          oui
-## 30      Savannah          oui          oui          non          non
-## 31         Selin          oui          Oui          Oui          oui
-## 32         Théo           non          non          non         &lt;NA&gt;
-## 33        Thomas          oui          oui          non          non
-## 34        Yanis           non          oui          non         &lt;NA&gt;
-## 35       Zachary          oui          oui          oui          oui
-##    cours5..oui. cours6..oui. cours7..oui.
-## 1           non          non          non
-## 2           Oui          oui          oui
-## 3           oui          oui          oui
-## 4          &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 5          &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 6           oui          Oui          oui
-## 7           oui          oui          oui
-## 8          &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 9          &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 10         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 11         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 12         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 13          oui          oui          non
-## 14          non                          
-## 15          non          non          non
-## 16          oui          oui          oui
-## 17          oui          oui          oui
-## 18          non                       non
-## 19         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 20         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 21          oui          oui          oui
-## 22         &lt;NA&gt;         &lt;NA&gt;          oui
-## 23         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 24          oui          oui          oui
-## 25          Oui          oui          oui
-## 26         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 27         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 28          oui          oui          non
-## 29          non          non          oui
-## 30          non          non          oui
-## 31          oui          oui          oui
-## 32         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 33          non          non          non
-## 34         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
-## 35          oui          Oui          oui</code></pre>
+<pre><code>##           Prénom cours1..oui. cours10..oui. cours2..oui. cours3..oui.
+## 1          Alaya          oui           non          oui          oui
+## 2           Anna          oui           Oui          oui          oui
+## 3           Anne          oui           oui          oui          oui
+## 4        Aurélie          non          &lt;NA&gt;          non          non
+## 5        Camille          oui          &lt;NA&gt;     autre TD         &lt;NA&gt;
+## 6     Chang-Beom          oui           oui          oui          oui
+## 7          Chloé          oui           oui          oui          oui
+## 8           Eah           oui          &lt;NA&gt;          non          non
+## 9  Elif-Delphine          oui          &lt;NA&gt;          non          non
+## 10         Elisa          oui          &lt;NA&gt;     autre TD         &lt;NA&gt;
+## 11          Emma          non          &lt;NA&gt;          non          non
+## 12        Gaëlle          oui          &lt;NA&gt;     autre TD         &lt;NA&gt;
+## 13         Galli         &lt;NA&gt;           Oui          oui          non
+## 14      Gianluca          oui           non          oui          non
+## 15       Guénolé          oui           non          oui          non
+## 16         Ianis          oui           oui          oui          oui
+## 17          Iman          oui           oui          oui          non
+## 18      Jennifer          oui           non          oui          non
+## 19        Laura           oui          &lt;NA&gt;     autre TD         &lt;NA&gt;
+## 20         Linda          oui          &lt;NA&gt;                       non
+## 21         Louis          oui           oui          oui          oui
+## 22         Lucas         &lt;NA&gt;           non         &lt;NA&gt;         &lt;NA&gt;
+## 23         LUCAS          oui          &lt;NA&gt;          oui          non
+## 24        Mariam          oui           oui          oui          oui
+## 25        Marion          oui           Oui          oui          Oui
+## 26      Matthieu          non          &lt;NA&gt;          non          non
+## 27         SALIF          oui          &lt;NA&gt;          non          non
+## 28         Sanaa          oui           oui          oui          oui
+## 29         sarah         &lt;NA&gt;           non          oui          oui
+## 30      Savannah          oui           oui          oui          non
+## 31         Selin          oui           oui          Oui          Oui
+## 32         Théo           non          &lt;NA&gt;          non          non
+## 33        Thomas          oui           non          oui          non
+## 34        Yanis           non          &lt;NA&gt;          oui          non
+## 35       Zachary          oui           oui          oui          oui
+##    cours4..oui. cours5..oui. cours6..oui. cours7..oui. cours8..oui.
+## 1           oui          non          non          non          non
+## 2           oui          Oui          oui          oui          oui
+## 3           oui          oui          oui          oui          oui
+## 4          &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 5          &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 6           oui          oui          Oui          oui          oui
+## 7           oui          oui          oui          oui          oui
+## 8          &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 9          &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 10         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 11         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 12         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 13          oui          oui          oui          non          oui
+## 14          oui          non                                    oui
+## 15          non          non          non          non          non
+## 16          oui          oui          oui          oui          oui
+## 17         &lt;NA&gt;          oui          oui          oui          oui
+## 18          oui          non                       non          non
+## 19         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 20         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 21          oui          oui          oui          oui          oui
+## 22         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;          oui          oui
+## 23         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 24          oui          oui          oui          oui          oui
+## 25          Oui          Oui          oui          oui          oui
+## 26         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 27         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 28          oui          oui          oui          non          oui
+## 29          oui          non          non          oui          oui
+## 30          non          non          non          oui          oui
+## 31          oui          oui          oui          oui          oui
+## 32         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 33          non          non          non          non          non
+## 34         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;
+## 35          oui          oui          Oui          oui          oui
+##    cours9..oui.
+## 1           non
+## 2           oui
+## 3           oui
+## 4          &lt;NA&gt;
+## 5          &lt;NA&gt;
+## 6           oui
+## 7           oui
+## 8          &lt;NA&gt;
+## 9          &lt;NA&gt;
+## 10         &lt;NA&gt;
+## 11         &lt;NA&gt;
+## 12         &lt;NA&gt;
+## 13          oui
+## 14          non
+## 15          non
+## 16          non
+## 17          non
+## 18          non
+## 19         &lt;NA&gt;
+## 20         &lt;NA&gt;
+## 21          oui
+## 22          non
+## 23         &lt;NA&gt;
+## 24          non
+## 25          oui
+## 26         &lt;NA&gt;
+## 27         &lt;NA&gt;
+## 28          oui
+## 29          non
+## 30          oui
+## 31          oui
+## 32         &lt;NA&gt;
+## 33          non
+## 34         &lt;NA&gt;
+## 35          oui</code></pre>
 </div>
 </div>
 <div id="en-utilisant-les-listes-et-les-apply" class="section level3" number="3.2.3">
@@ -1231,6 +1273,30 @@ div.tocify {
 ## 32 Elif-Delphine    oui
 ## 
 ## [[2]]
+##        Prénom cours10..oui.
+## 1       Louis           oui
+## 2        Anne           oui
+## 3      Mariam           oui
+## 4       Selin           oui
+## 5       Sanaa           oui
+## 6       Chloé           oui
+## 7       Ianis           oui
+## 8    Jennifer           non
+## 9        Anna           Oui
+## 10     Marion           Oui
+## 11   Gianluca           non
+## 12   Savannah           oui
+## 13      Alaya           non
+## 14    Guénolé           non
+## 15     Thomas           non
+## 16 Chang-Beom           oui
+## 17    Zachary           oui
+## 18      Galli           Oui
+## 19      sarah           non
+## 20       Iman           oui
+## 21      Lucas           non
+## 
+## [[3]]
 ##           Prénom cours2..oui.
 ## 1          Louis          oui
 ## 2         Gaëlle     autre TD
@@ -1267,7 +1333,7 @@ div.tocify {
 ## 33         Galli          oui
 ## 34         sarah          oui
 ## 
-## [[3]]
+## [[4]]
 ##           Prénom cours3..oui.
 ## 1          Louis          oui
 ## 2           Anne          oui
@@ -1300,7 +1366,7 @@ div.tocify {
 ## 29         Galli          non
 ## 30         sarah          oui
 ## 
-## [[4]]
+## [[5]]
 ##        Prénom cours4..oui.
 ## 1       Louis          oui
 ## 2        Anne          oui
@@ -1322,7 +1388,7 @@ div.tocify {
 ## 18      Galli          oui
 ## 19      sarah          oui
 ## 
-## [[5]]
+## [[6]]
 ##        Prénom cours5..oui.
 ## 1       Louis          oui
 ## 2        Anne          oui
@@ -1345,7 +1411,7 @@ div.tocify {
 ## 19      sarah          non
 ## 20       Iman          oui
 ## 
-## [[6]]
+## [[7]]
 ##        Prénom cours6..oui.
 ## 1       Louis          oui
 ## 2        Anne          oui
@@ -1368,7 +1434,7 @@ div.tocify {
 ## 19      sarah          non
 ## 20       Iman          oui
 ## 
-## [[7]]
+## [[8]]
 ##        Prénom cours7..oui.
 ## 1       Louis          oui
 ## 2        Anne          oui
@@ -1390,7 +1456,55 @@ div.tocify {
 ## 18      Galli          non
 ## 19      sarah          oui
 ## 20       Iman          oui
-## 21      Lucas          oui</code></pre>
+## 21      Lucas          oui
+## 
+## [[9]]
+##        Prénom cours8..oui.
+## 1       Louis          oui
+## 2        Anne          oui
+## 3      Mariam          oui
+## 4       Selin          oui
+## 5       Sanaa          oui
+## 6       Chloé          oui
+## 7       Ianis          oui
+## 8    Jennifer          non
+## 9        Anna          oui
+## 10     Marion          oui
+## 11   Gianluca          oui
+## 12   Savannah          oui
+## 13      Alaya          non
+## 14    Guénolé          non
+## 15     Thomas          non
+## 16 Chang-Beom          oui
+## 17    Zachary          oui
+## 18      Galli          oui
+## 19      sarah          oui
+## 20       Iman          oui
+## 21      Lucas          oui
+## 
+## [[10]]
+##        Prénom cours9..oui.
+## 1       Louis          oui
+## 2        Anne          oui
+## 3      Mariam          non
+## 4       Selin          oui
+## 5       Sanaa          oui
+## 6       Chloé          oui
+## 7       Ianis          non
+## 8    Jennifer          non
+## 9        Anna          oui
+## 10     Marion          oui
+## 11   Gianluca          non
+## 12   Savannah          oui
+## 13      Alaya          non
+## 14    Guénolé          non
+## 15     Thomas          non
+## 16 Chang-Beom          oui
+## 17    Zachary          oui
+## 18      Galli          oui
+## 19      sarah          non
+## 20       Iman          non
+## 21      Lucas          non</code></pre>
 </div>
 </div>
 <div id="recodage" class="section level2" number="3.4">
@@ -1440,6 +1554,10 @@ div.tocify {
 ## [25] &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot;
 ## 
 ## [[2]]
+##  [1] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot;
+## [13] &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot; &quot;non&quot;
+## 
+## [[3]]
 ##  [1] &quot;oui&quot;      &quot;autre TD&quot; &quot;oui&quot;      &quot;oui&quot;      &quot;autre TD&quot; &quot;autre TD&quot;
 ##  [7] &quot;oui&quot;      &quot;oui&quot;      &quot;non&quot;      &quot;oui&quot;      &quot;oui&quot;      &quot;oui&quot;     
 ## [13] &quot;&quot;         &quot;oui&quot;      &quot;oui&quot;      &quot;oui&quot;      &quot;oui&quot;      &quot;oui&quot;     
@@ -1447,26 +1565,34 @@ div.tocify {
 ## [25] &quot;oui&quot;      &quot;oui&quot;      &quot;non&quot;      &quot;oui&quot;      &quot;non&quot;      &quot;non&quot;     
 ## [31] &quot;non&quot;      &quot;non&quot;      &quot;oui&quot;      &quot;oui&quot;     
 ## 
-## [[3]]
+## [[4]]
 ##  [1] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot;
 ## [13] &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;non&quot;
 ## [25] &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot;
 ## 
-## [[4]]
+## [[5]]
 ##  [1] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot;
 ## [13] &quot;oui&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot;
 ## 
-## [[5]]
+## [[6]]
 ##  [1] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;non&quot;
 ## [13] &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot;
 ## 
-## [[6]]
+## [[7]]
 ##  [1] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;&quot;    &quot;oui&quot; &quot;oui&quot; &quot;&quot;    &quot;non&quot;
 ## [13] &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot;
 ## 
-## [[7]]
+## [[8]]
 ##  [1] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;&quot;    &quot;oui&quot;
-## [13] &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot;</code></pre>
+## [13] &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot;
+## 
+## [[9]]
+##  [1] &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot;
+## [13] &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot;
+## 
+## [[10]]
+##  [1] &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;oui&quot;
+## [13] &quot;non&quot; &quot;non&quot; &quot;non&quot; &quot;oui&quot; &quot;oui&quot; &quot;oui&quot; &quot;non&quot; &quot;non&quot; &quot;non&quot;</code></pre>
 </div>
 </div>
 <div id="explorations-statistiques-sur-les-présences" class="section level1" number="4">

@@ -362,3 +362,4 @@ dev.off()
 
 
 ![](img/propchoroT.png)
+Attention ! Trouvez l'erreur !

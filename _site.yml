@@ -19,6 +19,8 @@ navbar:
       href: 08_webmapping.html
     - text: "Correction2"
       href: 09_correction.html  
+    - text: "Revision"
+      href: 10_revision.html  
   right:
     - icon: fa-github
       href: https://github.com/beababa/beababa.github.io

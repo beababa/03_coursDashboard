@@ -340,9 +340,8 @@ Ici, en utilisant la taille des morceaux de carreaux, on obtient beaucoup de zon
 ```{r}
 # Enfin, on agrége les carreaux aux bureaux
 agg <- aggregate (inter$nbRel , by = list(inter$bureau), sum )
-agg
-names(agg) <- c("bureau", "densite")
-# jointure
+names(agg) <- c("bureau", "sommeDensite")
+#ré jointure
 names(vote)
 jointure <- merge(vote, agg, by = "bureau")
 names(jointure)
@@ -354,9 +353,9 @@ jointure$densite <- drop_units(jointure$densite)
 ```
 
 ```{r}
-mf_export(inter, filename ="img/propchoroT.png", width = 1000, res = 200, expandBB = c(0,0,0,0.9))
+mf_export(inter, filename ="img/propchoroT.png", width = 1000, res = 200, expandBB = c(0,0,0,0.8))
 mf_map(jointure, col = "antiquewhite1", border = "grey")
-mf_map(jointure, type ="prop_choro", var = c("vote", "densite"), border = NA, leg_pos = c("topright", "right"), leg_title = c("vote (nb)", "densité\npauvres (%)"))
+mf_map(jointure, type ="prop_choro", var = c("vote", "densite"), border = NA, leg_pos = c("topright", "right"), leg_title = c("vote (nb)", "somme densité\npauvres (%)"))
 mf_layout(title = "Les précaires votent à gauche", credits = "INSEE / PV électoral\nBondy, avril 2022")
 dev.off()
 ```
